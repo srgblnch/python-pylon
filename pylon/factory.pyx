@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               __init__.py
+## file :               factory.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,6 +33,13 @@
 ##
 ###############################################################################
 
-include "version.pyx"
-include "factory.pyx"
+from libcpp cimport bool
+
+cdef extern from "pylon/Container.h" namespace "Pylon":
+    cdef cppclass DeviceInfoList
+    ctypedef DeviceInfoList DeviceInfoList_t
+
+cdef extern from "pylon/DeviceFactory.h" namespace "Pylon":
+    cdef cppclass IDeviceFactory:
+        int EnumerateDevices( DeviceInfoList_t& list, bool addToList = false )
 

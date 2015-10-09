@@ -68,11 +68,8 @@ setup(name = 'pylon',
                      ''],
       url="https://github.com/srgblnch/python-pylon",
       cmdclass = {'build_ext': build_ext},
-      ext_modules=[
-        Extension('pylon',['pylon/__init__.pyx'],language='c++'),
-        #Extension('version',['pylon/version.pyx'],language='c++'),
-                   ],
-      install_requires=['cython>=0.21.1'],
+      ext_modules=[Extension('pylon',['pylon/__init__.pyx'],language='c++')],
+      #install_requires=['cython>=0.21.1'],
 )
 
 #for the classifiers review see:

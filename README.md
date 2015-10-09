@@ -15,23 +15,35 @@ This variable $PYLON_BASE is the key to link this module with an specific releas
 It's time for the required includes before build, specify to use g++ and pylon shared libraries.
 
 ```bash
-$ export PYLON_BASE=/opt/pylon
-$ export CFLAGS="-I$PYLON_BASE/include -I$PYLON_BASE/genicam/library/CPP/include "
-$ python setup.py build
+$ ./setup.sh
 ```
-
-Using different $PYLON_BASE for pylon major releases 2, 3 or 4 they can be saw in code that the used SDK for the python module is the wanted one:
 
 ```python
 >>> import pylon
 >>> pylon.pylonversionstr()
- '2.3.3-1337'
-
->>> import pylon
->>> pylon.pylonversionstr()
-'3.2.1-0'
-
->>> import pylon
->>> pylon.pylonversionstr()
- '4.0.0-62'
+    '4.0.0-62'
 ```
+
+By default it is will compile the python module for pylon 4, but this can be modified using arguments in the _setup.sh_ _pylon_ followed by the number:
+
+```bash
+$ ./setup.sh pylon 2
+```
+
+```python
+>>> import pylon
+>>> pylon.pylonversionstr()
+    '2.3.3-1337'
+```
+
+```bash
+$ ./setup.sh pylon 3
+```
+
+```python
+>>> import pylon
+>>> pylon.pylonversionstr()
+    '3.2.1-0'
+```
+
+Finally there is a command to clean as an argument of the _setup.sh_.
