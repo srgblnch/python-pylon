@@ -1,8 +1,8 @@
-#!/usr/bin/env cython
+#!/bin/bash
 
 #---- licence header
 ###############################################################################
-## file :               __init__.py
+## file :               env.sh
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,12 +33,29 @@
 ##
 ###############################################################################
 
-include "version.pyx"
-include "guard.pyx"
-guard = _Guard()
-def initialize():
-    guard.initialize()
-def terminate(shutDownLogging=True):
-    guard.terminate(shutDownLogging)
-include "factory.pyx"
+export PYLON_BASE=/opt
+if [[ "$1" == 'pylon' && "$2" != '' ]]; then
+	export PYLON_MAJORVERSION=$2
+else
+	export PYLON_MAJORVERSION=4
+fi
 
+if [ "$PYLON_MAJORVERSION" == '2' ]; then
+	export PYLON_ROOT=$PYLON_BASE/pylon
+else
+	export PYLON_ROOT=$PYLON_BASE/pylon$PYLON_MAJORVERSION
+fi
+
+export GENICAM_ROOT_V2_1=$PYLON_ROOT/genicam
+
+if [ -d /lib64 ] ; then
+    echo "Environment for Pylon $PYLON_MAJORVERSION arch64"
+    PYLONLIBDIR=$PYLON_ROOT/lib64
+    GCLIBDIR=$GENICAM_ROOT_V2_1/bin/Linux64_x64
+else
+    echo "Environment for Pylon $PYLON_MAJORVERSION arch32"
+    PYLONLIBDIR=$PYLON_ROOT/lib
+    GCLIBDIR=$GENICAM_ROOT_V2_1/bin/Linux32_i86
+fi
+export LD_LIBRARY_PATH=$GCLIBDIR:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$PYLONLIBDIR:$PYLONLIBDIR/pylon/tl/:$LD_LIBRARY_PATH

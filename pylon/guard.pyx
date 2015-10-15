@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               __init__.py
+## file :               factory.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,12 +33,16 @@
 ##
 ###############################################################################
 
-include "version.pyx"
-include "guard.pyx"
-guard = _Guard()
-def initialize():
-    guard.initialize()
-def terminate(shutDownLogging=True):
-    guard.terminate(shutDownLogging)
-include "factory.pyx"
+from libcpp cimport bool
 
+cdef extern from "pylon/PylonBase.h" namespace "Pylon":
+    cdef void PylonInitialize()
+    cdef void PylonTerminate(bool ShutDownLogging)
+    
+class _Guard(object):
+    def __init__(self):
+        super(_Guard,self).__init__()
+    def initialize(self):
+        PylonInitialize()
+    def terminate(self,shutDownLogging=True):
+        PylonTerminate(shutDownLogging)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env cython
 
 #---- licence header
 ###############################################################################
@@ -33,13 +33,14 @@
 ##
 ###############################################################################
 
-from libcpp cimport bool
+include "TransportLayer.pyx"
 
-cdef extern from "pylon/Container.h" namespace "Pylon":
-    cdef cppclass DeviceInfoList
-    ctypedef DeviceInfoList DeviceInfoList_t
-
-cdef extern from "pylon/DeviceFactory.h" namespace "Pylon":
-    cdef cppclass IDeviceFactory:
-        int EnumerateDevices( DeviceInfoList_t& list, bool addToList = false )
+class Factory(object):
+    _TransportLayer = None
+    def __cinit__(self):
+        super(Factory,self).__init__()
+        #self._TransportLayer = #_TlFactory()
+    @property
+    def TransportLayer(self):
+        return TransportLayerFactory()
 
