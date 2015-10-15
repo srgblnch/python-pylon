@@ -60,7 +60,7 @@ cdef extern from "pylon/TlFactory.h" namespace "Pylon":
         int EnumerateTls( TlInfoList_t& )
         ITransportLayer* CreateTl( const CTlInfo& )
         void ReleaseTl( const ITransportLayer* )
-        int EnumerateDevices( DeviceInfoList_t&, bool addToList = false );
+        int EnumerateDevices( DeviceInfoList_t&, bool)
     #the way to declare static members is outside the class 
     cdef CTlFactory& CTlFactory_GetInstance "Pylon::CTlFactory::GetInstance"()
 
@@ -78,7 +78,7 @@ cdef class TransportLayer:
         self._tlFactory = &CTlFactory_GetInstance()
         self.__CreateTl()
         cdef DeviceInfoList_t deviceInfoList
-        self._nCameras = self._tlFactory.EnumerateDevices(deviceInfoList)
+        self._nCameras = self._tlFactory.EnumerateDevices(deviceInfoList,False)
         self._deviceInfoList = &deviceInfoList
     def __del__(self):
         self.__ReleaseTl()
