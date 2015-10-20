@@ -34,19 +34,24 @@
 ###############################################################################
 
 from libcpp cimport bool
+from cython.operator cimport preincrement as inc,dereference as deref
 
-cdef extern from "pylon/DeviceInfo.h" namespace "Pylon":
-    cdef cppclass CDeviceInfo:
-        CDeviceInfo() except +
+include "device.pyx"
 
 cdef extern from "pylon/Container.h" namespace "Pylon":
     cdef cppclass TlInfoList
     ctypedef TlInfoList TlInfoList_t
     cdef cppclass DeviceInfoList:
         DeviceInfoList() except +
-    ctypedef DeviceInfoList DeviceInfoList_t
-    #cdef DeviceInfoList_t* GetDeviceInfoList "new Pylon::DeviceInfoList"()
-    
+        cppclass iterator:
+            CDeviceInfo operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        iterator begin()
+        iterator end()
+    #ctypedef DeviceInfoList DeviceInfoList_t
+    #cdef DeviceInfoList& GetDeviceInfoList "Pylon::DeviceInfoList::DeviceInfoList"()
 
 cdef extern from "pylon/TransportLayer.h" namespace "Pylon":
     cdef cppclass ITransportLayer
@@ -60,37 +65,55 @@ cdef extern from "pylon/TlFactory.h" namespace "Pylon":
         int EnumerateTls( TlInfoList_t& )
         ITransportLayer* CreateTl( const CTlInfo& )
         void ReleaseTl( const ITransportLayer* )
-        int EnumerateDevices( DeviceInfoList_t&, bool)
+        int EnumerateDevices( DeviceInfoList&, bool)
+#         IPylonDevice* CreateDevice( CDeviceInfo& )
+#         void DestroyDevice( IPylonDevice* )
     #the way to declare static members is outside the class 
     cdef CTlFactory& CTlFactory_GetInstance "Pylon::CTlFactory::GetInstance"()
 
 cdef extern from "pylon/gige/BaslerGigECamera.h" namespace "Pylon":
     cdef CTlInfo& GetDeviceClass "Pylon::CBaslerGigECamera::DeviceClass"()
 
+
 #---- NOT available from python space
 cdef class TransportLayer:
     cdef CTlFactory* _tlFactory
     cdef TlInfoList_t* _tlInfoList
     cdef ITransportLayer* _tl
-    cdef DeviceInfoList_t* _deviceInfoList
     cdef int _nCameras
+    cdef DeviceInfoList* _deviceInfoList
+    _camerasList = []
     def __init__(self):
         self._tlFactory = &CTlFactory_GetInstance()
         self.__CreateTl()
-        cdef DeviceInfoList_t deviceInfoList
+        cdef DeviceInfoList deviceInfoList# = DeviceInfoList()
         self._nCameras = self._tlFactory.EnumerateDevices(deviceInfoList,False)
-        self._deviceInfoList = &deviceInfoList
+        #self._camerasList = []
+        cdef DeviceInfoList.iterator it = deviceInfoList.begin()
+        while it != deviceInfoList.end():
+            self._camerasList.append(DeviceInfo_Init(deref(it),self._tlFactory))
+            #self._camerasList.append(PylonDevice(DeviceInfo_Init(deref(it))))
+            inc(it)
     def __del__(self):
         self.__ReleaseTl()
     def __CreateTl(self):
         self._tl = self._tlFactory.CreateTl(GetDeviceClass())
     def __ReleaseTl(self):
         self._tlFactory.ReleaseTl(self._tl)
+#     cdef CreateDevice(self,CDeviceInfo& devInfo):
+#         return self._tlFactory.CreateDevice(devInfo)
+#     def DestroyDevice(device):
+#         self._tlFactory.DestroyDevice(device)
     def nCameras(self):
         return self._nCameras
-#     property nCameras:
-#         def __get__(self):
-#             return self._nCameras
+    def deviceInfoList(self):
+        return self._camerasList
+    def getCameraBySerialNumber(self,number):
+        for cameraInfo in self._camerasList:
+            if cameraInfo.serialNumber == int(number):
+                return cameraInfo.getPylonDevice()
+        raise KeyError("serial %s not found"%(number))
+
 
 #---- Available from python space
 class TransportLayerFactory(object):
@@ -100,3 +123,10 @@ class TransportLayerFactory(object):
     @property
     def nCameras(self):
         return self._tlFactory.nCameras()
+    @property
+    def CamerasList(self):
+        #return ["%s"%i for i in self._tlFactory.deviceInfoList()]
+        return self._tlFactory.deviceInfoList()
+    def getCameraBySerialNumber(self,number):
+        return self._tlFactory.getCameraBySerialNumber(number)
+

@@ -44,6 +44,8 @@ from distutils.core import setup
 from distutils.extension import Extension
 import numpy as np
 
+pylonExtension = Extension('pylon',['pylon/__init__.pyx'],language="c++")
+
 
 setup(name = 'pylon',
       license = "GPLv3+",
@@ -68,8 +70,8 @@ setup(name = 'pylon',
                      ''],
       url="https://github.com/srgblnch/python-pylon",
       cmdclass = {'build_ext': build_ext},
-      ext_modules=[Extension('pylon',['pylon/__init__.pyx'],language='c++')],
-      #install_requires=['cython>=0.21.1'],
+      ext_modules=[pylonExtension],
+      #install_requires=['cython>=0.20.1'],
 )
 
 #for the classifiers review see:
