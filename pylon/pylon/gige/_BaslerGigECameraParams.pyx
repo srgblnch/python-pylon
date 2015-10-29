@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               strings.pyx
+## file :               _BaslerGigECameraParams.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,32 +33,11 @@
 ##
 ###############################################################################
 
-from libcpp.string cimport string
-
-cdef extern from "pylon/stdinclude.h" namespace "Pylon":
-    cdef cppclass String_t
-
-#This code has been get from:
-#http://docs.cython.org/src/tutorial/strings.html
-#and it to simplify compatibility with python 2 and 3
-
-# from cpython.version cimport PY_MAJOR_VERSION
-#  
-# cdef unicode _ustring(s):
-#     if type(s) is unicode:
-#         # fast path for most common case(s)
-#         return <unicode>s
-#     elif PY_MAJOR_VERSION < 3 and isinstance(s, bytes):
-#         # only accept byte strings in Python 2.x, not in Py3
-#         return (<bytes>s).decode('ascii')
-#     elif isinstance(s, unicode):
-#         # an evil cast to <unicode> might work here in some(!) cases,
-#         # depending on what the further processing does.  to be safe,
-#         # we can always create a copy instead
-#         return unicode(s)
-#     else:
-#         raise TypeError("Cannot convert %s to python string"%(type(s)))
-
-# cdef str2py(String_t pylonstr):
-#     cdef string s = <string>pylonstr
-#     return _ustring(s)
+cdef extern from "pylon/gige/_BaslerGigECameraParams.h" \
+namespace "Basler_GigECamera":
+    cdef enum GainAutoEnums: GainAuto_Off, GainAuto_Once, GainAuto_Continuous
+#     cdef cppclass CGigECamera_Params:
+#         CGigECamera_Params()
+#         IInteger &SensorWidth
+#         IInteger &SensorHeight
+    

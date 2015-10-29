@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               BaslerGigECamera.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,17 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
+include "../../genicam/IInteger.pyx"
 
+cdef extern from "pylon/gige/BaslerGigECamera.h" namespace "Pylon":
+    cdef cppclass CBaslerGigECamera:
+        CBaslerGigECamera()
+        CBaslerGigECamera( IPylonDevice*, bool )
+        IInteger &PayloadSize
+    cdef CBaslerGigECamera* BuildCBaslerGigECamera \
+    "new Pylon::CBaslerGigECamera"( IPylonDevice*, bool )
+    cdef CTlInfo& GetDeviceClass "Pylon::CBaslerGigECamera::DeviceClass"()
 
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+# cdef CBaslerGigECamera* CBaslerGigECamera_Init(IPylonDevice* pylonDevice):
+#     cdef CBaslerGigECamera res = CBaslerGigECamera(pylonDevice,True)
+#     return &res

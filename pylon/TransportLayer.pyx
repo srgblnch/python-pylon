@@ -33,46 +33,14 @@
 ##
 ###############################################################################
 
-from libcpp cimport bool
 from cython.operator cimport preincrement as inc,dereference as deref
 
-include "device.pyx"
-
-cdef extern from "pylon/Container.h" namespace "Pylon":
-    cdef cppclass TlInfoList
-    ctypedef TlInfoList TlInfoList_t
-    cdef cppclass DeviceInfoList:
-        DeviceInfoList() except +
-        cppclass iterator:
-            CDeviceInfo operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        iterator begin()
-        iterator end()
-    #ctypedef DeviceInfoList DeviceInfoList_t
-    #cdef DeviceInfoList& GetDeviceInfoList "Pylon::DeviceInfoList::DeviceInfoList"()
-
-cdef extern from "pylon/TransportLayer.h" namespace "Pylon":
-    cdef cppclass ITransportLayer
-
-cdef extern from "pylon/TlInfo.h" namespace "Pylon":
-    cdef cppclass CTlInfo
-
-cdef extern from "pylon/TlFactory.h" namespace "Pylon":
-    cdef cppclass CTlFactory:
-        CTlFactory() except +
-        int EnumerateTls( TlInfoList_t& )
-        ITransportLayer* CreateTl( const CTlInfo& )
-        void ReleaseTl( const ITransportLayer* )
-        int EnumerateDevices( DeviceInfoList&, bool)
-#         IPylonDevice* CreateDevice( CDeviceInfo& )
-#         void DestroyDevice( IPylonDevice* )
-    #the way to declare static members is outside the class 
-    cdef CTlFactory& CTlFactory_GetInstance "Pylon::CTlFactory::GetInstance"()
-
-cdef extern from "pylon/gige/BaslerGigECamera.h" namespace "Pylon":
-    cdef CTlInfo& GetDeviceClass "Pylon::CBaslerGigECamera::DeviceClass"()
+include "Camera.pyx"
+include "pylon/Container.pyx"
+include "pylon/stdint.pyx"
+include "pylon/TransportLayer.pyx"
+include "pylon/TlInfo.pyx"
+include "pylon/TlFactory.pyx"
 
 
 #---- NOT available from python space
@@ -91,28 +59,27 @@ cdef class TransportLayer:
         #self._camerasList = []
         cdef DeviceInfoList.iterator it = deviceInfoList.begin()
         while it != deviceInfoList.end():
-            self._camerasList.append(DeviceInfo_Init(deref(it),self._tlFactory))
-            #self._camerasList.append(PylonDevice(DeviceInfo_Init(deref(it))))
+            self._camerasList.append(Camera_Init(deref(it),self._tlFactory))
             inc(it)
     def __del__(self):
+        self.__ReleaseTl()
+    def __dealloc__(self):
         self.__ReleaseTl()
     def __CreateTl(self):
         self._tl = self._tlFactory.CreateTl(GetDeviceClass())
     def __ReleaseTl(self):
         self._tlFactory.ReleaseTl(self._tl)
-#     cdef CreateDevice(self,CDeviceInfo& devInfo):
-#         return self._tlFactory.CreateDevice(devInfo)
-#     def DestroyDevice(device):
-#         self._tlFactory.DestroyDevice(device)
     def nCameras(self):
         return self._nCameras
     def deviceInfoList(self):
         return self._camerasList
     def getCameraBySerialNumber(self,number):
         for cameraInfo in self._camerasList:
+            #FIXME: this is maybe a too big loop, think how to make it shorter
             if cameraInfo.serialNumber == int(number):
-                return cameraInfo.getPylonDevice()
-        raise KeyError("serial %s not found"%(number))
+                return cameraInfo.pylonDevice()
+        raise KeyError("serial number %s not found"%(number))
+    #TODO: shall be other getters, like from ipaddress
 
 
 #---- Available from python space

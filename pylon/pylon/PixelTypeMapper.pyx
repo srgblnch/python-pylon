@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               PixelTypeMapper.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,25 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
+cdef extern from "pylon/PixelTypeMapper.h" namespace "Pylon":
+    cdef cppclass CPixelTypeMapper
+        CPixelTypeMapper()
+        CPixelTypeMapper(GenApi::IEnumeration* pEnum)
+        bool IsValid()
+        void SetPixelFormatEnumNode(GenApi::IEnumeration* pEnum)
+        PixelType GetPylonPixelTypeFromNodeValue(int64_t nodeValue)
+    cdef PixelType GetPylonPixelTypeByName \
+    "Pylon::CPixelTypeMapper::GetPylonPixelTypeByName"(\
+                                                   const char* pszSymbolicName)
+    cdef PixelType GetPylonPixelTypeByName \
+    "Pylon::CPixelTypeMapper::GetPylonPixelTypeByName"(\
+                                         const GenICam::gcstring& symbolicName)
+    cdef cppclass CCameraPixelTypeMapperT:
+        CCameraPixelTypeMapperT()
+        CCameraPixelTypeMapperT(GenApi::IEnumerationT<EnumT>* pEnumT)
+        bool IsValid()
+        void SetPixelFormatEnumNode(GenApi::IEnumerationT<EnumT>* pEnumT)
+        PixelType GetPylonPixelTypeFromPixelFormatEnum(EnumT pixelFormatEnumValue)
+        static PixelType GetPylonPixelTypeByName(const char* pszSymbolicName)
+        static PixelType GetPylonPixelTypeByName(const GenICam::gcstring& symbolicName)
 
-
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)

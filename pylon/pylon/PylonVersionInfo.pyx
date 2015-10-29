@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               PylonVersionInfo.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,21 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
-
-
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "pylon/PylonVersionInfo.h" namespace "Pylon":
+    cdef cppclass VersionInfo:
+        VersionInfo(bool)
+        VersionInfo(unsigned int major,unsigned int minor,
+                    unsigned int subminor)
+        VersionInfo(unsigned int major,unsigned int minor,
+                    unsigned int subminor,unsigned int build)
+        unsigned int getMajor()
+        unsigned int getMinor()
+        unsigned int getSubminor()
+        unsigned int getBuild()
+        bool operator > (VersionInfo& rhs)
+        bool operator == (const VersionInfo& rhs)
+        bool operator >= (const VersionInfo& rhs)
+        bool operator < (const VersionInfo& rhs)
+        bool operator != (const VersionInfo& rhs)
+        bool operator <= (const VersionInfo& rhs)
+    cdef string_t GetPylonVersionString "Pylon::VersionInfo::getVersionString"()

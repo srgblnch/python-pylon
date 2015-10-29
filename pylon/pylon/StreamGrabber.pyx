@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               streamGRabber.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,23 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
+include "Result.pyx"
+include "WaitObject.pyx"
 
+from libcpp cimport bool
 
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "pylon/StreamGrabber.h" namespace "Pylon":
+    ctypedef void* StreamBufferHandle
+    cdef cppclass IStreamGrabber:
+        void Open() except +
+        void Close()
+        bool IsOpen()
+        StreamBufferHandle RegisterBuffer( void* Buffer, size_t BufferSize )
+        void* DeregisterBuffer( StreamBufferHandle )
+        void PrepareGrab()
+        void FinishGrab()
+        void QueueBuffer( StreamBufferHandle, const void* Context=NULL )
+        void CancelGrab()
+        bool RetrieveResult( GrabResult& )
+        WaitObject& GetWaitObject()
+        INodeMap* GetNodeMap()

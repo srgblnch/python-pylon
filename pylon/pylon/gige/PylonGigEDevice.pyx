@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               PylonGigEDevice.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,30 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
+
+include "../ChunkParser.pyx"
+include "../EventGrabber.pyx"
+include "../../genicam/INodeMap.pyx"
+include "../StreamGrabber.pyx"
 
 
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "pylon/gige/PylonGigEDevice.h" namespace "Pylon":
+    cdef cppclass IPylonGigEDevice:
+        void Open(AccessModeSet)
+        void Close()
+        bool IsOpen()
+        AccessModeSet AccessMode()
+        uint32_t GetNumStreamGrabberChannels()
+        IStreamGrabber* GetStreamGrabber(uint32_t index)
+        IEventGrabber* GetEventGrabber()
+        INodeMap* GetNodeMap()
+        INodeMap* GetTLNodeMap()
+        IChunkParser* CreateChunkParser()
+        void DestroyChunkParser( IChunkParser* )
+        void ChangeIpConfiguration( bool EnablePersistentIp, bool EnableDhcp )
+        void GetPersistentIpAddress(String_t& IpAddress, 
+                                    String_t& SubnetMask, 
+                                    String_t& DefaultGateway)
+        void SetPersistentIpAddress(String_t& IpAddress,
+                                    String_t& SubnetMask,
+                                    String_t& DefaultGateway)

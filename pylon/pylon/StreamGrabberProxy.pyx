@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               StreamGrabberProxy.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,22 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
-
-
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "pylon/StreamGrabberProxy.h" namespace "Pylon":
+    cdef cppclass CStreamGrabberProxyT:
+        CStreamGrabberProxyT()
+        CStreamGrabberProxyT(Pylon::IStreamGrabber*)
+        void Attach(IStreamGrabber*)
+        virtual bool IsAttached()
+        virtual IStreamGrabber* GetStreamGrabber()
+        void Open()
+        void Close()
+        bool IsOpen()
+        StreamBufferHandle RegisterBuffer( void* Buffer, size_t BufferSize )
+        void* DeregisterBuffer( StreamBufferHandle handle )
+        void PrepareGrab()
+        void FinishGrab()
+        void QueueBuffer( StreamBufferHandle Handle , void* Context=NULL )
+        void CancelGrab()
+        bool RetrieveResult( GrabResult& Result )
+        WaitObject& GetWaitObject() const
+        GenApi::INodeMap* GetNodeMap()

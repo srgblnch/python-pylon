@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               Result.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,38 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
+from libcpp cimport bool
 
+include "stdint.pyx"
+include "PixelType.pyx"
 
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "pylon/Result.h" namespace "Pylon":
+    cdef enum GrabStatus: Idle, Queued, Grabbed, Canceled, Failed
+    cdef enum PayloadType: PayloadType_Undefined = -1, PayloadType_Image,\
+                           PayloadType_RawData, PayloadType_File,\
+                           PayloadType_ChunkData, PayloadType_DeviceSpecific
+    cdef cppclass GrabResult:
+        GrabResult()
+        bool Succeeded()
+        void* Buffer()
+        GrabStatus Status()
+        void* Context()
+        uint32_t FrameNr()
+        PayloadType GetPayloadType()
+        PixelType GetPixelType()
+        uint64_t GetTimeStamp()
+        int32_t GetSizeX()
+        int32_t GetSizeY()
+        int32_t GetOffsetX()
+        int32_t GetOffsetY()
+        int32_t GetPaddingX()
+        int32_t GetPaddingY()
+        int64_t GetPayloadSize()
+        size_t GetPayloadSize_t()
+        uint32_t GetErrorCode()
+    cdef cppclass EventResult:
+        EventResult()
+        bool Succeeded()
+        String_t ErrorDescription()
+        unsigned long ErrorCode()
+        unsigned char Buffer[576]

@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               IInteger.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,15 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
+include "../pylon/stdint.pyx"
 
-
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "GenApi/IInteger.h" namespace "GenApi":
+    cdef cppclass IInteger:
+        void SetValue(int64_t Value, bool Verify = true)
+        #IInteger& operator=(int64_t Value)
+        int64_t GetValue(bool Verify = false, bool IgnoreCache = false )
+        int64_t GetMin()
+        int64_t GetMax()
+        int64_t GetInc()
+        #gcstring GetUnit()
+        

@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               _GigETLParams.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,12 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
+include "../../genicam/IInteger.pyx"
 
-
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "pylon/gige/_GigETLParams.h" namespace "Basler_GigETLParams":
+    cdef cppclass CGigETLParams_Params:
+        IInteger &ReadTimeout
+        IInteger &WriteTimeout
+        IInteger &HeartbeatTimeout
+    ctypedef CGigETLParams_Params TLParams_t
+    

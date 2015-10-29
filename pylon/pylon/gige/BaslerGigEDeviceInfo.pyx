@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               BaslerGigEDeviceInfo.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,24 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
+include "_GigETLParams.pyx"
+include "../Info.pyx"
 
-
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "pylon/gige/BaslerGigEDeviceInfo.h" namespace "Pylon":
+    cdef cppclass CBaslerGigEDeviceInfo:
+        String_t GetAddress()
+        String_t GetIpAddress()
+        String_t GetDefaultGateway()
+        String_t GetSubnetMask()
+        String_t GetPortNr()
+        String_t GetMacAddress()
+        String_t GetInterface()
+        String_t GetIpConfigOptions()
+        String_t GetIpConfigCurrent()
+        bool IsPersistentIpActive()
+        bool IsDhcpActive()
+        bool IsAutoIpActive()
+        bool IsPersistentIpSupported()
+        bool IsDhcpSupported()
+        bool IsAutoIpSupported()
+        bool IsSubset( IProperties& Subset)

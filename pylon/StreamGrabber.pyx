@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               StreamGrabber.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,42 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
+include "pylon/StreamGrabber.pyx"
+include "Buffer.pyx"
 
-
-class _Guard(object):
+cdef class StreamGrabber(object):
+    cdef:
+        IPylonDevice* _pylonDevice
+        IStreamGrabber* _streamGrabber
+        #StreamBufferHandle* _streamBufferHandle
     def __init__(self):
-        super(_Guard,self).__init__()
+        super(StreamGrabber,self).__init__()
     def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+        self.Close()
+        #if self._streamGrabber != NULL and self._streamBufferHandle != NULL:
+            #self._streamGrabber.DeregisterBuffer(self._streamBufferHandle)
+    @property
+    def isOpen(self):
+        if self._streamGrabber != NULL:
+            return self._streamGrabber.IsOpen()
+        return False
+    def Open(self):
+        if not self.isOpen:
+            self._streamGrabber.Open()
+            return True
+        return False
+    def Close(self):
+        if self.isOpen:
+            self._streamGrabber.Close()
+            return True
+        return False
+    @property
+    def channels(self):
+        if self._pylonDevice != NULL:
+            return self._pylonDevice.GetNumStreamGrabberChannels()
+
+cdef StreamGrabber_Init(IPylonDevice* pylonDevice):
+    res = StreamGrabber()
+    res._pylonDevice = pylonDevice
+    res._streamGrabber = pylonDevice.GetStreamGrabber(0)
+    return res

@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               Device.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,31 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
+
+include "ChunkParser.pyx"
+include "EventGrabber.pyx"
+include "../genicam/INodeMap.pyx"
+include "StreamGrabber.pyx"
 
 
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "pylon/Device.h" namespace "Pylon":
+    ctypedef enum AccessMode: Stream, Control, Event, Exclusive
+    cdef cppclass AccessModeSet:
+        AccessModeSet()
+        AccessModeSet(AccessMode)
+    cdef cppclass IPylonDevice:
+        void Open(AccessModeSet)
+        void Close()
+        bool IsOpen()
+        AccessModeSet AccessMode()
+        uint32_t GetNumStreamGrabberChannels()
+        IStreamGrabber* GetStreamGrabber(uint32_t index)
+        IEventGrabber* GetEventGrabber()
+        INodeMap* GetNodeMap()
+        INodeMap* GetTLNodeMap()
+        IChunkParser* CreateChunkParser()
+        void DestroyChunkParser( IChunkParser* )
+        #IEventAdapter* CreateEventAdapter()
+        #void DestroyEventAdapter( IEventAdapter* )
+        #DeviceCallbackHandle RegisterRemovalCallback( DeviceCallback& )
+        #bool DeregisterRemovalCallback( DeviceCallbackHandle )

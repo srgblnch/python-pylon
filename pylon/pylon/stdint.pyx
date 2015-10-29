@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               streamGRabber.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,14 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
+from libcpp cimport bool
 
-
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "stdint.h":
+    ctypedef   signed char  int8_t
+    ctypedef   signed short int16_t
+    ctypedef   signed int   int32_t
+    ctypedef   signed long  int64_t
+    ctypedef unsigned char  uint8_t
+    ctypedef unsigned short uint16_t
+    ctypedef unsigned int   uint32_t
+    ctypedef unsigned long long uint64_t

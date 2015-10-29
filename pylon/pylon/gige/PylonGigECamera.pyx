@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               PylonGigECamera.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,21 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
 
 
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "pylon/gige/PylonGigECamera.h" namespace "Pylon":
+    cdef cppclass CPylonGigETLParams:
+        CPylonGigETLParams( INodeMap* )
+    cdef CPylonGigETLParams* BuildCPylonGigETLParams \
+    "new Pylon::CPylonGigETLParams"( INodeMap* )
+#     cdef cppclass CPylonGigEStreamGrabber
+#         CPylonGigEStreamGrabber()
+#     cdef cppclass CPylonGigEEventGrabber
+#         CPylonGigEEventGrabber()
+#     cdef cppclass CPylonGigECameraT
+#         CPylonGigECameraT()
+#     cdef cppclass CPylonGigECameraT:
+#         CPylonGigECameraT()
+#         CPylonGigECameraT(IPylonDevice* pDevice, bool takeOwnership)
+#         String_t DeviceClass()
+    

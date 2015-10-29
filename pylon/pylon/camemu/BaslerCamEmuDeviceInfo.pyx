@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               factory.pyx
+## file :               BaslerCamEmuDeviceInfo.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,16 +33,7 @@
 ##
 ###############################################################################
 
-include "pylon/stdint.pyx"
-include "pylon/PylonBase.pyx"
-
-
-class _Guard(object):
-    def __init__(self):
-        super(_Guard,self).__init__()
-    def __dealloc__(self):
-        self.terminate()
-    def initialize(self):
-        PylonInitialize()
-    def terminate(self,shutDownLogging=True):
-        PylonTerminate(shutDownLogging)
+cdef extern from "pylon/camemu/BaslerCamEmuDeviceInfo.h" namespace "Pylon":
+    cdef cppclass CBaslerCamEmuDeviceInfo:
+        CBaslerCamEmuDeviceInfo()
+        CBaslerCamEmuDeviceInfo(const CDeviceInfo& )
