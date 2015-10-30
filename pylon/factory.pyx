@@ -74,16 +74,16 @@ cdef class __CppTlFactory:
         return self._camerasList
 
 class TlFactory(object):
-    _cppTlFactory = None
+    __cppTlFactory = None
     def __init__(self):
         super(TlFactory,self).__init__()
-        self._cppTlFactory = __CppTlFactory()
+        self.__cppTlFactory = __CppTlFactory()
         self._cameraList = []
-        for camera in self._cppTlFactory.cameraList():
+        for camera in self.__cppTlFactory.cameraList():
             self._cameraList.append(Camera(camera))
     @property
     def nCameras(self):
-        return self._cppTlFactory.nCameras()
+        return self.__cppTlFactory.nCameras()
     @property
     def cameraList(self):
         return self._cameraList[:]

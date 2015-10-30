@@ -68,7 +68,7 @@ cdef class __CppCamera:
             pylonDevice = self._TlFactory.CreateDevice(self._devInfo)
             self._pylonDevice = <IPylonGigEDevice*>&pylonDevice
 #             tlParams = self._pylonDevice.GetTLNodeMap()
-#             self._pylonParams = <CGigETLParams_Params*>&tlParams
+#             self._tlParams = <CGigETLParams_Params*>&tlParams
     def __Release__(self):
         self.__ReleasePylonDevice__()
         self.__ReleaseTl()
@@ -155,46 +155,46 @@ cdef BuildCppCamera(CDeviceInfo devInfo,CTlFactory* tlFactory):
 class Camera(object):
     def __init__(self,cppCamera):
         super(Camera,self).__init__()
-        self._cppCamera = cppCamera
+        self.__cppCamera = cppCamera
     def __str__(self):
         return "%s"%(self.serialNumber)
     def __repr__(self):
         return "%s (%s)"%(self.serialNumber,self.modelName)
     def CreateDevice(self):
-        self._cppCamera.CreateDevice()
+        self.__cppCamera.CreateDevice()
     @property
     def serialNumber(self):
-        return self._cppCamera.GetSerialNumber()
+        return self.__cppCamera.GetSerialNumber()
     @property
     def modelName(self):
-        return self._cppCamera.GetModelName()
+        return self.__cppCamera.GetModelName()
     @property
     def deviceVersion(self):
-        return self._cppCamera.GetDeviceVersion()
+        return self.__cppCamera.GetDeviceVersion()
     @property
     def deviceFactory(self):
-        return self._cppCamera.GetDeviceFactory()
+        return self.__cppCamera.GetDeviceFactory()
     @property
     def ipAddress(self):
-        return self._cppCamera.GetIpAddress()
+        return self.__cppCamera.GetIpAddress()
     @property
     def ipAddress(self):
-        return self._cppCamera.GetIpAddress()
+        return self.__cppCamera.GetIpAddress()
     @property
     def port(self):
-        return self._cppCamera.GetPortNr()
+        return self.__cppCamera.GetPortNr()
     @property
     def macAddress(self):
-        return self._cppCamera.GetMacAddress()
+        return self.__cppCamera.GetMacAddress()
     @property
     def gateway(self):
-        return self._cppCamera.GetDefaultGateway()
+        return self.__cppCamera.GetDefaultGateway()
     @property
     def netmask(self):
-        return self._cppCamera.GetSubnetMask()
+        return self.__cppCamera.GetSubnetMask()
     @property
     def interface(self):
-        return self._cppCamera.GetInterface()
+        return self.__cppCamera.GetInterface()
 #     @property
 #     def readTimeout(self):
-#         return self._cppCamera.GetReadTimeout()
+#         return self.__cppCamera.GetReadTimeout()
