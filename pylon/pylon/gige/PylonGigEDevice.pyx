@@ -36,6 +36,7 @@
 
 include "../ChunkParser.pyx"
 include "../EventGrabber.pyx"
+include "../../genicam/IInteger.pyx"
 include "../../genicam/INodeMap.pyx"
 include "../StreamGrabber.pyx"
 

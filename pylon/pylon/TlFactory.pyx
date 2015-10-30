@@ -34,6 +34,11 @@
 ###############################################################################
 
 include "Container.pyx"
+include "Device.pyx"
+include "DeviceInfo.pyx"
+include "stdinclude.pyx"
+include "TlInfo.pyx"
+include "TransportLayer.pyx"
 
 cdef extern from "pylon/TlFactory.h" namespace "Pylon":
     cdef cppclass CTlFactory:

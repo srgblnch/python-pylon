@@ -37,12 +37,32 @@ include "../../genicam/IInteger.pyx"
 
 cdef extern from "pylon/gige/BaslerGigECamera.h" namespace "Pylon":
     cdef cppclass CBaslerGigECamera:
-        CBaslerGigECamera()
-        CBaslerGigECamera( IPylonDevice*, bool )
-        IInteger &PayloadSize
-    cdef CBaslerGigECamera* BuildCBaslerGigECamera \
-    "new Pylon::CBaslerGigECamera"( IPylonDevice*, bool )
+        void Attach(IPylonDevice*, bool takeOwnership = true)
+        bool IsAttached()
+        bool HasOwnership()
+        IInteger& PayloadSize
+#         IInteger& Width
+#         IInteger& Height
+#         IInteger& SensorWidth
+#         IInteger& SensorHeight
+#         IInteger& WidthMax
+#         IInteger& HeightMax
+#         IInteger& OffsetX
+#         IInteger& OffsetY
+#         IInteger& BinningVertical
+#         IInteger& BinningHorizontal
+        #IEnumerationT<Basler_GigECameraParams::AcquisitionModeEnums>&\
+        #    AcquisitionMode
+#         ICommand& AcquisitionStart
+#         ICommand& AcquisitionStop
+#         ICommand& AcquisitionAbort
+        
     cdef CTlInfo& GetDeviceClass "Pylon::CBaslerGigECamera::DeviceClass"()
+#     cdef CBaslerGigECamera* BuildCBaslerGigECamera \
+#     "new Pylon::CBaslerGigECamera"( IPylonDevice*, bool )
+    cdef CBaslerGigECamera* BuildCBaslerGigECamera \
+    "new Pylon::CBaslerGigECamera"()
+    
 
 # cdef CBaslerGigECamera* CBaslerGigECamera_Init(IPylonDevice* pylonDevice):
 #     cdef CBaslerGigECamera res = CBaslerGigECamera(pylonDevice,True)

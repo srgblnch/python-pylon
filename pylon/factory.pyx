@@ -33,14 +33,90 @@
 ##
 ###############################################################################
 
-include "TransportLayer.pyx"
+#include "TransportLayer.pyx"
 
-class Factory(object):
-    _TransportLayer = None
+# class Factory(object):
+#     _TransportLayer = None
+#     def __cinit__(self):
+#         super(Factory,self).__init__()
+#         #self._TransportLayer = #_TlFactory()
+#     @property
+#     def TransportLayer(self):
+#         return TransportLayerFactory()
+
+from cython.operator cimport preincrement as inc,dereference as deref
+
+include "Camera.pyx"
+include "pylon/Container.pyx"
+include "pylon/TlFactory.pyx"
+include "pylon/gige/BaslerGigECamera.pyx"
+
+cdef class __CppTlFactory:
+    cdef:
+        CTlFactory* _TlFactory
+        int _nCameras
+    _camerasList = []
     def __cinit__(self):
-        super(Factory,self).__init__()
-        #self._TransportLayer = #_TlFactory()
+        cdef:
+            DeviceInfoList deviceInfoList
+            DeviceInfoList.iterator it
+        self._TlFactory = &CTlFactory_GetInstance()
+        self._nCameras = self._TlFactory.EnumerateDevices(deviceInfoList,False)
+        if not deviceInfoList.empty():
+            it = deviceInfoList.begin()
+            while it != deviceInfoList.end():
+                self._camerasList.append(BuildCppCamera(deref(it),
+                                                        self._TlFactory))
+                inc(it)
+    def nCameras(self):
+        return self._nCameras
+    def cameraList(self):
+        return self._camerasList
+
+class TlFactory(object):
+    _cppTlFactory = None
+    def __init__(self):
+        super(TlFactory,self).__init__()
+        self._cppTlFactory = __CppTlFactory()
+        self._cameraList = []
+        for camera in self._cppTlFactory.cameraList():
+            self._cameraList.append(Camera(camera))
     @property
-    def TransportLayer(self):
-        return TransportLayerFactory()
+    def nCameras(self):
+        return self._cppTlFactory.nCameras()
+    @property
+    def cameraList(self):
+        return self._cameraList[:]
+    @property
+    def ipList(self):
+        ipLst = []
+        for camera in self._cameraList:
+            if len(camera.ipAddress) > 0:
+                ipLst.append(camera.ipAddress)
+        return ipLst
+    @property
+    def macList(self):
+        macLst = []
+        for camera in self._cameraList:
+            if len(camera.macAddress) > 0:
+                macLst.append(camera.macAddress)
+        return macLst
+    def getCameraBySerialNumber(self,number):
+        for camera in self._cameraList:
+            if camera.serialNumber == int(number):
+                camera.CreateDevice()
+                return camera
+        raise KeyError("serial number %s not found"%(number))
+    def getCameraByIpAddress(self,ipAddress):
+        for camera in self._cameraList:
+            if camera.ipAddress == ipAddress:
+                camera.CreateDevice()
+                return camera
+        raise KeyError("ip address %s not found"%(ipAddress))
+    def getCameraByMacAddress(self,macAddress):
+        for camera in self._cameraList:
+            if camera.macAddress == macAddress:
+                camera.CreateDevice()
+                return camera
+        raise KeyError("mac address %s not found"%(macAddress))
 

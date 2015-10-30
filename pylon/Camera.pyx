@@ -33,115 +33,168 @@
 ##
 ###############################################################################
 
-
-include "pylon/Device.pyx"
-include "pylon/DeviceInfo.pyx"
 include "pylon/DeviceFactory.pyx"
-include "pylon/gige/BaslerGigECamera.pyx"
-include "pylon/gige/PylonGigECamera.pyx"
+include "pylon/DeviceInfo.pyx"
 include "pylon/gige/BaslerGigEDeviceInfo.pyx"
 include "pylon/gige/PylonGigEDevice.pyx"
-include "StreamGrabber.pyx"
-include "ChunkParser.pyx"
-include "genicam/IInteger.pyx"
+include "pylon/TransportLayer.pyx"
 
-
-cdef class Camera(object):
+cdef class __CppCamera:
     cdef:
         CDeviceInfo _devInfo
-        IDeviceFactory* _tlFactory
+        CTlFactory* _TlFactory
         IPylonGigEDevice* _pylonDevice
-        #CBaslerGigECamera* _baslerCamera
-        StreamGrabber _streamGrabber
+        ITransportLayer* _tl#Each camera has each transport layer to it.
+        CGigETLParams_Params* _tlParams
     def __cinit__(self):
-        super(Camera,self).__init__()
+        pass
+    def CreateDevice(self):
+        self.__CreateTl__()
+        self.__CreatePylonDevice__()
+    def __del__(self):
+        self.__Release__()
     def __dealloc__(self):
-        self.Close()
-        if self._pylonDevice != NULL:
-            self._tlFactory.DestroyDevice(<IPylonDevice*>self._pylonDevice)
-    def pylonDevice(self):
-        return self.__buildPylonDevice()
-    def __buildPylonDevice(self):
-        if self._pylonDevice == NULL:
-            #FIXME: this call seems to take a long time,
-            # check if we can do it faster
-            self._pylonDevice = \
-            <IPylonGigEDevice*>self._tlFactory.CreateDevice(self._devInfo)
-#             self._baslerCamera = \
-#             BuildCBaslerGigECamera(<IPylonDevice*>self._pylonDevice,True)
-        return self
-    @property
-    def isOpen(self):
-        if self._pylonDevice != NULL:
-            return self._pylonDevice.IsOpen()
-        return False
-    def Open(self):
-        if not self.isOpen:
-            self._pylonDevice.Open(AccessModeSet(Exclusive))
-            try:
-                self.streamGrabber.Open()
-            except:
-                pass
-            return True
-        return False
-    def Close(self):
-        if self.isOpen:
-            try:
-                self.streamGrabber.Close()
-            except:
-                pass
-            self._pylonDevice.Close()
-            return True
-        return False
+        self.__Release__()
+    def __CreateTl__(self):
+        if self._TlFactory is NULL:
+            self._TlFactory = &CTlFactory_GetInstance()
+        if self._tl is NULL:
+            self._tl = self._TlFactory.CreateTl(GetDeviceClass())
+    def __CreatePylonDevice__(self):
+        cdef:
+            IPylonDevice* pylonDevice
+            INodeMap* tlParams
+        if self._pylonDevice is NULL:
+            pylonDevice = self._TlFactory.CreateDevice(self._devInfo)
+            self._pylonDevice = <IPylonGigEDevice*>&pylonDevice
+#             tlParams = self._pylonDevice.GetTLNodeMap()
+#             self._pylonParams = <CGigETLParams_Params*>&tlParams
+    def __Release__(self):
+        self.__ReleasePylonDevice__()
+        self.__ReleaseTl()
+    def __ReleaseTl__(self):
+        if self._TlFactory is not NULL and self._tl is not NULL:
+            self._TlFactory.ReleaseTl(self._tl)
+    def __ReleasePylonDevice__(self):
+        if self._pylonDevice is not NULL:
+            self._TlFactory.DestroyDevice(<IPylonDevice*>&self._pylonDevice)
+    def GetSerialNumber(self):
+        try:
+            return int(<string>self._devInfo.GetSerialNumber())
+        except:
+            return 0
+    def GetModelName(self):
+        try:
+            return <string>self._devInfo.GetModelName()
+        except:
+            return ''
+    def GetDeviceVersion(self):
+        try:
+            return <string>self._devInfo.GetDeviceVersion()
+        except:
+            return ''
+    def GetDeviceFactory(self):
+        try:
+            return <string>self._devInfo.GetDeviceFactory()
+        except:
+            return ''
+    def GetIpAddress(self):
+        cdef CBaslerGigEDeviceInfo devInfo
+        try:
+            devInfo = <CBaslerGigEDeviceInfo>self._devInfo
+            return <string>devInfo.GetIpAddress()
+        except:
+            return ''
+    def GetPortNr(self):
+        cdef CBaslerGigEDeviceInfo devInfo
+        try:
+            devInfo = <CBaslerGigEDeviceInfo>self._devInfo
+            return <string>devInfo.GetPortNr()
+        except:
+            return ''
+    def GetMacAddress(self):
+        cdef CBaslerGigEDeviceInfo devInfo
+        try:
+            devInfo = <CBaslerGigEDeviceInfo>self._devInfo
+            return <string>devInfo.GetMacAddress()
+        except:
+            return ''
+    def GetDefaultGateway(self):
+        cdef CBaslerGigEDeviceInfo devInfo
+        try:
+            devInfo = <CBaslerGigEDeviceInfo>self._devInfo
+            return <string>devInfo.GetDefaultGateway()
+        except:
+            return ''
+    def GetSubnetMask(self):
+        cdef CBaslerGigEDeviceInfo devInfo
+        try:
+            devInfo = <CBaslerGigEDeviceInfo>self._devInfo
+            return <string>devInfo.GetSubnetMask()
+        except:
+            return ''
+    def GetInterface(self):
+        cdef CBaslerGigEDeviceInfo devInfo
+        try:
+            devInfo = <CBaslerGigEDeviceInfo>self._devInfo
+            return <string>devInfo.GetInterface()
+        except:
+            return ''
+#     def GetReadTimeout(self):
+#         try:
+#             return self._tlParams.ReadTimeout.GetValue()
+#         except:
+#             raise ValueError("ReadTimeout not accessible")
+
+cdef BuildCppCamera(CDeviceInfo devInfo,CTlFactory* tlFactory):
+    res = __CppCamera()
+    res._devInfo = devInfo
+    res._TlFactory = tlFactory#<IDeviceFactory*>tlFactory
+    return res
+
+class Camera(object):
+    def __init__(self,cppCamera):
+        super(Camera,self).__init__()
+        self._cppCamera = cppCamera
     def __str__(self):
         return "%s"%(self.serialNumber)
     def __repr__(self):
         return "%s (%s)"%(self.serialNumber,self.modelName)
+    def CreateDevice(self):
+        self._cppCamera.CreateDevice()
     @property
     def serialNumber(self):
-        return int(<string>self._devInfo.GetSerialNumber())
-    @property
-    def userName(self):
-        return <string>self._devInfo.GetUserDefinedName()
+        return self._cppCamera.GetSerialNumber()
     @property
     def modelName(self):
-        return <string>self._devInfo.GetModelName()
+        return self._cppCamera.GetModelName()
     @property
     def deviceVersion(self):
-        return <string>self._devInfo.GetDeviceVersion()
+        return self._cppCamera.GetDeviceVersion()
     @property
     def deviceFactory(self):
-        return <string>self._devInfo.GetDeviceFactory()
+        return self._cppCamera.GetDeviceFactory()
     @property
     def ipAddress(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetIpAddress()
+        return self._cppCamera.GetIpAddress()
+    @property
+    def ipAddress(self):
+        return self._cppCamera.GetIpAddress()
     @property
     def port(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetPortNr()
+        return self._cppCamera.GetPortNr()
     @property
     def macAddress(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetMacAddress()
+        return self._cppCamera.GetMacAddress()
     @property
     def gateway(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetDefaultGateway()
+        return self._cppCamera.GetDefaultGateway()
     @property
     def netmask(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetSubnetMask()
+        return self._cppCamera.GetSubnetMask()
     @property
     def interface(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetInterface()
-    @property
-    def streamGrabber(self):
-        if self._pylonDevice != NULL and self._streamGrabber == None:
-            try:
-                self._streamGrabber = StreamGrabber_Init(<IPylonDevice*>self._pylonDevice)
-            except Exception,e:
-                print("Camera.streamGrabber Exception: %s"%(e))
-        return self._streamGrabber
-
-
-cdef Camera_Init(CDeviceInfo devInfo,CTlFactory* tlFactory):
-    res = Camera()
-    res._devInfo = devInfo
-    res._tlFactory = <IDeviceFactory*>tlFactory
-    return res
+        return self._cppCamera.GetInterface()
+#     @property
+#     def readTimeout(self):
+#         return self._cppCamera.GetReadTimeout()
