@@ -36,8 +36,16 @@
 
 cdef extern from "pylon/Info.h" namespace "Pylon":
     cdef cppclass IProperties:
-        int GetPropertyNames( StringList_t & )
-        bool GetPropertyAvailable( String_t& )
-        bool GetPropertyValue( String_t&, String_t& )
-        IProperties& SetPropertyValue( String_t&, String_t& )
-        bool IsSubset( IProperties& Subset )
+        int GetPropertyNames( StringList_t & ) except +
+        bool GetPropertyAvailable( String_t& ) except +
+        bool GetPropertyValue( String_t&, String_t& ) except +
+        IProperties& SetPropertyValue( String_t&, String_t& ) except +
+        bool IsSubset( IProperties& Subset ) except +
+    cdef cppclass CInfoBase
+
+cdef class __IProperties:
+    pass
+ 
+cdef class __CInfoBase(__IProperties):
+    def __cinit__(self):
+        super(__CInfoBase,self).__init__()

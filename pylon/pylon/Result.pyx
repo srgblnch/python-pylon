@@ -33,10 +33,6 @@
 ##
 ###############################################################################
 
-from libcpp cimport bool
-
-include "stdint.pyx"
-include "PixelType.pyx"
 
 cdef extern from "pylon/Result.h" namespace "Pylon":
     cdef enum GrabStatus: Idle, Queued, Grabbed, Canceled, Failed
@@ -44,27 +40,28 @@ cdef extern from "pylon/Result.h" namespace "Pylon":
                            PayloadType_RawData, PayloadType_File,\
                            PayloadType_ChunkData, PayloadType_DeviceSpecific
     cdef cppclass GrabResult:
-        GrabResult()
-        bool Succeeded()
-        void* Buffer()
-        GrabStatus Status()
-        void* Context()
-        uint32_t FrameNr()
-        PayloadType GetPayloadType()
-        PixelType GetPixelType()
-        uint64_t GetTimeStamp()
-        int32_t GetSizeX()
-        int32_t GetSizeY()
-        int32_t GetOffsetX()
-        int32_t GetOffsetY()
-        int32_t GetPaddingX()
-        int32_t GetPaddingY()
-        int64_t GetPayloadSize()
-        size_t GetPayloadSize_t()
-        uint32_t GetErrorCode()
+        GrabResult() except +
+        bool Succeeded() except +
+        void* Buffer() except +
+        GrabStatus Status() except +
+        void* Context() except +
+        uint32_t FrameNr() except +
+        PayloadType GetPayloadType() except +
+        PixelType GetPixelType() except +
+        uint64_t GetTimeStamp() except +
+        int32_t GetSizeX() except +
+        int32_t GetSizeY() except +
+        int32_t GetOffsetX() except +
+        int32_t GetOffsetY() except +
+        int32_t GetPaddingX() except +
+        int32_t GetPaddingY() except +
+        int64_t GetPayloadSize() except +
+        size_t GetPayloadSize_t() except +
+        uint32_t GetErrorCode() except +
     cdef cppclass EventResult:
-        EventResult()
-        bool Succeeded()
-        String_t ErrorDescription()
-        unsigned long ErrorCode()
+        EventResult() except +
+        bool Succeeded() except +
+        String_t ErrorDescription() except +
+        unsigned long ErrorCode() except +
         unsigned char Buffer[576]
+

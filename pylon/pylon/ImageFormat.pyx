@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               DeviceFactory.pyx
+## file :               ImageFormat.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -34,11 +34,9 @@
 ###############################################################################
 
 
-cdef extern from "pylon/DeviceFactory.h" namespace "Pylon":
-    cdef cppclass IDeviceFactory:
-        IPylonDevice* CreateDevice( CDeviceInfo& ) except +
-        void DestroyDevice( IPylonDevice* ) except +
-
-cdef class __IDeviceFactory:
-    def __cinit__(self):
-        pass
+cdef extern from "pylon/ImageFormat.h" namespace "Pylon":
+    cdef struct SImageFormat
+    cdef struct SOutputImageFormat
+    cdef struct SRGBAPixel
+    cdef struct SYUV422_UYVY
+    cdef struct SYUV422_YUYV

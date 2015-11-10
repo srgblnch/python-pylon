@@ -34,30 +34,64 @@
 ###############################################################################
 
 
-include "ChunkParser.pyx"
-include "EventGrabber.pyx"
-include "../genicam/INodeMap.pyx"
-include "StreamGrabber.pyx"
-
-
 cdef extern from "pylon/Device.h" namespace "Pylon":
     ctypedef enum AccessMode: Stream, Control, Event, Exclusive
     cdef cppclass AccessModeSet:
-        AccessModeSet()
-        AccessModeSet(AccessMode)
+        AccessModeSet() except +
+        AccessModeSet(AccessMode) except +
+    cdef cppclass IDevice
     cdef cppclass IPylonDevice:
-        void Open(AccessModeSet)
-        void Close()
-        bool IsOpen()
-        AccessModeSet AccessMode()
-        uint32_t GetNumStreamGrabberChannels()
-        IStreamGrabber* GetStreamGrabber(uint32_t index)
-        IEventGrabber* GetEventGrabber()
-        INodeMap* GetNodeMap()
-        INodeMap* GetTLNodeMap()
-        IChunkParser* CreateChunkParser()
-        void DestroyChunkParser( IChunkParser* )
-        #IEventAdapter* CreateEventAdapter()
-        #void DestroyEventAdapter( IEventAdapter* )
-        #DeviceCallbackHandle RegisterRemovalCallback( DeviceCallback& )
-        #bool DeregisterRemovalCallback( DeviceCallbackHandle )
+        void Open(AccessModeSet) except +
+        void Close() except +
+        bool IsOpen() except +
+        AccessModeSet AccessMode() except +
+        uint32_t GetNumStreamGrabberChannels() except +Exception
+        IStreamGrabber* GetStreamGrabber(uint32_t index) except +
+        IEventGrabber* GetEventGrabber() except +
+        INodeMap* GetNodeMap() except +
+        INodeMap* GetTLNodeMap() except +
+        IChunkParser* CreateChunkParser() except +
+        void DestroyChunkParser( IChunkParser* ) except +
+        #IEventAdapter* CreateEventAdapter() except +
+        #void DestroyEventAdapter( IEventAdapter* ) except +
+        #DeviceCallbackHandle RegisterRemovalCallback( DeviceCallback& ) except +
+        #bool DeregisterRemovalCallback( DeviceCallbackHandle ) except +
+
+# cdef class __AccessModeSet:
+#     cdef:
+#         AccessModeSet _accessMode
+#     def __cinit__(self):
+#         self._accessMode = AccessModeSet(Exclusive)
+#     cdef AccessModeSet GetAccessModeSet(self):
+#         return self._accessMode
+# 
+cdef class __IDevice:
+    def __cinit__(self):
+        pass#super(__IDevice,self).__init__()
+    def __str__(self):
+        return "IDevice"
+
+cdef class __IPylonDevice(__IDevice):
+    cdef:
+        IPylonDevice* _pylonDevice
+    _accessMode = None
+    def __cinit__(self):
+        super(__IPylonDevice,self).__init__()
+#         self._accessMode = __AccessModeSet()
+    def __dealloc__(self):
+        if self._pylonDevice is not NULL:
+            pass#TODO: avoid memory leak
+    def __str__(self):
+        return "IPylonDevice"
+    def __repr__(self):
+        return "%s"%self
+    cdef SetIPylonDevice(self,IPylonDevice* pylonDevice):
+        self._pylonDevice = pylonDevice
+    cdef IPylonDevice* GetIPylonDevice(self):
+        return self._pylonDevice
+    def IsOpen(self):
+        return self._pylonDevice.IsOpen()
+    def Open(self):
+        self._pylonDevice.Open(AccessModeSet(Exclusive))
+    def Close(self):
+        self._pylonDevice.Close()

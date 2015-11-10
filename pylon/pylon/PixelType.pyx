@@ -33,6 +33,7 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/PixelType.h" namespace "Pylon":
     cdef enum PixelType:
         PixelType_Undefined = -1,
@@ -82,16 +83,16 @@ cdef extern from "pylon/PixelType.h" namespace "Pylon":
         PixelType_BayerGB16,
         PixelType_BayerBG16,
         PixelType_RGB12V1packed,
-    int PixelSize(PixelType pixelType)
-    bool IsMonoPacked(PixelType pixelType)
-    bool IsBayerPacked(PixelType pixelType)
-    bool IsYUV( PixelType pixelType)
-    bool IsRGBPacked(PixelType pixelType)
-    bool IsValidRGB(PixelType pixelType)
-    bool IsValidBGR(PixelType pixelType)
-    bool IsPacked(PixelType pixelType)
-    int BitPerPixel(PixelType pixelType)
-    int PixelSize( PixelType pixelType)
-    bool IsMono( PixelType pixelType)
-    int BitDepth(  PixelType pixelType )
+    int PixelSize(PixelType pixelType) except +
+    bool IsMonoPacked(PixelType pixelType) except +
+    bool IsBayerPacked(PixelType pixelType) except +
+    bool IsYUV( PixelType pixelType) except +
+    bool IsRGBPacked(PixelType pixelType) except +
+    bool IsValidRGB(PixelType pixelType) except +
+    bool IsValidBGR(PixelType pixelType) except +
+    bool IsPacked(PixelType pixelType) except +
+    int BitPerPixel(PixelType pixelType) except +
+    int PixelSize( PixelType pixelType) except +
+    bool IsMono( PixelType pixelType) except +
+    int BitDepth(  PixelType pixelType ) except +
     

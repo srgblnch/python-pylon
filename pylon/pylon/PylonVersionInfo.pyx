@@ -33,21 +33,23 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/PylonVersionInfo.h" namespace "Pylon":
     cdef cppclass VersionInfo:
-        VersionInfo(bool)
+        VersionInfo(bool) except +
         VersionInfo(unsigned int major,unsigned int minor,
-                    unsigned int subminor)
+                    unsigned int subminor) except +
         VersionInfo(unsigned int major,unsigned int minor,
-                    unsigned int subminor,unsigned int build)
-        unsigned int getMajor()
-        unsigned int getMinor()
-        unsigned int getSubminor()
-        unsigned int getBuild()
-        bool operator > (VersionInfo& rhs)
-        bool operator == (const VersionInfo& rhs)
-        bool operator >= (const VersionInfo& rhs)
-        bool operator < (const VersionInfo& rhs)
-        bool operator != (const VersionInfo& rhs)
-        bool operator <= (const VersionInfo& rhs)
-    cdef string_t GetPylonVersionString "Pylon::VersionInfo::getVersionString"()
+                    unsigned int subminor,unsigned int build) except +
+        unsigned int getMajor() except +
+        unsigned int getMinor() except +
+        unsigned int getSubminor() except +
+        unsigned int getBuild() except +
+        bool operator > (VersionInfo& rhs) except +
+        bool operator == (const VersionInfo& rhs) except +
+        bool operator >= (const VersionInfo& rhs) except +
+        bool operator < (const VersionInfo& rhs) except +
+        bool operator != (const VersionInfo& rhs) except +
+        bool operator <= (const VersionInfo& rhs) except +
+    cdef string_t GetPylonVersionString \
+    "Pylon::VersionInfo::getVersionString"() except +

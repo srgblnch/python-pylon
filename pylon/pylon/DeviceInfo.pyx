@@ -33,12 +33,48 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/DeviceInfo.h" namespace "Pylon":
     cdef cppclass CDeviceInfo:
         CDeviceInfo() except +
         CDeviceInfo(CDeviceInfo&) except +
-        String_t GetSerialNumber()
-        String_t GetUserDefinedName()
-        String_t GetModelName()
-        String_t GetDeviceVersion()
-        String_t GetDeviceFactory()
+        String_t GetSerialNumber() except +
+        String_t GetUserDefinedName() except +
+        String_t GetModelName() except +
+        String_t GetDeviceVersion() except +
+        String_t GetDeviceFactory() except +
+
+cdef class __CDeviceInfo(__CInfoBase):
+    cdef:
+        CDeviceInfo _devInfo
+        CTlFactory* _TlFactory
+    def __cinit__(self):
+        super(__CDeviceInfo,self).__init__()
+    def __str__(self):
+        return "CDeviceInfo (of %s)"%self.GetSerialNumber()
+    def __repr__(self):
+        return "%s"%self
+    cdef SetDevInfo(self,CDeviceInfo devInfo):
+        self._devInfo = devInfo
+    cdef CDeviceInfo GetDevInfo(self):
+        return self._devInfo
+    cdef SetTlFactory(self,CTlFactory* factory):
+        self._TlFactory = factory
+    cdef IPylonDevice* BuildIPylonDevice(self):
+        return self._TlFactory.CreateDevice(self._devInfo)
+    def GetSerialNumber(self):
+        return int(<string>self._devInfo.GetSerialNumber())
+    def GetUserDefinedName(self):
+        return <string>self._devInfo.GetUserDefinedName()
+    def GetModelName(self):
+        return <string>self._devInfo.GetModelName()
+    def GetDeviceVersion(self):
+        return <string>self._devInfo.GetDeviceVersion()
+    def GetDeviceFactory(self):
+        return <string>self._devInfo.GetDeviceFactory()
+
+cdef BuildDevInfo(CDeviceInfo devInfo,CTlFactory* factory):
+    wrapper = __CDeviceInfo()
+    wrapper.SetDevInfo(devInfo)
+    wrapper.SetTlFactory(factory)
+    return wrapper

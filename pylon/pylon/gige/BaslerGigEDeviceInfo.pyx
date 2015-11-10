@@ -33,24 +33,66 @@
 ##
 ###############################################################################
 
-include "_GigETLParams.pyx"
-include "../Info.pyx"
 
 cdef extern from "pylon/gige/BaslerGigEDeviceInfo.h" namespace "Pylon":
     cdef cppclass CBaslerGigEDeviceInfo:
-        String_t GetAddress()
-        String_t GetIpAddress()
-        String_t GetDefaultGateway()
-        String_t GetSubnetMask()
-        String_t GetPortNr()
-        String_t GetMacAddress()
-        String_t GetInterface()
-        String_t GetIpConfigOptions()
-        String_t GetIpConfigCurrent()
-        bool IsPersistentIpActive()
-        bool IsDhcpActive()
-        bool IsAutoIpActive()
-        bool IsPersistentIpSupported()
-        bool IsDhcpSupported()
-        bool IsAutoIpSupported()
-        bool IsSubset( IProperties& Subset)
+        String_t GetAddress() except +
+        String_t GetIpAddress() except +
+        String_t GetDefaultGateway() except +
+        String_t GetSubnetMask() except +
+        String_t GetPortNr() except +
+        String_t GetMacAddress() except +
+        String_t GetInterface() except +
+        String_t GetIpConfigOptions() except +
+        String_t GetIpConfigCurrent() except +
+        bool IsPersistentIpActive() except +
+        bool IsDhcpActive() except +
+        bool IsAutoIpActive() except +
+        bool IsPersistentIpSupported() except +
+        bool IsDhcpSupported() except +
+        bool IsAutoIpSupported() except +
+        bool IsSubset( IProperties& Subset) except +
+
+cdef class __CBaslerGigEDeviceInfo(__CDeviceInfo):
+    def __cinit__(self):
+        super(__CBaslerGigEDeviceInfo,self).__init__()
+    def __str__(self):
+        return "CBaslerGigEDeviceInfo (of %s)"%self.GetSerialNumber()
+    def __repr__(self):
+        return "%s"%self
+    def GetAddress(self):
+        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetAddress()
+    def GetIpAddress(self):
+        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetIpAddress()
+    def GetDefaultGateway(self):
+        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetDefaultGateway()
+    def GetSubnetMask(self):
+        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetSubnetMask()
+    def GetPortNr(self):
+        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetPortNr()
+    def GetMacAddress(self):
+        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetMacAddress()
+    def GetInterface(self):
+        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetInterface()
+    def GetIpConfigOptions(self):
+        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetIpConfigOptions()
+    def GetIpConfigCurrent(self):
+        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetIpConfigCurrent()
+    def IsPersistentIpActive(self):
+        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsPersistentIpActive()
+    def IsDhcpActive(self):
+        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsDhcpActive()
+    def IsAutoIpActive(self):
+        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsAutoIpActive()
+    def IsPersistentIpSupported(self):
+        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsPersistentIpSupported()
+    def IsDhcpSupported(self):
+        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsDhcpSupported()
+    def IsAutoIpSupported(self):
+        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsAutoIpSupported()
+
+cdef BuildBaslerGigEDevInfo(CDeviceInfo devInfo,CTlFactory* factory):
+    wrapper = __CBaslerGigEDeviceInfo()
+    wrapper.SetDevInfo(devInfo)
+    wrapper.SetTlFactory(factory)
+    return wrapper

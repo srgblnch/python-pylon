@@ -33,14 +33,13 @@
 ##
 ###############################################################################
 
-include "../../genicam/IInteger.pyx"
 
 cdef extern from "pylon/gige/_GigETLParams.h" namespace "Basler_GigETLParams":
     cdef cppclass CGigETLParams_Params:
-        void _Initialize(INodeMap*)
+        void _Initialize(INodeMap*) except +
         IInteger &ReadTimeout
         IInteger &WriteTimeout
         IInteger &HeartbeatTimeout
     #ctypedef CGigETLParams_Params TLParams_t
     cdef CGigETLParams_Params* BuildCGigETLParams_Params \
-    "new Basler_GigETLParams::CGigETLParams_Params"()
+    "new Basler_GigETLParams::CGigETLParams_Params"() except +

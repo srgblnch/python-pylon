@@ -33,13 +33,12 @@
 ##
 ###############################################################################
 
-include "../../genicam/IInteger.pyx"
 
 cdef extern from "pylon/gige/BaslerGigECamera.h" namespace "Pylon":
     cdef cppclass CBaslerGigECamera:
-        void Attach(IPylonDevice*, bool takeOwnership = true)
-        bool IsAttached()
-        bool HasOwnership()
+        void Attach(IPylonDevice*, bool takeOwnership = true) except +
+        bool IsAttached() except +
+        bool HasOwnership() except +
         IInteger& PayloadSize
 #         IInteger& Width
 #         IInteger& Height
@@ -58,8 +57,8 @@ cdef extern from "pylon/gige/BaslerGigECamera.h" namespace "Pylon":
 #         ICommand& AcquisitionAbort
         
     cdef CTlInfo& GetDeviceClass "Pylon::CBaslerGigECamera::DeviceClass"()
-#     cdef CBaslerGigECamera* BuildCBaslerGigECamera \
-#     "new Pylon::CBaslerGigECamera"( IPylonDevice*, bool )
+    cdef CBaslerGigECamera* BuildAndAttachCBaslerGigECamera \
+    "new Pylon::CBaslerGigECamera"( IPylonDevice* )
     cdef CBaslerGigECamera* BuildCBaslerGigECamera \
     "new Pylon::CBaslerGigECamera"()
     

@@ -36,9 +36,12 @@
 
 cdef extern from "pylon/EventGrabber.h" namespace "Pylon":
     cdef cppclass IEventGrabber:
-        void Open()
-        void Close()
-        bool IsOpen()
-        bool RetrieveEvent( EventResult& )
-        WaitObject& GetWaitObject()
-        INodeMap* GetNodeMap()
+        void Open() except +
+        void Close() except +
+        bool IsOpen() except +
+        bool RetrieveEvent( EventResult& ) except +
+        WaitObject& GetWaitObject() except +
+        INodeMap* GetNodeMap() except +
+
+# cdef class IEventGrabberWrapper:
+#     pass

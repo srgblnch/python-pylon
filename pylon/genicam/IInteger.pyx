@@ -33,15 +33,14 @@
 ##
 ###############################################################################
 
-include "../pylon/stdint.pyx"
 
 cdef extern from "GenApi/IInteger.h" namespace "GenApi":
     cdef cppclass IInteger:
-        void SetValue(int64_t Value, bool Verify = true)
+        void SetValue(int64_t Value, bool Verify = true) except +
         #IInteger& operator=(int64_t Value)
-        int64_t GetValue(bool Verify = false, bool IgnoreCache = false )
-        int64_t GetMin()
-        int64_t GetMax()
-        int64_t GetInc()
+        int64_t GetValue(bool Verify = false, bool IgnoreCache = false ) except +
+        int64_t GetMin() except +
+        int64_t GetMax() except +
+        int64_t GetInc() except +
         #gcstring GetUnit()
         

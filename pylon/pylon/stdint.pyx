@@ -33,7 +33,6 @@
 ##
 ###############################################################################
 
-from libcpp cimport bool
 
 cdef extern from "stdint.h":
     ctypedef   signed char  int8_t

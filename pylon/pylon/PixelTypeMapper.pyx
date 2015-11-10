@@ -33,25 +33,29 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/PixelTypeMapper.h" namespace "Pylon":
     cdef cppclass CPixelTypeMapper
-        CPixelTypeMapper()
-        CPixelTypeMapper(GenApi::IEnumeration* pEnum)
-        bool IsValid()
-        void SetPixelFormatEnumNode(GenApi::IEnumeration* pEnum)
-        PixelType GetPylonPixelTypeFromNodeValue(int64_t nodeValue)
+        CPixelTypeMapper() except +
+        CPixelTypeMapper(GenApi::IEnumeration* pEnum) except +
+        bool IsValid() except +
+        void SetPixelFormatEnumNode(GenApi::IEnumeration* pEnum) except +
+        PixelType GetPylonPixelTypeFromNodeValue(int64_t nodeValue) except +
     cdef PixelType GetPylonPixelTypeByName \
     "Pylon::CPixelTypeMapper::GetPylonPixelTypeByName"(\
-                                                   const char* pszSymbolicName)
+                                        const char* pszSymbolicName) except +
     cdef PixelType GetPylonPixelTypeByName \
     "Pylon::CPixelTypeMapper::GetPylonPixelTypeByName"(\
-                                         const GenICam::gcstring& symbolicName)
+                                const GenICam::gcstring& symbolicName) except +
     cdef cppclass CCameraPixelTypeMapperT:
-        CCameraPixelTypeMapperT()
-        CCameraPixelTypeMapperT(GenApi::IEnumerationT<EnumT>* pEnumT)
-        bool IsValid()
-        void SetPixelFormatEnumNode(GenApi::IEnumerationT<EnumT>* pEnumT)
-        PixelType GetPylonPixelTypeFromPixelFormatEnum(EnumT pixelFormatEnumValue)
-        static PixelType GetPylonPixelTypeByName(const char* pszSymbolicName)
-        static PixelType GetPylonPixelTypeByName(const GenICam::gcstring& symbolicName)
-
+        CCameraPixelTypeMapperT() except +
+        CCameraPixelTypeMapperT(GenApi::IEnumerationT<EnumT>* pEnumT) except +
+        bool IsValid() except +
+        void SetPixelFormatEnumNode(\
+                                GenApi::IEnumerationT<EnumT>* pEnumT) except +
+        PixelType GetPylonPixelTypeFromPixelFormatEnum(\
+                                        EnumT pixelFormatEnumValue) except +
+        static PixelType GetPylonPixelTypeByName(\
+                                        const char* pszSymbolicName) except +
+        static PixelType GetPylonPixelTypeByName(\
+                                const GenICam::gcstring& symbolicName) except +

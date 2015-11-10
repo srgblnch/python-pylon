@@ -37,9 +37,11 @@
 
 cdef extern from "pylon/gige/PylonGigECamera.h" namespace "Pylon":
     cdef cppclass CPylonGigETLParams:
-        CPylonGigETLParams( INodeMap* )
+        CPylonGigETLParams( INodeMap* ) except +
+        bool IsAttached() except +
+        INodeMap* GetNodeMap() except +
     cdef CPylonGigETLParams* BuildCPylonGigETLParams \
-    "new Pylon::CPylonGigETLParams"( INodeMap* )
+    "new Pylon::CPylonGigETLParams"( INodeMap* ) except +
 #     cdef cppclass CPylonGigEStreamGrabber
 #         CPylonGigEStreamGrabber()
 #     cdef cppclass CPylonGigEEventGrabber

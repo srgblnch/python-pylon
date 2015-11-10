@@ -33,14 +33,15 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/gige/_BaslerGigECameraParams.h" \
 namespace "Basler_GigECamera":
     cdef enum GainAutoEnums: GainAuto_Off, GainAuto_Once, GainAuto_Continuous
     cdef cppclass CGigECamera_Params:
-        CGigECamera_Params()
-        void _Initialize(INodeMap*)
+        CGigECamera_Params() except +
+        void _Initialize(INodeMap*) except +
 #         IInteger &SensorWidth
 #         IInteger &SensorHeight
 #     cdef CGigECamera_Params* BuildCGigECamera_Params \
-#     "new Basler_GigECamera::CGigECamera_Params"()
+#     "new Basler_GigECamera::CGigECamera_Params"() except +
     

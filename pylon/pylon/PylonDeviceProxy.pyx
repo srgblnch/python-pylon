@@ -33,27 +33,29 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/PylonDeviceProxy.h" namespace "Pylon":
     cdef cppclass CPylonDeviceProxyT:
-        CPylonDeviceProxyT()
-        CPylonDeviceProxyT(IPylonDevice*, bool takeOwnership = true)
-        void Attach(IPylonDevice*, bool takeOwnership = true)
-        virtual bool IsAttached()
-        virtual bool HasOwnership()
-        virtual IPylonDevice* GetDevice()
-        void Open(AccessModeSet mode)
-        void Close()
-        bool IsOpen()
-        AccessModeSet AccessMode()
-        CDeviceInfo& GetDeviceInfo()
-        uint32_t GetNumStreamGrabberChannels()
-        IStreamGrabber* GetStreamGrabber(uint32_t index)
-        IEventGrabber* GetEventGrabber()
-        GenApi::INodeMap* GetNodeMap()
-        GenApi::INodeMap* GetTLNodeMap()
-        Pylon::IChunkParser* CreateChunkParser()
-        void DestroyChunkParser(Pylon::IChunkParser* pChunkParser)
-        IEventAdapter* CreateEventAdapter()
-        void DestroyEventAdapter(IEventAdapter* pAdapter)
-        DeviceCallbackHandle RegisterRemovalCallback(DeviceCallback& d)
-        bool DeregisterRemovalCallback(DeviceCallbackHandle h)
+        CPylonDeviceProxyT() except +
+        CPylonDeviceProxyT(IPylonDevice*, bool takeOwnership = true) except +
+        void Attach(IPylonDevice*, bool takeOwnership = true) except +
+        virtual bool IsAttached() except +
+        virtual bool HasOwnership() except +
+        virtual IPylonDevice* GetDevice() except +
+        void Open(AccessModeSet mode) except +
+        void Close() except +
+        bool IsOpen() except +
+        AccessModeSet AccessMode() except +
+        CDeviceInfo& GetDeviceInfo() except +
+        uint32_t GetNumStreamGrabberChannels() except +
+        IStreamGrabber* GetStreamGrabber(uint32_t index) except +
+        IEventGrabber* GetEventGrabber() except +
+        GenApi::INodeMap* GetNodeMap() except +
+        GenApi::INodeMap* GetTLNodeMap() except +
+        Pylon::IChunkParser* CreateChunkParser() except +
+        void DestroyChunkParser(Pylon::IChunkParser* pChunkParser) except +
+        IEventAdapter* CreateEventAdapter() except +
+        void DestroyEventAdapter(IEventAdapter* pAdapter) except +
+        DeviceCallbackHandle RegisterRemovalCallback(DeviceCallback& d) except +
+        bool DeregisterRemovalCallback(DeviceCallbackHandle h) except +
+

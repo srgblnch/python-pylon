@@ -35,3 +35,4 @@
 
 cdef extern from "pylon/TlInfo.h" namespace "Pylon":
     cdef cppclass CTlInfo
+

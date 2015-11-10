@@ -35,5 +35,5 @@
 
 cdef extern from "pylon/camemu/BaslerCamEmuDeviceInfo.h" namespace "Pylon":
     cdef cppclass CBaslerCamEmuDeviceInfo:
-        CBaslerCamEmuDeviceInfo()
-        CBaslerCamEmuDeviceInfo(const CDeviceInfo& )
+        CBaslerCamEmuDeviceInfo() except +
+        CBaslerCamEmuDeviceInfo(const CDeviceInfo& ) except +

@@ -33,11 +33,17 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/PylonBase.h" namespace "Pylon":
-    cdef void PylonInitialize()
-    cdef void PylonTerminate(bool ShutDownLogging)
+    cdef void PylonInitialize() except +
+    cdef void PylonTerminate(bool ShutDownLogging) except +
 #     cdef void GetPylonVersion( unsigned int* major, unsigned int* minor, 
 #                                unsigned int* subminor, unsigned int* build)
 #     cdef cppclass PylonAutoInitTerm:
 #         PylonAutoInitTerm()
 
+cdef class PylonAutoInitTermWrapper:
+    def __init__(self):
+        PylonInitialize()
+    def __dealloc__(self):
+        PylonTerminate(True)

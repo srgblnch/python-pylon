@@ -33,18 +33,25 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/Container.h" namespace "Pylon":
     cdef cppclass TlInfoList
     ctypedef TlInfoList TlInfoList_t
     cdef cppclass DeviceInfoList:
         DeviceInfoList() except +
-        bool empty()
+        bool empty() except +
         cppclass iterator:
-            CDeviceInfo operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        iterator begin()
-        iterator end()
-        size_t size()
+            CDeviceInfo operator*() except +
+            iterator operator++() except +
+            bint operator==(iterator) except +
+            bint operator!=(iterator) except +
+        iterator begin() except +
+        iterator end() except +
+        size_t size() except +
     ctypedef DeviceInfoList DeviceInfoList_t
+
+# cdef class DeviceInfoListWrapper:
+#     pass
+# 
+# cdef class TlInfoListWrapper:
+#     pass

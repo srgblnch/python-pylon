@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               __init__.py
+## file :               __init__.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,12 +33,11 @@
 ##
 ###############################################################################
 
-include "version.pyx"
-include "guard.pyx"
+include "includes.pyx"
+
 guard = _Guard()
 def initialize():
     guard.initialize()
 def terminate(shutDownLogging=True):
     guard.terminate(shutDownLogging)
-include "factory.pyx"
 

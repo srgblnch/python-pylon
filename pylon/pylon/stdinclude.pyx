@@ -33,8 +33,6 @@
 ##
 ###############################################################################
 
-from libcpp.string cimport string
-#from libcpp.vector cimport vector
 
 cdef extern from "pylon/stdinclude.h" namespace "Pylon":
     cdef cppclass String_t

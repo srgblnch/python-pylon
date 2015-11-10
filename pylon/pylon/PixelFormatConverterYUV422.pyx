@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               DeviceFactory.pyx
+## file :               PixelFormatConverterYUV422.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -34,11 +34,12 @@
 ###############################################################################
 
 
-cdef extern from "pylon/DeviceFactory.h" namespace "Pylon":
-    cdef cppclass IDeviceFactory:
-        IPylonDevice* CreateDevice( CDeviceInfo& ) except +
-        void DestroyDevice( IPylonDevice* ) except +
+cdef extern from "pylon/PixelFormatConverterYUV422.h" namespace "Pylon":
+    cdef cppclass CPixelFormatConverterYUV422
+    cdef cppclass CPixelFormatConverterYUV422YUYV
 
-cdef class __IDeviceFactory:
-    def __cinit__(self):
-        pass
+# cdef class CPixelFormatConverterYUV422Wrapper(CPixelFormatConverterWrapper):
+#     pass
+# 
+# cdef class CPixelFormatConverterYUV422YUYVWrapper(CPixelFormatConverterWrapper):
+#     pass

@@ -33,9 +33,6 @@
 ##
 ###############################################################################
 
-from libcpp cimport bool
-
-include "stdint.pyx"
 
 cdef extern from "pylon/WaitObject.h" namespace "Pylon":
     cdef enum waitex_result_t:
@@ -49,3 +46,4 @@ cdef extern from "pylon/WaitObject.h" namespace "Pylon":
         bool IsValid()
         bool Wait(unsigned int timeout)
         waitex_result_t WaitEx(unsigned int timeout, bool bAlertable)
+

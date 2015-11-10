@@ -33,7 +33,16 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/TransportLayer.h" namespace "Pylon":
     cdef cppclass ITransportLayer:
-        CTlInfo GetTlInfo()
-        CDeviceInfo CreateDeviceInfo()
+        CTlInfo GetTlInfo() except +
+        CDeviceInfo CreateDeviceInfo() except +
+
+cdef class __ITransportLayer(__IDeviceFactory):
+    cdef:
+        ITransportLayer* _tl
+    def __cinit__(self):
+        super(__ITransportLayer,self).__init__()
+    cdef SetITransportLayer(self,ITransportLayer* tl):
+        self._tl = tl

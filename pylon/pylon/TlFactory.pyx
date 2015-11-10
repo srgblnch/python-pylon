@@ -33,25 +33,58 @@
 ##
 ###############################################################################
 
-include "Container.pyx"
-include "Device.pyx"
-include "DeviceInfo.pyx"
-include "stdinclude.pyx"
-include "TlInfo.pyx"
-include "TransportLayer.pyx"
 
 cdef extern from "pylon/TlFactory.h" namespace "Pylon":
     cdef cppclass CTlFactory:
-        int EnumerateTls( TlInfoList_t& )
-        ITransportLayer* CreateTl( CTlInfo& )
-        ITransportLayer* CreateTl( String_t& DeviceClass )
-        void ReleaseTl( ITransportLayer* )
-        int EnumerateDevices( DeviceInfoList&, bool )
-        int EnumerateDevices( DeviceInfoList&, DeviceInfoList&, bool)
-        IPylonDevice* CreateDevice( CDeviceInfo& )
-        IPylonDevice* CreateFirstDevice( CDeviceInfo& )
-        IPylonDevice* CreateDevice( CDeviceInfo&, StringList_t& )
-        IPylonDevice* CreateFirstDevice( CDeviceInfo&, StringList_t& )
-        IPylonDevice* CreateDevice( String_t& )
-        void DestroyDevice( IPylonDevice* )
-    cdef CTlFactory& CTlFactory_GetInstance "Pylon::CTlFactory::GetInstance"()
+        int EnumerateTls( TlInfoList_t& ) except +
+        ITransportLayer* CreateTl( CTlInfo& ) except +
+        ITransportLayer* CreateTl( String_t& DeviceClass ) except +
+        void ReleaseTl( ITransportLayer* ) except +
+        int EnumerateDevices( DeviceInfoList&, bool ) except +
+        #int EnumerateDevices( DeviceInfoList&, DeviceInfoList&, bool) except +
+        IPylonDevice* CreateDevice( CDeviceInfo& ) except +
+        #IPylonDevice* CreateFirstDevice( CDeviceInfo& ) except +
+        #IPylonDevice* CreateDevice( CDeviceInfo&, StringList_t& ) except +
+        #IPylonDevice* CreateFirstDevice( CDeviceInfo&, StringList_t& ) except +
+        #IPylonDevice* CreateDevice( String_t& ) except +
+        void DestroyDevice( IPylonDevice* ) except +
+    cdef CTlFactory& CTlFactory_GetInstance \
+    "Pylon::CTlFactory::GetInstance"()
+
+cdef class __CTlFactory(__IDeviceFactory):
+    cdef:
+        CTlFactory* _TlFactory
+        int _nCameras
+    _camerasList = []
+    def __cinit__(self):
+        cdef:
+            DeviceInfoList deviceInfoList
+            DeviceInfoList.iterator it
+        super(__CTlFactory,self).__init__()
+        self._TlFactory = &CTlFactory_GetInstance()
+        self._nCameras = self._TlFactory.EnumerateDevices(deviceInfoList,False)
+        while len(self._camerasList) > 0:
+            self._camerasList.pop()
+        if not deviceInfoList.empty():
+            it = deviceInfoList.begin()
+            while it != deviceInfoList.end():
+                #FIXME: By now only build GigE cameras but shall support others
+                devInfo = BuildBaslerGigEDevInfo(deref(it),self._TlFactory)
+                self._camerasList.append(devInfo)
+                inc(it)
+    def TransportLayer(self):
+        tl = __ITransportLayer()
+        tl.SetITransportLayer(self._TlFactory.CreateTl(GetDeviceClass()))
+        return tl
+    cdef IPylonDevice* _CreateDevice(self,CDeviceInfo devInfo):
+        return self._TlFactory.CreateDevice(devInfo)
+    def CreateDevice(self,__CDeviceInfo devInfo):
+        wrapper = __IPylonGigEDevice()
+        wrapper.SetIPylonDevice(self._CreateDevice(devInfo.GetDevInfo()))
+        return wrapper
+        #FIXME: By now only building GigE cameras but shall support the others
+#         return BuildIPylonGigEDevice(devInfo)
+    def nCameras(self):
+        return self._nCameras
+    def cameraList(self):
+        return self._camerasList

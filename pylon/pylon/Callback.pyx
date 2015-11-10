@@ -33,6 +33,9 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/Callback.h" namespace "Pylon":
+    cdef cppclass Base_Callback1Body
+    cdef cppclass Callback1
     cdef cppclass Function_CallbackBody
     cdef cppclass Member_CallbackBody

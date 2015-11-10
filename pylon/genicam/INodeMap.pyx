@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               EventGrabber.pyx
+## file :               INodeMap.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -35,4 +35,5 @@
 
 
 cdef extern from "GenApi/INodeMap.h" namespace "GenApi":
-    cdef cppclass INodeMap
+    cdef cppclass INodeMap#:
+        #INode* GetNode( const GenICam::gcstring& Name)

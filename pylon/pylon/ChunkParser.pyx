@@ -33,7 +33,6 @@
 ##
 ###############################################################################
 
-include "../genicam/ChunkAdapter.pyx"
 
 cdef extern from "pylon/ChunkParser.h" namespace "Pylon":
     cdef cppclass IChunkParser:
@@ -46,3 +45,9 @@ cdef extern from "pylon/ChunkParser.h" namespace "Pylon":
         AttachBuffer( void*, int64_t, AttachStatistics_t* )
         void DetachBuffer()
         void UpdateBuffer( void* )
+        
+# cdef class IChunkParserWrapper:
+#     pass
+# 
+# cdef class CChunkParserWrapper(IChunkParserWrapper):
+#     pass

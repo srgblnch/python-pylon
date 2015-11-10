@@ -34,30 +34,38 @@
 ###############################################################################
 
 
-include "../ChunkParser.pyx"
-include "../EventGrabber.pyx"
-include "../../genicam/IInteger.pyx"
-include "../../genicam/INodeMap.pyx"
-include "../StreamGrabber.pyx"
-
-
 cdef extern from "pylon/gige/PylonGigEDevice.h" namespace "Pylon":
     cdef cppclass IPylonGigEDevice:
-        void Open(AccessModeSet)
-        void Close()
-        bool IsOpen()
-        AccessModeSet AccessMode()
-        uint32_t GetNumStreamGrabberChannels()
-        IStreamGrabber* GetStreamGrabber(uint32_t index)
-        IEventGrabber* GetEventGrabber()
-        INodeMap* GetNodeMap()
-        INodeMap* GetTLNodeMap()
-        IChunkParser* CreateChunkParser()
-        void DestroyChunkParser( IChunkParser* )
-        void ChangeIpConfiguration( bool EnablePersistentIp, bool EnableDhcp )
+        #void Open(AccessModeSet) except +
+        #void Close() except +
+        #bool IsOpen() except +
+        AccessModeSet AccessMode() except +
+        uint32_t GetNumStreamGrabberChannels() except +
+        IStreamGrabber* GetStreamGrabber(uint32_t index) except +Exception
+        IEventGrabber* GetEventGrabber() except +
+        INodeMap* GetNodeMap() except +
+        INodeMap* GetTLNodeMap() except +
+        IChunkParser* CreateChunkParser() except +
+        void DestroyChunkParser( IChunkParser* ) except +
+        void ChangeIpConfiguration( bool EnablePersistentIp, 
+                                    bool EnableDhcp ) except +
         void GetPersistentIpAddress(String_t& IpAddress, 
                                     String_t& SubnetMask, 
-                                    String_t& DefaultGateway)
+                                    String_t& DefaultGateway) except +
         void SetPersistentIpAddress(String_t& IpAddress,
                                     String_t& SubnetMask,
-                                    String_t& DefaultGateway)
+                                    String_t& DefaultGateway) except +
+
+cdef class __IPylonGigEDevice(__IPylonDevice):
+    def __cinit__(self):
+        super(__IPylonGigEDevice,self).__init__()
+    def __str__(self):
+        return "IPylonGigEDevice"
+    def __repr__(self):
+        return "%s"%self
+
+# cdef BuildIPylonGigEDevice(devInfo):
+#     wrapper = __IPylonGigEDevice()
+#     #wrapper.SetIPylonDevice(<IPylonDevice*>devInfo.BuildIPylonDevice())
+#     wrapper.SetIPylonDevice(<IPylonDevice*>((devInfo._TlFactory).CreateDevice(<CDeviceInfo>devInfo.GetDevInfo())))
+#     return wrapper

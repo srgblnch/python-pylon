@@ -33,8 +33,9 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/ThreadPriority.h" namespace "Pylon":
     cdef HANDLE THREADHANDLE
-    void GetRTThreadPriorityCapabilities(int& prioMin, int& prioMax)
-    int GetRTThreadPriority(THREADHANDLE thread)
-    void SetRTThreadPriority(THREADHANDLE thread, int priority)
+    void GetRTThreadPriorityCapabilities(int& prioMin, int& prioMax) except +
+    int GetRTThreadPriority(THREADHANDLE thread) except +
+    void SetRTThreadPriority(THREADHANDLE thread, int priority) except +

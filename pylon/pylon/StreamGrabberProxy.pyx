@@ -33,22 +33,25 @@
 ##
 ###############################################################################
 
+
 cdef extern from "pylon/StreamGrabberProxy.h" namespace "Pylon":
     cdef cppclass CStreamGrabberProxyT:
-        CStreamGrabberProxyT()
-        CStreamGrabberProxyT(Pylon::IStreamGrabber*)
-        void Attach(IStreamGrabber*)
-        virtual bool IsAttached()
-        virtual IStreamGrabber* GetStreamGrabber()
-        void Open()
-        void Close()
-        bool IsOpen()
-        StreamBufferHandle RegisterBuffer( void* Buffer, size_t BufferSize )
-        void* DeregisterBuffer( StreamBufferHandle handle )
-        void PrepareGrab()
-        void FinishGrab()
-        void QueueBuffer( StreamBufferHandle Handle , void* Context=NULL )
-        void CancelGrab()
-        bool RetrieveResult( GrabResult& Result )
-        WaitObject& GetWaitObject() const
-        GenApi::INodeMap* GetNodeMap()
+        CStreamGrabberProxyT() except +
+        CStreamGrabberProxyT(Pylon::IStreamGrabber*) except +
+        void Attach(IStreamGrabber*) except +
+        virtual bool IsAttached() except +
+        virtual IStreamGrabber* GetStreamGrabber() except +
+        void Open() except +
+        void Close() except +
+        bool IsOpen() except +
+        StreamBufferHandle RegisterBuffer( void* Buffer, 
+                                           size_t BufferSize ) except +
+        void* DeregisterBuffer( StreamBufferHandle handle ) except +
+        void PrepareGrab() except +
+        void FinishGrab() except +
+        void QueueBuffer( StreamBufferHandle Handle , 
+                          void* Context=NULL ) except +
+        void CancelGrab() except +
+        bool RetrieveResult( GrabResult& Result ) except +
+        WaitObject& GetWaitObject() except +
+        GenApi::INodeMap* GetNodeMap() except +
