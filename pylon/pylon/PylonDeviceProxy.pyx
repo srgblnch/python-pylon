@@ -39,9 +39,9 @@ cdef extern from "pylon/PylonDeviceProxy.h" namespace "Pylon":
         CPylonDeviceProxyT() except +
         CPylonDeviceProxyT(IPylonDevice*, bool takeOwnership = true) except +
         void Attach(IPylonDevice*, bool takeOwnership = true) except +
-        virtual bool IsAttached() except +
-        virtual bool HasOwnership() except +
-        virtual IPylonDevice* GetDevice() except +
+        #virtual bool IsAttached() except +
+        #virtual bool HasOwnership() except +
+        #virtual IPylonDevice* GetDevice() except +
         void Open(AccessModeSet mode) except +
         void Close() except +
         bool IsOpen() except +
@@ -50,12 +50,15 @@ cdef extern from "pylon/PylonDeviceProxy.h" namespace "Pylon":
         uint32_t GetNumStreamGrabberChannels() except +
         IStreamGrabber* GetStreamGrabber(uint32_t index) except +
         IEventGrabber* GetEventGrabber() except +
-        GenApi::INodeMap* GetNodeMap() except +
-        GenApi::INodeMap* GetTLNodeMap() except +
-        Pylon::IChunkParser* CreateChunkParser() except +
-        void DestroyChunkParser(Pylon::IChunkParser* pChunkParser) except +
-        IEventAdapter* CreateEventAdapter() except +
-        void DestroyEventAdapter(IEventAdapter* pAdapter) except +
-        DeviceCallbackHandle RegisterRemovalCallback(DeviceCallback& d) except +
-        bool DeregisterRemovalCallback(DeviceCallbackHandle h) except +
+        INodeMap* GetNodeMap() except +
+        INodeMap* GetTLNodeMap() except +
+        #IChunkParser* CreateChunkParser() except +
+        #void DestroyChunkParser(IChunkParser* pChunkParser) except +
+        #IEventAdapter* CreateEventAdapter() except +
+        #void DestroyEventAdapter(IEventAdapter* pAdapter) except +
+        #DeviceCallbackHandle RegisterRemovalCallback(DeviceCallback& d) except +
+        #bool DeregisterRemovalCallback(DeviceCallbackHandle h) except +
 
+
+# cdef class __CPylonDeviceProxy:#(TCameraParams):
+#     pass

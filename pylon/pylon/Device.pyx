@@ -45,7 +45,7 @@ cdef extern from "pylon/Device.h" namespace "Pylon":
         void Close() except +
         bool IsOpen() except +
         AccessModeSet AccessMode() except +
-        uint32_t GetNumStreamGrabberChannels() except +Exception
+        uint32_t GetNumStreamGrabberChannels() except +
         IStreamGrabber* GetStreamGrabber(uint32_t index) except +
         IEventGrabber* GetEventGrabber() except +
         INodeMap* GetNodeMap() except +
@@ -90,8 +90,26 @@ cdef class __IPylonDevice(__IDevice):
     cdef IPylonDevice* GetIPylonDevice(self):
         return self._pylonDevice
     def IsOpen(self):
-        return self._pylonDevice.IsOpen()
+        if self._pylonDevice != NULL:
+            return self._pylonDevice.IsOpen()
+        return False
     def Open(self):
-        self._pylonDevice.Open(AccessModeSet(Exclusive))
+        if not self.IsOpen():
+            try:
+                self._pylonDevice.Open(AccessModeSet(Exclusive))
+                return True
+            except Exception,e:
+                raise RuntimeError(e)
+        return False
     def Close(self):
-        self._pylonDevice.Close()
+        if self.IsOpen():
+            self._pylonDevice.Close()
+            return True
+        return False
+    def GetNumStreamGrabberChannels(self):
+        return self._pylonDevice.GetNumStreamGrabberChannels()
+    def GetStreamGrabber(self):
+        return StreamGrabber_Init(self._pylonDevice)
+    def GetNodeMap(self):
+        nodeMap = BuildINodeMap(self._pylonDevice.GetNodeMap())
+        return nodeMap.GetINodeList()

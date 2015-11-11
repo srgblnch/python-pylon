@@ -62,22 +62,28 @@ class Factory(object):
             if len(camera.macAddress) > 0:
                 macLst.append(camera.macAddress)
         return macLst
+    def __prepareCameraObj(self,camera):
+        camera.pylonDevice = self.__TlFactory.CreateDevice(camera._devInfo)
+        #FIXME: the attach fails
+        #camera.baslerCamera = BuildBaslerGigECamera(camera.pylonDevice)
+        camera.streamGrabber = camera.pylonDevice.GetStreamGrabber()
+        
     def getCameraBySerialNumber(self,number):
         for i,camera in enumerate(self._cameraList):
             if camera.serialNumber == int(number):
-                camera.pylonDevice = self.__TlFactory.CreateDevice(camera._devInfo)
+                self.__prepareCameraObj(camera)
                 return camera
         raise KeyError("serial number %s not found"%(number))
     def getCameraByIpAddress(self,ipAddress):
         for camera in self._cameraList:
             if camera.ipAddress == ipAddress:
-                camera.pylonDevice = self.__TlFactory.CreateDevice(camera._devInfo)
+                self.__prepareCameraObj(camera)
                 return camera
         raise KeyError("ip address %s not found"%(ipAddress))
     def getCameraByMacAddress(self,macAddress):
         for camera in self._cameraList:
             if camera.macAddress == macAddress:
-                camera.pylonDevice = self.__TlFactory.CreateDevice(camera._devInfo)
+                self.__prepareCameraObj(camera)
                 return camera
         raise KeyError("mac address %s not found"%(macAddress))
 

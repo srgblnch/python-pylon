@@ -44,5 +44,12 @@ cdef class __ITransportLayer(__IDeviceFactory):
         ITransportLayer* _tl
     def __cinit__(self):
         super(__ITransportLayer,self).__init__()
+    cdef ITransportLayer* GetITransportLayer(self):
+        return self._tl
     cdef SetITransportLayer(self,ITransportLayer* tl):
         self._tl = tl
+
+cdef BuildITransportLayer(ITransportLayer* tl):
+    wrapper = __ITransportLayer()
+    wrapper.SetITransportLayer(tl)
+    return wrapper

@@ -55,6 +55,7 @@ cdef class __CTlFactory(__IDeviceFactory):
     cdef:
         CTlFactory* _TlFactory
         int _nCameras
+        __ITransportLayer _tl
     _camerasList = []
     def __cinit__(self):
         cdef:
@@ -72,10 +73,16 @@ cdef class __CTlFactory(__IDeviceFactory):
                 devInfo = BuildBaslerGigEDevInfo(deref(it),self._TlFactory)
                 self._camerasList.append(devInfo)
                 inc(it)
+        self.TransportLayer()
+    def __dealloc__(self):
+        #FIXME:review the transport layer usage
+        self._TlFactory.ReleaseTl(self._tl.GetITransportLayer())
     def TransportLayer(self):
-        tl = __ITransportLayer()
-        tl.SetITransportLayer(self._TlFactory.CreateTl(GetDeviceClass()))
-        return tl
+        cdef ITransportLayer* _tlptr
+        if self._tl == None:
+            _tlptr = self._TlFactory.CreateTl(GetDeviceClass())
+            self._tl = BuildITransportLayer(_tlptr)
+        return self._tl
     cdef IPylonDevice* _CreateDevice(self,CDeviceInfo devInfo):
         return self._TlFactory.CreateDevice(devInfo)
     def CreateDevice(self,__CDeviceInfo devInfo):

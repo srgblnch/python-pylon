@@ -41,8 +41,10 @@ from libcpp.string cimport string
 #---- First level of needs
 include "pylon/stdint.pyx"
 include "pylon/stdinclude.pyx"
+include "genicam/GCString.pyx"
 
 #---- Second level (genicam)
+include "genicam/Container.pyx"
 include "genicam/ChunkAdapter.pyx"
 include "genicam/GCException.pyx"
 include "genicam/IInteger.pyx"
@@ -62,6 +64,7 @@ include "pylon/DeviceInfo.pyx"
 include "pylon/EventGrabber.pyx"
 include "pylon/Info.pyx"
 include "pylon/PixelType.pyx"
+include "pylon/PylonDeviceProxy.pyx"
 include "pylon/Result.pyx"
 include "pylon/TransportLayer.pyx"
 include "pylon/StreamGrabber.pyx"
@@ -70,11 +73,11 @@ include "pylon/gige/BaslerGigECamera.pyx"
 include "pylon/gige/BaslerGigEDeviceInfo.pyx"
 include "pylon/gige/PylonGigECamera.pyx"
 include "pylon/gige/PylonGigEDevice.pyx"
+include "pylon/gige/PylonGigEDeviceProxy.pyx"
 include "pylon/gige/_GigETLParams.pyx"
 
 #---- Last level (python-pylon)
+include "guard.pyx"
 include "Factory.pyx"
 include "Camera.pyx"
-#include "ChunkParser.pyx"
-#include "StreamGrabber.pyx"
-include "guard.pyx"
+

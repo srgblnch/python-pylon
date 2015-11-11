@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               PylonGigECamera.pyx
+## file :               Container.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,25 +33,18 @@
 ##
 ###############################################################################
 
-
-
-cdef extern from "pylon/gige/PylonGigECamera.h" namespace "Pylon":
-    cdef cppclass CPylonGigETLParams:
-        CPylonGigETLParams( INodeMap* ) except +
-        bool IsAttached() except +
-        INodeMap* GetNodeMap() except +
-    cdef CPylonGigETLParams* BuildCPylonGigETLParams \
-    "new Pylon::CPylonGigETLParams"( INodeMap* ) except +
-#     cdef cppclass CPylonGigEStreamGrabber
-#         CPylonGigEStreamGrabber()
-#     cdef cppclass CPylonGigEEventGrabber
-#         CPylonGigEEventGrabber()
-#     cdef cppclass CPylonGigECameraT
-#         CPylonGigECameraT()
-#     cdef cppclass CPylonGigECameraT:
-#         CPylonGigECameraT()
-#         CPylonGigECameraT(IPylonDevice* pDevice, bool takeOwnership)
-#         String_t DeviceClass()
-    
-# cdef class __CPylonGigECameraT(__CPylonGigEDeviceProxyT):
-#     pass
+cdef extern from "GenApi/INode.h" namespace "GenApi":
+    cdef cppclass node_vector:
+        node_vector() except +
+        node_vector(node_vector&) except +
+        bool empty() except +
+        cppclass iterator:
+            node_vector operator*() except +
+            iterator operator++() except +
+            bint operator==(iterator) except +
+            bint operator!=(iterator) except +
+        iterator begin() except +
+        iterator end() except +
+        size_t size() except +
+#     cdef node_vector& BuildNodeVector "new GenApi::node_vector"()
+#     cdef node_vector& CopyNodeVector "new GenApi::node_vector"(node_vector&)

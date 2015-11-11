@@ -37,5 +37,5 @@
 cdef extern from "pylon/PixelFormatConverterRGB.h" namespace "Pylon":
     cdef cppclass CPixelFormatConverterRGB
 
-# cdef class CPixelFormatConverterRGBWrapper(CPixelFormatConverterWrapper):
-#     pass
+cdef class __CPixelFormatConverterRGB(__CPixelFormatConverter):
+    pass

@@ -1,5 +1,4 @@
 #!/usr/bin/env cython
-from bdb import bar
 
 #---- licence header
 ###############################################################################
@@ -226,6 +225,8 @@ class Camera(object):
     def __init__(self,devInfo):
         super(Camera,self).__init__()
         self._devInfo = devInfo
+        self._pylonDevice = None
+        self._streamGrabber = None
     def __str__(self):
         return "%s"%(self.serialNumber)
     def __repr__(self):
@@ -239,17 +240,33 @@ class Camera(object):
     @pylonDevice.setter
     def pylonDevice(self,value):
         self._pylonDevice = value
+    @property
+    def streamGrabber(self):
+        return self._streamGrabber
+    @streamGrabber.setter
+    def streamGrabber(self,value):
+        self._streamGrabber = value
 #     @property
-#     def isOpen(self):
-#         return self._cppCamera.isOpen()
-#     def Open(self):
-#         if not self.isOpen:
-#             return self._cppCamera.Open()
-#         return False
-#     def Close(self):
-#         if self.isOpen:
-#             return self._cppCamera.Close()
-#         return False
+#     def baslerCamera(self):
+#         return self._baslerCamera
+#     @baslerCamera.setter
+#     def baslerCamera(self,value):
+#         self._baslerCamera = value
+    @property
+    def isOpen(self):
+        return self.pylonDevice.IsOpen() and self.streamGrabber.IsOpen()
+    def Open(self):
+        if not self.pylonDevice.IsOpen():
+            self.pylonDevice.Open()
+        if not self.streamGrabber.IsOpen():
+            return self.streamGrabber.Open()
+        return False
+    def Close(self):
+        if self.streamGrabber.IsOpen():
+            self.streamGrabber.Close()
+        if self.pylonDevice.IsOpen():
+            return self.pylonDevice.Close()
+        return False
     @property
     def serialNumber(self):
         return int(self._devInfo.GetSerialNumber())
@@ -284,9 +301,6 @@ class Camera(object):
     def interface(self):
         return self._devInfo.GetInterface()
 #     @property
-#     def streamGrabberChannels(self):
-#         return self._cppCamera.GetNumStreamGrabberChannels()
-#     @property
 #     def payloadSize(self):
-        return self._cppCamera.GetPayloadSize()
+#         return self._baslerCamera.GetPayloadSize()
 

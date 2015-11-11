@@ -35,5 +35,55 @@
 
 
 cdef extern from "GenApi/INodeMap.h" namespace "GenApi":
-    cdef cppclass INodeMap#:
-        #INode* GetNode( const GenICam::gcstring& Name)
+    cdef cppclass INodeMap:
+        void GetNodes(NodeList_t)
+        INode* GetNode( gcstring& )
+
+cdef class __INodeMap:
+    cdef:
+        INodeMap* _pNodeMap
+    _nodes = []
+    def __cinit__(self):
+        super(__INodeMap,self).__init__()
+    cdef SetINodeMap(self,INodeMap* pNodeMap):
+        self._pNodeMap = pNodeMap
+        self.__cleanNodeList()
+        self.__populateNodeMap()
+    def __cleanNodeList(self):
+        while len(self._nodes) > 0:
+            self._nodes.pop()
+    def __populateNodeMap(self):
+        #TODO: classify based on visibility of each node
+        cdef:
+            node_vector nodeLst
+            node_vector.iterator it
+        if self._pNodeMap is not NULL:
+            self._pNodeMap.GetNodes(nodeLst)
+            it = nodeLst.begin()
+            print(nodeLst.size())
+            while it != nodeLst.end():
+                node = BuildNode(<INode*>deref(it))
+                self._nodes.append(node)
+                inc(it)
+    def GetINodeList(self):
+        return self._nodes
+    
+#         if self._pNodeMap is not NULL:
+#             pass#self._pNodeMap.GetNodes(nodeLst)
+#            self._nodeVector = CopyNodeVector(nodeLst)
+#     def GetINodeList(self):
+#         cdef node_vector.iterator it
+#         if len(self._nodes) == 0:
+#             pass
+#             self._nodeMap.GetNodes(self._nodeLst)
+#             it = self._nodeLst.begin()
+#             while it != self._nodeLst.end():
+#                 #node = BuildNode(<INode*>deref(it))
+#                 #self._nodes.append(node)
+#                 pass
+#         return self._nodes
+
+cdef BuildINodeMap(INodeMap* nodeMap):
+    wrapper = __INodeMap()
+    wrapper.SetINodeMap(nodeMap)
+    return wrapper

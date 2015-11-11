@@ -46,8 +46,24 @@ cdef extern from "pylon/ChunkParser.h" namespace "Pylon":
         void DetachBuffer()
         void UpdateBuffer( void* )
         
-# cdef class IChunkParserWrapper:
-#     pass
+cdef class __IChunkParser:
+    pass
 # 
 # cdef class CChunkParserWrapper(IChunkParserWrapper):
 #     pass
+
+# cdef class ChunkParser(object):
+#     cdef:
+#         IPylonDevice* _pylonDevice
+#         IChunkParser* _chunkParser
+#     def __init__(self):
+#         super(ChunkParser,self).__init__()
+# 
+# cdef ChunkParser_Init(IPylonDevice* pylonDevice):
+#     res = ChunkParser()
+#     res._pylonDevice = pylonDevice
+#     try:
+#         res._chunkParser = pylonDevice.CreateChunkParser()
+#     except Exception,e:
+#         print("ChunkParser_Init Exception: %s"%e)
+#     return res

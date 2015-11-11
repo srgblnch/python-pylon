@@ -37,5 +37,5 @@
 cdef extern from "pylon/PixelFormatConverter.h" namespace "Pylon":
     cdef cppclass CPixelFormatConverter
 
-# cdef class CPixelFormatConverterWrapper:
-#     pass
+cdef class __CPixelFormatConverter:
+    pass

@@ -52,3 +52,40 @@ cdef extern from "pylon/StreamGrabber.h" namespace "Pylon":
         WaitObject& GetWaitObject() except +
         INodeMap* GetNodeMap() except +
 
+
+cdef class __StreamGrabber:
+    cdef:
+        IPylonDevice* _pylonDevice
+        IStreamGrabber* _streamGrabber
+        #StreamBufferHandle* _streamBufferHandle
+    def __init__(self):
+        super(__StreamGrabber,self).__init__()
+    def __dealloc__(self):
+        self.Close()
+        #if self._streamGrabber != NULL and self._streamBufferHandle != NULL:
+            #self._streamGrabber.DeregisterBuffer(self._streamBufferHandle)
+    cdef SetPylonDevice(self,IPylonDevice* pylonDevice):
+        self._pylonDevice = pylonDevice
+        self._streamGrabber = self._pylonDevice.GetStreamGrabber(0)
+    def IsOpen(self):
+        if self._streamGrabber != NULL:
+            return self._streamGrabber.IsOpen()
+        return False
+    def Open(self):
+        if not self.isOpen:
+            self._streamGrabber.Open()
+            return True
+        return False
+    def Close(self):
+        if self.isOpen:
+            self._streamGrabber.Close()
+            return True
+        return False
+    def channels(self):
+        if self._pylonDevice != NULL:
+            return self.pylonDevice.GetNumStreamGrabberChannels()
+
+cdef StreamGrabber_Init(IPylonDevice* pylonDevice):
+    wrapper = __StreamGrabber()
+    wrapper.SetPylonDevice(pylonDevice)
+    return wrapper

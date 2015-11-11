@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               PylonGigECamera.pyx
+## file :               GCString.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,25 +33,9 @@
 ##
 ###############################################################################
 
-
-
-cdef extern from "pylon/gige/PylonGigECamera.h" namespace "Pylon":
-    cdef cppclass CPylonGigETLParams:
-        CPylonGigETLParams( INodeMap* ) except +
-        bool IsAttached() except +
-        INodeMap* GetNodeMap() except +
-    cdef CPylonGigETLParams* BuildCPylonGigETLParams \
-    "new Pylon::CPylonGigETLParams"( INodeMap* ) except +
-#     cdef cppclass CPylonGigEStreamGrabber
-#         CPylonGigEStreamGrabber()
-#     cdef cppclass CPylonGigEEventGrabber
-#         CPylonGigEEventGrabber()
-#     cdef cppclass CPylonGigECameraT
-#         CPylonGigECameraT()
-#     cdef cppclass CPylonGigECameraT:
-#         CPylonGigECameraT()
-#         CPylonGigECameraT(IPylonDevice* pDevice, bool takeOwnership)
-#         String_t DeviceClass()
-    
-# cdef class __CPylonGigECameraT(__CPylonGigEDeviceProxyT):
-#     pass
+cdef extern from "Base/GCString.h" namespace "GenICam":
+    cdef cppclass gcstring:
+        char *c_str() except+
+        #gcstring& append( gcstring& )
+        #gcstring& append( size_t count, char ch )
+        
