@@ -41,15 +41,16 @@ from libcpp.string cimport string
 #---- First level of needs
 include "pylon/stdint.pyx"
 include "pylon/stdinclude.pyx"
-include "genicam/GCString.pyx"
+include "genicam/Base/GCString.pyx"
+include "genicam/GenApi/Types.pyx"
 
 #---- Second level (genicam)
-include "genicam/Container.pyx"
-include "genicam/ChunkAdapter.pyx"
-include "genicam/GCException.pyx"
-include "genicam/IInteger.pyx"
-include "genicam/INode.pyx"
-include "genicam/INodeMap.pyx"
+include "genicam/GenApi/Container.pyx"
+include "genicam/GenApi/ChunkAdapter.pyx"
+include "genicam/Base/GCException.pyx"
+include "genicam/GenApi/IInteger.pyx"
+include "genicam/GenApi/INode.pyx"
+include "genicam/GenApi/INodeMap.pyx"
 
 #---- Third level (pylon): no alphabetical order due to its own dependencies
 include "pylon/Container.pyx"

@@ -42,16 +42,22 @@ cdef extern from "GenApi/INodeMap.h" namespace "GenApi":
 cdef class __INodeMap:
     cdef:
         INodeMap* _pNodeMap
-    _nodes = []
+    _nodes = {}
     def __cinit__(self):
         super(__INodeMap,self).__init__()
+        self._nodes[Beginner] = []
+        self._nodes[Expert] = []
+        self._nodes[Guru] = []
+        self._nodes[Invisible] = []
+        self._nodes[_UndefinedVisibility] = []
     cdef SetINodeMap(self,INodeMap* pNodeMap):
         self._pNodeMap = pNodeMap
         self.__cleanNodeList()
         self.__populateNodeMap()
     def __cleanNodeList(self):
-        while len(self._nodes) > 0:
-            self._nodes.pop()
+        for key in self._nodes.keys():
+            while len(self._nodes[key]) > 0:
+                self._nodes[key].pop()
     def __populateNodeMap(self):
         #TODO: classify based on visibility of each node
         cdef:
@@ -63,7 +69,7 @@ cdef class __INodeMap:
             print(nodeLst.size())
             while it != nodeLst.end():
                 node = BuildNode(<INode*>deref(it))
-                self._nodes.append(node)
+                self._nodes[node.GetVisibility()].append(node)
                 inc(it)
     def GetINodeList(self):
         return self._nodes

@@ -38,7 +38,7 @@ cdef extern from "GenApi/INode.h" namespace "GenApi":
     cdef cppclass INode:
         gcstring GetName()
         #ENameSpace GetNameSpace()
-        #EVisibility GetVisibility()
+        EVisibility GetVisibility()
         gcstring GetDescription()
         gcstring GetDisplayName()
         gcstring GetDeviceName()
@@ -65,7 +65,9 @@ cdef class __INode:
     def __str__(self):
         return <string>self._node.GetName()
     def __repr__(self):
-        return "%s"%(self)
+        return "%s (%s)"%(self,self.GetVisibility())
+    def GetVisibility(self):
+        return self._node.GetVisibility()
 
 cdef BuildNode(INode* node):
     wrapper = __INode()

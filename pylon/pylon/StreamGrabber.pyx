@@ -72,12 +72,12 @@ cdef class __StreamGrabber:
             return self._streamGrabber.IsOpen()
         return False
     def Open(self):
-        if not self.isOpen:
+        if not self.IsOpen():
             self._streamGrabber.Open()
             return True
         return False
     def Close(self):
-        if self.isOpen:
+        if self.IsOpen():
             self._streamGrabber.Close()
             return True
         return False

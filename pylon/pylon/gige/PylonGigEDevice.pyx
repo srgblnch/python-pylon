@@ -63,6 +63,12 @@ cdef class __IPylonGigEDevice(__IPylonDevice):
         return "IPylonGigEDevice"
     def __repr__(self):
         return "%s"%self
+    def GetNodeMap(self):
+        nodeMap = BuildINodeMap(self._pylonDevice.GetNodeMap())
+        return nodeMap.GetINodeList()
+    def GetTLNodeMap(self):
+        nodeMap = BuildINodeMap(self._pylonDevice.GetTLNodeMap())
+        return nodeMap.GetINodeList()
 
 # cdef BuildIPylonGigEDevice(devInfo):
 #     wrapper = __IPylonGigEDevice()
