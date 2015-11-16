@@ -37,7 +37,7 @@ export PYLON_BASE=/opt
 if [[ "$1" == 'pylon' && "$2" != '' ]]; then
 	export PYLON_MAJORVERSION=$2
 else
-	export PYLON_MAJORVERSION=4
+	export PYLON_MAJORVERSION=2
 fi
 
 if [ "$PYLON_MAJORVERSION" == '2' ]; then
