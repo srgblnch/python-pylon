@@ -44,9 +44,10 @@ cdef extern from "pylon/DeviceInfo.h" namespace "Pylon":
         String_t GetDeviceVersion() except +
         String_t GetDeviceFactory() except +
 
+
 cdef class __CDeviceInfo(__CInfoBase):
     cdef:
-        CDeviceInfo _devInfo
+        CDeviceInfo _DeviceInfo
         CTlFactory* _TlFactory
     def __cinit__(self):
         super(__CDeviceInfo,self).__init__()
@@ -55,26 +56,21 @@ cdef class __CDeviceInfo(__CInfoBase):
     def __repr__(self):
         return "%s"%self
     cdef SetDevInfo(self,CDeviceInfo devInfo):
-        self._devInfo = devInfo
+         self._DeviceInfo = devInfo
     cdef CDeviceInfo GetDevInfo(self):
-        return self._devInfo
+        return <CDeviceInfo>self._DeviceInfo
     cdef SetTlFactory(self,CTlFactory* factory):
         self._TlFactory = factory
     cdef IPylonDevice* BuildIPylonDevice(self):
-        return self._TlFactory.CreateDevice(self._devInfo)
+        return self._TlFactory.CreateDevice(self.GetDevInfo())
     def GetSerialNumber(self):
-        return int(<string>self._devInfo.GetSerialNumber())
+        return int(<string>self.GetDevInfo().GetSerialNumber())
     def GetUserDefinedName(self):
-        return <string>self._devInfo.GetUserDefinedName()
+        return <string>self.GetDevInfo().GetUserDefinedName()
     def GetModelName(self):
-        return <string>self._devInfo.GetModelName()
+        return <string>self.GetDevInfo().GetModelName()
     def GetDeviceVersion(self):
-        return <string>self._devInfo.GetDeviceVersion()
+        return <string>self.GetDevInfo().GetDeviceVersion()
     def GetDeviceFactory(self):
-        return <string>self._devInfo.GetDeviceFactory()
+        return <string>self.GetDevInfo().GetDeviceFactory()
 
-cdef BuildDevInfo(CDeviceInfo devInfo,CTlFactory* factory):
-    wrapper = __CDeviceInfo()
-    wrapper.SetDevInfo(devInfo)
-    wrapper.SetTlFactory(factory)
-    return wrapper

@@ -37,12 +37,16 @@ from cython.operator cimport preincrement as inc,dereference as deref
 from libcpp cimport bool
 from libcpp.string cimport string
 #from libcpp.vector cimport vector
+from traceback import print_exc
 
 #---- First level of needs
 include "pylon/stdint.pyx"
 include "pylon/stdinclude.pyx"
 include "genicam/Base/GCString.pyx"
 include "genicam/GenApi/Types.pyx"
+include "genicam/GenApi/Pointer.pyx"
+include "genicam/GenApi/IBase.pyx"
+include "genicam/GenApi/IValue.pyx"
 
 #---- Second level (genicam)
 include "genicam/GenApi/Container.pyx"
@@ -52,6 +56,7 @@ include "genicam/GenApi/IInteger.pyx"
 include "genicam/GenApi/INode.pyx"
 include "genicam/GenApi/INodeMap.pyx"
 
+
 #---- Third level (pylon): no alphabetical order due to its own dependencies
 include "pylon/Container.pyx"
 include "pylon/ChunkParser.pyx"
@@ -60,6 +65,7 @@ include "pylon/TlInfo.pyx"
 include "pylon/TlFactory.pyx"
 
 #---- Fourth level (pylon cont.)
+include "pylon/Callback.pyx"
 include "pylon/Device.pyx"
 include "pylon/DeviceInfo.pyx"
 include "pylon/EventGrabber.pyx"
@@ -78,6 +84,7 @@ include "pylon/gige/PylonGigEDeviceProxy.pyx"
 include "pylon/gige/_GigETLParams.pyx"
 
 #---- Last level (python-pylon)
+include "version.pyx"
 include "guard.pyx"
 include "Factory.pyx"
 include "Camera.pyx"

@@ -54,8 +54,10 @@ cdef extern from "pylon/Device.h" namespace "Pylon":
         void DestroyChunkParser( IChunkParser* ) except +
         #IEventAdapter* CreateEventAdapter() except +
         #void DestroyEventAdapter( IEventAdapter* ) except +
-        #DeviceCallbackHandle RegisterRemovalCallback( DeviceCallback& ) except +
-        #bool DeregisterRemovalCallback( DeviceCallbackHandle ) except +
+#         DeviceCallbackHandle RegisterRemovalCallback( DeviceCallback& ) except +
+#         bool DeregisterRemovalCallback( DeviceCallbackHandle ) except +
+
+    #typedef Callback1<IPylonDevice*> DeviceCallback
 
 # cdef class __AccessModeSet:
 #     cdef:
@@ -73,43 +75,87 @@ cdef class __IDevice:
 
 cdef class __IPylonDevice(__IDevice):
     cdef:
-        IPylonDevice* _pylonDevice
+        IPylonDevice* _ipylonDevice
+        void* _pylonDevice
     _accessMode = None
+    _nodes = []
     def __cinit__(self):
         super(__IPylonDevice,self).__init__()
 #         self._accessMode = __AccessModeSet()
     def __dealloc__(self):
-        if self._pylonDevice is not NULL:
+        if self.GetIPylonDevice() is not NULL:
             pass#TODO: avoid memory leak
     def __str__(self):
         return "IPylonDevice"
     def __repr__(self):
         return "%s"%self
-    cdef SetIPylonDevice(self,IPylonDevice* pylonDevice):
+    cdef SetIPylonDevice(self,IPylonDevice* pylonDevice,visibility=Beginner):
+        if not self._ipylonDevice == NULL and self.IsOpen():
+            self._ipylonDevice.Close()
+        self._ipylonDevice = pylonDevice
         self._pylonDevice = pylonDevice
-    cdef IPylonDevice* GetIPylonDevice(self):
-        return self._pylonDevice
-    def IsOpen(self):
+        if not self.IsOpen():
+            self.Open()
         if self._pylonDevice != NULL:
-            return self._pylonDevice.IsOpen()
+            self.GetNodeMap(visibility)
+    cdef IPylonDevice* GetIPylonDevice(self):
+        return <IPylonDevice*>self._pylonDevice
+    def GetNumStreamGrabberChannels(self):
+        return self.GetIPylonDevice().GetNumStreamGrabberChannels()
+    def GetStreamGrabber(self):
+        return StreamGrabber_Init(self.GetIPylonDevice())
+    def IsOpen(self):
+        if self.GetIPylonDevice() != NULL:
+            return self.GetIPylonDevice().IsOpen()
         return False
     def Open(self):
         if not self.IsOpen():
             try:
-                self._pylonDevice.Open(AccessModeSet(Exclusive))
+                self.GetIPylonDevice().Open(AccessModeSet(Exclusive))
                 return True
             except Exception,e:
                 raise RuntimeError(e)
         return False
     def Close(self):
         if self.IsOpen():
-            self._pylonDevice.Close()
+            self.GetIPylonDevice().Close()
             return True
         return False
-    def GetNumStreamGrabberChannels(self):
-        return self._pylonDevice.GetNumStreamGrabberChannels()
-    def GetStreamGrabber(self):
-        return StreamGrabber_Init(self._pylonDevice)
-    def GetNodeMap(self):
-        nodeMap = BuildINodeMap(self._pylonDevice.GetNodeMap())
-        return nodeMap.GetINodeList()
+    def SetVisibility(self,visibility):
+        self.GetNodeMap(visibility)
+    def GetNodeMap(self,visibility=Beginner):
+        self.__cleanNodeMap()
+        self.__populateNodeMap(visibility)
+        return self._nodes
+#         nodeMap = BuildINodeMap(self.GetIPylonDevice().GetNodeMap())
+#         return nodeMap.GetINodeList(visibility)
+    def __cleanNodeMap(self):
+        while len(self._nodes) > 0:
+            self._nodes.pop()
+    def __populateNodeMap(self,visibility=Beginner):
+        nodeMap = BuildINodeMap(self.GetIPylonDevice().GetNodeMap())
+        for node in nodeMap.GetINodeList(visibility):
+            self._nodes.append(node)
+    def keys(self):
+        keys = []
+        for node in self._nodes:
+            keys.append(str(node))
+        return keys
+    def items(self):
+        return self._nodes
+#     def __setitem__(self,key,item):
+#         node = self._nodes[self._nodes.index(key)]
+#         raise NotImplementedError("Assignment not ready")
+    def __getitem__(self,key):
+        try:
+            pos = self._nodes.index(key)
+            node = self._nodes[pos]
+            return node
+        except:
+            raise KeyError("Unknown key (check visibility)")
+    def __len__(self):
+        return len(self._nodes)
+    def has_key(self,key):
+        return <bool>self._nodes.count(key)
+#     def SetRemovalCallback(self,cbFunction):
+#         self._pylonDevice.RegisterRemovalCallback()

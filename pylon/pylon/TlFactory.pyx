@@ -58,11 +58,14 @@ cdef class __CTlFactory(__IDeviceFactory):
         __ITransportLayer _tl
     _camerasList = []
     def __cinit__(self):
+        super(__CTlFactory,self).__init__()
+        self._TlFactory = &CTlFactory_GetInstance()
+        self._CreateTl()
+        self._deviceDiscovery()
+    def _deviceDiscovery(self):
         cdef:
             DeviceInfoList deviceInfoList
             DeviceInfoList.iterator it
-        super(__CTlFactory,self).__init__()
-        self._TlFactory = &CTlFactory_GetInstance()
         self._nCameras = self._TlFactory.EnumerateDevices(deviceInfoList,False)
         while len(self._camerasList) > 0:
             self._camerasList.pop()
@@ -70,28 +73,35 @@ cdef class __CTlFactory(__IDeviceFactory):
             it = deviceInfoList.begin()
             while it != deviceInfoList.end():
                 #FIXME: By now only build GigE cameras but shall support others
-                devInfo = BuildBaslerGigEDevInfo(deref(it),self._TlFactory)
+                devInfo = BuildBaslerGigEDevInfo(<CBaslerGigEDeviceInfo>deref(it),self._TlFactory)
                 self._camerasList.append(devInfo)
                 inc(it)
-        self.TransportLayer()
     def __dealloc__(self):
         #FIXME:review the transport layer usage
-        self._TlFactory.ReleaseTl(self._tl.GetITransportLayer())
-    def TransportLayer(self):
+        self._ReleaseTl()
+    def _CreateTl(self):
         cdef ITransportLayer* _tlptr
         if self._tl == None:
             _tlptr = self._TlFactory.CreateTl(GetDeviceClass())
             self._tl = BuildITransportLayer(_tlptr)
         return self._tl
+    def _ReleaseTl(self):
+        if not self._tl == None:
+            self._TlFactory.ReleaseTl(self._tl.GetITransportLayer())
+    def _getTl(self):
+        return self._tl
     cdef IPylonDevice* _CreateDevice(self,CDeviceInfo devInfo):
         return self._TlFactory.CreateDevice(devInfo)
+    cdef IPylonGigEDevice* _CreateGigEDevice(self,CDeviceInfo devInfo):
+        return <IPylonGigEDevice*>self._TlFactory.CreateDevice(devInfo)
     def CreateDevice(self,__CDeviceInfo devInfo):
         wrapper = __IPylonGigEDevice()
-        wrapper.SetIPylonDevice(self._CreateDevice(devInfo.GetDevInfo()))
+        #wrapper.SetIPylonDevice(self._CreateDevice(devInfo.GetDevInfo()))
+        wrapper.SetIPylonGigEDevice(self._CreateGigEDevice(devInfo.GetDevInfo()))
         return wrapper
         #FIXME: By now only building GigE cameras but shall support the others
-#         return BuildIPylonGigEDevice(devInfo)
     def nCameras(self):
         return self._nCameras
     def cameraList(self):
         return self._camerasList
+

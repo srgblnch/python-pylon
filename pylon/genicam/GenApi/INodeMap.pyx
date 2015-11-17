@@ -45,11 +45,9 @@ cdef class __INodeMap:
     _nodes = {}
     def __cinit__(self):
         super(__INodeMap,self).__init__()
-        self._nodes[Beginner] = []
-        self._nodes[Expert] = []
-        self._nodes[Guru] = []
-        self._nodes[Invisible] = []
-        self._nodes[_UndefinedVisibility] = []
+        for visibility in VisibilityEnum():
+            self._nodes[VisibilityToStr(visibility)] = []
+        #print("nodes visibilities: %s"%(self._nodes.keys()))
     cdef SetINodeMap(self,INodeMap* pNodeMap):
         self._pNodeMap = pNodeMap
         self.__cleanNodeList()
@@ -66,28 +64,40 @@ cdef class __INodeMap:
         if self._pNodeMap is not NULL:
             self._pNodeMap.GetNodes(nodeLst)
             it = nodeLst.begin()
-            print(nodeLst.size())
             while it != nodeLst.end():
                 node = BuildNode(<INode*>deref(it))
-                self._nodes[node.GetVisibility()].append(node)
+                nodeVisibility = VisibilityToStr(node.GetVisibility())
+                if nodeVisibility in self._nodes.keys():
+                    self._nodes[nodeVisibility].append(node)
+                else:
+                    print("Ouch! This should never happend!! "\
+                          "node: %s, visibility: %s (%s)"
+                          %(node.GetName(),nodeVisibility,self._nodes.keys()))
                 inc(it)
-    def GetINodeList(self):
-        return self._nodes
-    
-#         if self._pNodeMap is not NULL:
-#             pass#self._pNodeMap.GetNodes(nodeLst)
-#            self._nodeVector = CopyNodeVector(nodeLst)
-#     def GetINodeList(self):
-#         cdef node_vector.iterator it
-#         if len(self._nodes) == 0:
-#             pass
-#             self._nodeMap.GetNodes(self._nodeLst)
-#             it = self._nodeLst.begin()
-#             while it != self._nodeLst.end():
-#                 #node = BuildNode(<INode*>deref(it))
-#                 #self._nodes.append(node)
-#                 pass
-#         return self._nodes
+    def GetINodeList(self,visibilityLimit=Beginner):
+        if type(visibilityLimit) == str:
+            visibilityLimit = VisibilityFromStr(visibilityLimit)
+        nodes = []
+        for visibility in VisibilityEnum():
+            #print("Adding %d elements from %s visibility (we had %d)"
+            #      %(len(self._nodes[VisibilityToStr(visibility)]),
+            #        VisibilityToStr(visibility),
+            #        len(nodes)))
+            nodes += self._nodes[VisibilityToStr(visibility)]
+            if visibility == visibilityLimit:
+                #print("Visibility limit reached")
+                break
+        return nodes
+    def GetInodeBeginnerList(self):
+        return self._nodes[VisibilityToStr(Beginner)]
+    def GetInodeExpertList(self):
+        return self._nodes[VisibilityToStr(Expert)]
+    def GetInodeGuruList(self):
+        return self._nodes[VisibilityToStr(Guru)]
+    def GetNode(self,nodeName,visibilityLimit=Beginner):
+        nodes = self.GetINodeList(visibilityLimit)
+        if nodeName in nodes:
+            return nodes[nodes.index(nodeName)]
 
 cdef BuildINodeMap(INodeMap* nodeMap):
     wrapper = __INodeMap()

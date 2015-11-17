@@ -38,199 +38,40 @@ __TLWRITE_TIMEOUT = 250#ms
 __TLHEARTBEAT_TIMEOUT = 5000#ms
 
 
-# cdef class __CppCamera:
-#     cdef:
-#         CDeviceInfo _devInfo
-#         CTlFactory* _TlFactory
-#         IPylonGigEDevice* _pylonDevice
-#         CBaslerGigECamera* _baslerCamera
-#         ITransportLayer* _tl#Each camera has each transport layer to it.
-#         __StreamGrabber _streamGrabber
-#     def __cinit__(self):
-#         pass
-#     def __del__(self):
-#         self.ReleaseDevice()
-#     def __dealloc__(self):
-#         self.ReleaseDevice()
-#     #---- Build area
-#     def CreateDevice(self):
-#         try:
-#             self.__CreateTransportLayer__()
-#             self.__CreatePylonDevice__()
-#         except Exception,e:
-#             print e
-#             raise Exception(e)
-#     def ReleaseDevice(self):
-#         try:
-#             self.__ReleasePylonDevice__()
-#             self.__ReleaseTransportLayer()
-#         except Exception,e:
-#             print e
-#             raise Exception(e)
-#     def __CreateTransportLayer__(self):
-#         if self._TlFactory is NULL:
-#             self._TlFactory = &CTlFactory_GetInstance()
-#             if not self._TlFactory:
-#                 raise ReferenceError("Fatal building Transport Layer Factory")
-#         if self._tl is NULL:
-#             self._tl = self._TlFactory.CreateTl(GetDeviceClass())
-#             if not self._tl:
-#                 raise ReferenceError("Fatal building Transport Layer")
-#     def __ReleaseTransportLayer__(self):
-#         if self._TlFactory is not NULL and self._tl is not NULL:
-#             self._TlFactory.ReleaseTl(self._tl)
-#     def __CreatePylonDevice__(self):
-#         cdef:
-#             IPylonDevice* pylonDevice
-#         if self._pylonDevice is NULL:
-#             pylonDevice = self._TlFactory.CreateDevice(self._devInfo)
-#             if not pylonDevice:
-#                 raise ReferenceError("Fatal building Pylon Device")
-#             self._pylonDevice = <IPylonGigEDevice*>&pylonDevice
-#             #self._pylonDevice.Open()
-#     def __ReleasePylonDevice__(self):
-#         if self._pylonDevice is not NULL:
-#             self._TlFactory.DestroyDevice(<IPylonDevice*>&self._pylonDevice)
-#     def __CreateBaslerCamera__(self):
-#         if self._baslerCamera is NULL and  self._pylonDevice is not NULL:
-#             self._baslerCamera = BuildAndAttachCBaslerGigECamera(\
-#                 <IPylonDevice*>&self._pylonDevice)
-# #             self._baslerCamera = BuildCBaslerGigECamera()
-#             if not self._baslerCamera:
-#                 raise ReferenceError("Fatal building Basler Camera")
-# #             if not self._baslerCamera.IsAttached():
-# #                 self._baslerCamera.Attach(<IPylonDevice*>&self._pylonDevice)
-#     def __ReleaseBaslerCamera(self):
-#         if self._baslerCamera is not NULL:
-#             pass
-#     def __CreateStreamGrabber__(self):
-#         if self._pylonDevice is NULL:
-#             raise IOError("Not connected to the camera")
-#         if self._streamGrabber is None:
-#             self._streamGrabber = StreamGrabber_Init(\
-#                 <IPylonDevice*>&self._pylonDevice)
-#             if not self._streamGrabber:
-#                 raise ReferenceError("Fatal building Stream Grabber")
-#             self._streamGrabber.Open()
-#     def __ReleaseStreamGrabber__(self):
-#         if self._streamGrabber is not None:
-#             self._streamGrabber.Close()
-#     #---- actions area
-#     def isOpen(self):
-#         if self._pylonDevice is not NULL:
-#             return self._pylonDevice.IsOpen()
-#         return False
-#     def Open(self):
-#         if not self.isOpen():
-#             #self.__CreateBaslerCamera__()
-#             #self.__CreateStreamGrabber__()
-#             self._pylonDevice.Open(AccessModeSet(Exclusive))
-#             return True
-#         return False
-#     def Close(self):
-#         if self.isOpen():
-#             #self.__ReleaseStreamGrabber__()
-#             #self.__ReleaseBaslerCamera()
-#             self._pylonDevice.Close()
-#             return True
-#         return False
-#     #---- basic information
-#     def GetSerialNumber(self):
-#         try:
-#             return int(<string>self._devInfo.GetSerialNumber())
-#         except:
-#             return 0
-#     def GetModelName(self):
-#         try:
-#             return <string>self._devInfo.GetModelName()
-#         except:
-#             return ''
-#     def GetDeviceVersion(self):
-#         try:
-#             return <string>self._devInfo.GetDeviceVersion()
-#         except:
-#             return ''
-#     def GetDeviceFactory(self):
-#         try:
-#             return <string>self._devInfo.GetDeviceFactory()
-#         except:
-#             return ''
-#     def GetIpAddress(self):
-#         cdef CBaslerGigEDeviceInfo devInfo
-#         try:
-#             devInfo = <CBaslerGigEDeviceInfo>self._devInfo
-#             return <string>devInfo.GetIpAddress()
-#         except:
-#             return ''
-#     def GetPortNr(self):
-#         cdef CBaslerGigEDeviceInfo devInfo
-#         try:
-#             devInfo = <CBaslerGigEDeviceInfo>self._devInfo
-#             return <string>devInfo.GetPortNr()
-#         except:
-#             return ''
-#     def GetMacAddress(self):
-#         cdef CBaslerGigEDeviceInfo devInfo
-#         try:
-#             devInfo = <CBaslerGigEDeviceInfo>self._devInfo
-#             return <string>devInfo.GetMacAddress()
-#         except:
-#             return ''
-#     def GetDefaultGateway(self):
-#         cdef CBaslerGigEDeviceInfo devInfo
-#         try:
-#             devInfo = <CBaslerGigEDeviceInfo>self._devInfo
-#             return <string>devInfo.GetDefaultGateway()
-#         except:
-#             return ''
-#     def GetSubnetMask(self):
-#         cdef CBaslerGigEDeviceInfo devInfo
-#         try:
-#             devInfo = <CBaslerGigEDeviceInfo>self._devInfo
-#             return <string>devInfo.GetSubnetMask()
-#         except:
-#             return ''
-#     def GetInterface(self):
-#         cdef CBaslerGigEDeviceInfo devInfo
-#         try:
-#             devInfo = <CBaslerGigEDeviceInfo>self._devInfo
-#             return <string>devInfo.GetInterface()
-#         except:
-#             return ''
-#     def GetNumStreamGrabberChannels(self):
-#         cdef uint32_t nChannels
-#         if self._pylonDevice is not NULL and self._pylonDevice.IsOpen():
-#             try:
-#                 nChannels = self._pylonDevice.GetNumStreamGrabberChannels()
-#                 print nChannels
-#                 return int(nChannels)
-#             except:
-#                 pass
-#         return -1
-#     def GetPayloadSize(self):
-#         if self._baslerCamera is not NULL and self._baslerCamera.IsAttached():
-#             try:
-#                 return self._baslerCamera.PayloadSize.GetValue()
-#             except:
-#                 pass
-#         return -1
-# 
-# cdef BuildCppCamera(CDeviceInfo devInfo,CTlFactory* tlFactory):
-#     res = __CppCamera()
-#     res._devInfo = devInfo
-#     res._TlFactory = tlFactory
-#     return res
-
 class Camera(object):
     def __init__(self,devInfo):
         super(Camera,self).__init__()
         self._devInfo = devInfo
         self._pylonDevice = None
+        self._baslerCamera = None
         self._streamGrabber = None
+#         self._nodes = []
+    def __dealloc__(self):
+        if self.streamGrabber != None and self.streamGrabber.IsOpen():
+            self.streamGrabber.Close()
+        if self.baslerCamera != None and self.baslerCamera.IsOpen():
+            self.baslerCamera.Close()
+        if self.pylonDevice != None and self.pylonDevice.IsOpen():
+            self.pylonDevice.Close()
     def __str__(self):
         return "%s"%(self.serialNumber)
     def __repr__(self):
         return "%s (%s)"%(self.serialNumber,self.modelName)
+    def __richcmp__(self,other,int op):
+        if op == 0:#<
+            return self.serialNumber < other.serialNumber
+        elif op == 1:#<=
+            return self.serialNumber <= other.serialNumber
+        elif op == 2:#==
+            return self.serialNumber == other.serialNumber
+        elif op == 3:#!=
+            return self.serialNumber != other.serialNumber
+        elif op == 4:#>
+            return self.serialNumber > other.serialNumber
+        elif op == 5:#>=
+            return self.serialNumber >= other.serialNumber
+        else:
+            raise IndexError("Compare operation not undertood (%d)"%(op))
     @property
     def devInfo(self):
         return self._devInfo
@@ -240,18 +81,19 @@ class Camera(object):
     @pylonDevice.setter
     def pylonDevice(self,value):
         self._pylonDevice = value
+#         self._updateNodes()
+    @property
+    def baslerCamera(self):
+        return self._baslerCamera
+    @baslerCamera.setter
+    def baslerCamera(self,value):
+        self._baslerCamera = value
     @property
     def streamGrabber(self):
         return self._streamGrabber
     @streamGrabber.setter
     def streamGrabber(self,value):
         self._streamGrabber = value
-#     @property
-#     def baslerCamera(self):
-#         return self._baslerCamera
-#     @baslerCamera.setter
-#     def baslerCamera(self,value):
-#         self._baslerCamera = value
     @property
     def isOpen(self):
         return self.pylonDevice.IsOpen() and self.streamGrabber.IsOpen()
@@ -302,5 +144,34 @@ class Camera(object):
         return self._devInfo.GetInterface()
 #     @property
 #     def payloadSize(self):
-#         return self._baslerCamera.GetPayloadSize()
-
+#         return self.pylonDevice["PayloadSize"]
+#         #return self._baslerCamera.GetPayloadSize()
+    #---- Dict area
+#     def _updateNodes(self):
+#         self._nodes = self._pylonDevice.GetNodeMap(self._visibility)
+#     @property
+#     def visibility(self):
+#         return VisibilityToStr(self._visibility)
+#     @visibility.setter
+#     def visibility(self,value):
+#         self.pylonDevice.SetVisibility(value)
+#         self._visibility = VisibilityFromStr(value)
+#         self._updateNodes()
+#     def keys(self):
+#         keys = []
+#         for node in self._nodes:
+#             keys.append(str(node))
+#         return keys
+#     def items(self):
+#         return self._nodes
+#     def __getitem__(self,key):
+#         try:
+#             pos = self._nodes.index(key)
+#             node = self._nodes[pos]
+#             return node
+#         except:
+#             raise KeyError("Unknown key (check visibility)")
+#     def __len__(self):
+#         return len(self._nodes)
+#     def has_key(self,key):
+#         return <bool>self._nodes.count(key)

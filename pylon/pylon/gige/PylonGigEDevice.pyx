@@ -36,9 +36,6 @@
 
 cdef extern from "pylon/gige/PylonGigEDevice.h" namespace "Pylon":
     cdef cppclass IPylonGigEDevice:
-        #void Open(AccessModeSet) except +
-        #void Close() except +
-        #bool IsOpen() except +
         AccessModeSet AccessMode() except +
         uint32_t GetNumStreamGrabberChannels() except +
         IStreamGrabber* GetStreamGrabber(uint32_t index) except +Exception
@@ -57,18 +54,43 @@ cdef extern from "pylon/gige/PylonGigEDevice.h" namespace "Pylon":
                                     String_t& DefaultGateway) except +
 
 cdef class __IPylonGigEDevice(__IPylonDevice):
+    cdef:
+        IPylonGigEDevice* _pylonGigEDevice
+        #__INodeMap _TlNodeMap
+    _TlNodes = []
     def __cinit__(self):
         super(__IPylonGigEDevice,self).__init__()
     def __str__(self):
         return "IPylonGigEDevice"
     def __repr__(self):
         return "%s"%self
-    def GetNodeMap(self):
-        nodeMap = BuildINodeMap(self._pylonDevice.GetNodeMap())
-        return nodeMap.GetINodeList()
+    cdef SetIPylonGigEDevice(self,IPylonGigEDevice* pylonGigEDevice,
+                             visibility=Beginner):
+        self._pylonGigEDevice = pylonGigEDevice
+        self._pylonDevice = pylonGigEDevice
+        if self._pylonDevice != NULL:
+            self.GetNodeMap(visibility)
+            self.GetTLNodeMap()
+    def __cleanTlNodeMap(self):
+        while len(self._TlNodes) > 0:
+            self._TlNodes.pop()
+    def __populateTlNodeMap(self):
+        nodeMap = BuildINodeMap(self.GetIPylonDevice().GetTLNodeMap())
+        for node in nodeMap.GetINodeList():
+            self._TlNodes.append(node)
     def GetTLNodeMap(self):
-        nodeMap = BuildINodeMap(self._pylonDevice.GetTLNodeMap())
-        return nodeMap.GetINodeList()
+        self.__cleanTlNodeMap()
+        self.__populateTlNodeMap()
+        return self._TlNodes
+#         if len(self.self._TlNodeMap) == 0:
+#             self._TlNodeMap = BuildINodeMap(self.GetIPylonDevice().GetTLNodeMap())
+#         return self._TlNodeMap.GetINodeList()
+    def GetHeartbeatTimeout(self):
+        return self._TlNodeMap.GetNode('HeartbeatTimeout').GetValue()
+    def GetReadTimeout(self):
+        return self._TlNodeMap.GetNode('ReadTimeout').GetValue()
+    def GetWriteTimeout(self):
+        return self._TlNodeMap.GetNode('WriteTimeout').GetValue()
 
 # cdef BuildIPylonGigEDevice(devInfo):
 #     wrapper = __IPylonGigEDevice()

@@ -83,7 +83,7 @@ cdef class __StreamGrabber:
         return False
     def channels(self):
         if self._pylonDevice != NULL:
-            return self.pylonDevice.GetNumStreamGrabberChannels()
+            return self._pylonDevice.GetNumStreamGrabberChannels()
 
 cdef StreamGrabber_Init(IPylonDevice* pylonDevice):
     wrapper = __StreamGrabber()

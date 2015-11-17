@@ -79,6 +79,8 @@ cdef class __CBaslerGigECamera:#(__CPylonGigECameraT):
         return "%s"%self
     cdef SetBaslerCamera(self,CBaslerGigECamera* baslerCamera):
         self._baslerCamera = baslerCamera
+    cdef Attach(self,IPylonGigEDevice* pylonDevice):
+        self._baslerCamera.Attach(pylonDevice)
     def IsAttached(self):
         if self._baslerCamera is not NULL:
             return <bool>self._baslerCamera.IsAttached()
@@ -87,20 +89,17 @@ cdef class __CBaslerGigECamera:#(__CPylonGigECameraT):
         if self._baslerCamera is not NULL:
             return <bool>self._baslerCamera.HasOwnership()
         return False
-#     def GetPayloadSize(self):
-#         if self._baslerCamera is not NULL:
-#             return self._baslerCamera.PayloadSize.GetValue()
-#         return -1
+    def GetPayloadSize(self):
+        if self._baslerCamera is not NULL:
+            return self._baslerCamera.PayloadSize.GetValue()
+        return -1
 
 cdef BuildBaslerGigECamera(__IPylonDevice pylonDevice):
     wrapper = __CBaslerGigECamera()
-#     wrapper.SetBaslerCamera(\
-#         BuildAndAttachCBaslerGigECamera(\
-#             <IPylonGigEDevice*>pylonDevice.GetIPylonDevice()))
-    wrapper.SetBaslerCamera(BuildCBaslerGigECamera())
-    try:
-        wrapper._baslerCamera.Attach(<IPylonGigEDevice*>pylonDevice.GetIPylonDevice())
-    except Exception,e:
-        raise RuntimeError(e)
+    wrapper.SetBaslerCamera(\
+        BuildAndAttachCBaslerGigECamera(\
+            <IPylonGigEDevice*>pylonDevice.GetIPylonDevice()))
+#     wrapper.SetBaslerCamera(BuildCBaslerGigECamera())
+#     wrapper._baslerCamera.Attach(<IPylonGigEDevice*>pylonDevice.GetIPylonDevice())
     return wrapper
 

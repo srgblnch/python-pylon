@@ -35,7 +35,24 @@
 
 cdef extern from "Base/GCString.h" namespace "GenICam":
     cdef cppclass gcstring:
+        gcstring( char *pc = 0 )
+        gcstring( size_t, char )
+        gcstring( gcstring& )
         char *c_str() except+
         #gcstring& append( gcstring& )
         #gcstring& append( size_t count, char ch )
+
+cdef extern from "Base/GCStringVector.h" namespace "GenICam":
+    cdef cppclass gcstring_vector:
+        gcstring_vector() except +
+        gcstring_vector(size_t uiSize, gcstring &str) except +
+        gcstring_vector(gcstring_vector &obj) except +
+        cppclass iterator:
+            CDeviceInfo operator*() except +
+            iterator operator++() except +
+            bint operator==(iterator) except +
+            bint operator!=(iterator) except +
+        iterator begin() except +
+        iterator end() except +
+        size_t size() except +
         

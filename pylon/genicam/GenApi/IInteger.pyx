@@ -38,9 +38,47 @@ cdef extern from "GenApi/IInteger.h" namespace "GenApi":
     cdef cppclass IInteger:
         void SetValue(int64_t Value, bool Verify = true) except +
         #IInteger& operator=(int64_t Value)
-        int64_t GetValue(bool Verify = false, bool IgnoreCache = false ) except +
+        int64_t GetValue(bool Verify = true, bool IgnoreCache = false ) except +
         int64_t GetMin() except +
         int64_t GetMax() except +
         int64_t GetInc() except +
-        #gcstring GetUnit()
+        gcstring GetUnit()
         
+cdef class __IInteger(__IValue):
+    cdef:
+        #CIntegerPtr _bar
+        IInteger* _ptr
+    def __cinit__(self):
+        super(__IInteger,self).__init__()
+    cdef SetIInteger(self,IInteger* iinteger):
+        self._ptr = iinteger
+    def GetValue(self):
+        if not self._ptr == NULL:
+            return self._ptr.GetValue()
+    def SetValue(self,int64_t value):
+        if not self._ptr == NULL:
+            self._ptr.SetValue(value)
+    def GetMin(self):
+        if not self._ptr == NULL:
+            return self._ptr.GetMin()
+    def GetMax(self):
+        if not self._ptr == NULL:
+            return self._ptr.GetMax()
+    def GetInc(self):
+        if not self._ptr == NULL:
+            return self._ptr.GetInc()
+    def GetUnit(self):
+        if not self._ptr == NULL:
+            return <string>self._ptr.GetUnit()
+
+cdef _IInteger(INode* inode):
+    cdef:
+        gcstring name
+        INodeMap* nodeMap
+        CIntegerPtr ptr
+    name = inode.GetName()
+    nodeMap = inode.GetNodeMap()
+    #ptr = <CIntegerPtr>inode#nodeMap.GetNode(name)
+    wrapper = __IInteger()
+    wrapper.SetIInteger(<IInteger*>inode)#ptr)
+    return wrapper

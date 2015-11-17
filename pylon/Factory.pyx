@@ -39,9 +39,26 @@ class Factory(object):
     def __init__(self):
         super(Factory,self).__init__()
         self.__TlFactory = __CTlFactory()
+        self._refreshTlInfo()
+    def _refreshTlInfo(self):
         self._cameraList = []
+        self._cameraModels = {}
+        self._ipLst = []
+        self._macLst = []
+        self.__TlFactory._deviceDiscovery()
         for camera in self.__TlFactory.cameraList():
-            self._cameraList.append(Camera(camera))
+            cameraObj = Camera(camera)
+            self._cameraList.append(cameraObj)
+            if not cameraObj.modelName in self._cameraModels.keys():
+                self._cameraModels[cameraObj.modelName] = []
+            self._cameraModels[cameraObj.modelName].append(cameraObj)
+            self._ipLst.append(cameraObj.ipAddress)
+            self._macLst.append(cameraObj.macAddress)
+        self._cameraList.sort()
+        for model in self._cameraModels.keys():
+            self._cameraModels[model].sort()
+        self._ipLst.sort()
+        self._macLst.sort()
     @property
     def nCameras(self):
         return self.__TlFactory.nCameras()
@@ -49,23 +66,27 @@ class Factory(object):
     def cameraList(self):
         return self._cameraList[:]
     @property
+    def cameraModels(self):
+        return self._cameraModels.keys()
+    def cameraListByModel(self,model):
+        if model in self._cameraModels.keys():
+            return self._cameraModels[model][:]
+        return []
+    @property
     def ipList(self):
-        ipLst = []
-        for camera in self._cameraList:
-            if len(camera.ipAddress) > 0:
-                ipLst.append(camera.ipAddress)
-        return ipLst
+        return self._ipLst[:]
     @property
     def macList(self):
-        macLst = []
-        for camera in self._cameraList:
-            if len(camera.macAddress) > 0:
-                macLst.append(camera.macAddress)
-        return macLst
+        return self._macLst[:]
     def __prepareCameraObj(self,camera):
-        camera.pylonDevice = self.__TlFactory.CreateDevice(camera._devInfo)
-        #FIXME: the attach fails
-        #camera.baslerCamera = BuildBaslerGigECamera(camera.pylonDevice)
+        camera.pylonDevice = self.__TlFactory.CreateDevice(camera.devInfo)
+        #FIXME: the attach fails, exception says:
+        #       "The attached Pylon Device is not of type IPylonGigEDevice"
+        try:
+            camera.baslerCamera = BuildBaslerGigECamera(camera.pylonDevice)
+        except Exception as ex:
+#             print("Exception '%s': %s"%(type(ex).__name__,ex))
+            print_exc()
         camera.streamGrabber = camera.pylonDevice.GetStreamGrabber()
         
     def getCameraBySerialNumber(self,number):
@@ -86,4 +107,3 @@ class Factory(object):
                 self.__prepareCameraObj(camera)
                 return camera
         raise KeyError("mac address %s not found"%(macAddress))
-

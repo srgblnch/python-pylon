@@ -36,6 +36,11 @@
 
 cdef extern from "pylon/gige/BaslerGigEDeviceInfo.h" namespace "Pylon":
     cdef cppclass CBaslerGigEDeviceInfo:
+        String_t GetSerialNumber() except +
+        String_t GetUserDefinedName() except +
+        String_t GetModelName() except +
+        String_t GetDeviceVersion() except +
+        String_t GetDeviceFactory() except +
         String_t GetAddress() except +
         String_t GetIpAddress() except +
         String_t GetDefaultGateway() except +
@@ -54,45 +59,52 @@ cdef extern from "pylon/gige/BaslerGigEDeviceInfo.h" namespace "Pylon":
         bool IsSubset( IProperties& Subset) except +
 
 cdef class __CBaslerGigEDeviceInfo(__CDeviceInfo):
+    cdef:
+        CBaslerGigEDeviceInfo _baslerGigEDeviceInfo
     def __cinit__(self):
         super(__CBaslerGigEDeviceInfo,self).__init__()
     def __str__(self):
         return "CBaslerGigEDeviceInfo (of %s)"%self.GetSerialNumber()
     def __repr__(self):
         return "%s"%self
+    cdef SetDevGigEInfo(self,CBaslerGigEDeviceInfo devGigEInfo):
+        self._baslerGigEDeviceInfo = devGigEInfo
+    cdef CBaslerGigEDeviceInfo GetDevGigEInfo(self):
+        return self._baslerGigEDeviceInfo
     def GetAddress(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetAddress()
+        return <string>self.GetDevGigEInfo().GetAddress()
     def GetIpAddress(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetIpAddress()
+        return <string>self.GetDevGigEInfo().GetIpAddress()
     def GetDefaultGateway(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetDefaultGateway()
+        return <string>self.GetDevGigEInfo().GetDefaultGateway()
     def GetSubnetMask(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetSubnetMask()
+        return <string>self.GetDevGigEInfo().GetSubnetMask()
     def GetPortNr(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetPortNr()
+        return <string>self.GetDevGigEInfo().GetPortNr()
     def GetMacAddress(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetMacAddress()
+        return <string>self.GetDevGigEInfo().GetMacAddress()
     def GetInterface(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetInterface()
+        return <string>self.GetDevGigEInfo().GetInterface()
     def GetIpConfigOptions(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetIpConfigOptions()
+        return <string>self.GetDevGigEInfo().GetIpConfigOptions()
     def GetIpConfigCurrent(self):
-        return <string>(<CBaslerGigEDeviceInfo>self._devInfo).GetIpConfigCurrent()
+        return <string>self.GetDevGigEInfo().GetIpConfigCurrent()
     def IsPersistentIpActive(self):
-        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsPersistentIpActive()
+        return <bool>self.GetDevGigEInfo().IsPersistentIpActive()
     def IsDhcpActive(self):
-        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsDhcpActive()
+        return <bool>self.GetDevGigEInfo().IsDhcpActive()
     def IsAutoIpActive(self):
-        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsAutoIpActive()
+        return <bool>self.GetDevGigEInfo().IsAutoIpActive()
     def IsPersistentIpSupported(self):
-        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsPersistentIpSupported()
+        return <bool>self.GetDevGigEInfo().IsPersistentIpSupported()
     def IsDhcpSupported(self):
-        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsDhcpSupported()
+        return <bool>self.GetDevGigEInfo().IsDhcpSupported()
     def IsAutoIpSupported(self):
-        return <bool>(<CBaslerGigEDeviceInfo>self._devInfo).IsAutoIpSupported()
+        return <bool>self.GetDevGigEInfo().IsAutoIpSupported()
 
-cdef BuildBaslerGigEDevInfo(CDeviceInfo devInfo,CTlFactory* factory):
+cdef BuildBaslerGigEDevInfo(CBaslerGigEDeviceInfo devInfo,CTlFactory* factory):
     wrapper = __CBaslerGigEDeviceInfo()
-    wrapper.SetDevInfo(devInfo)
+    wrapper.SetDevInfo(<CDeviceInfo>devInfo)
+    wrapper.SetDevGigEInfo(devInfo)
     wrapper.SetTlFactory(factory)
     return wrapper

@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               Callback.pyx
+## file :               IBase.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -34,9 +34,9 @@
 ###############################################################################
 
 
-cdef extern from "pylon/Callback.h" namespace "Pylon":
-    cdef cppclass Base_Callback1Body[P1]
-    cdef cppclass Callback1[P]
-    cdef cppclass Function_CallbackBody[Function,P]
-    cdef cppclass Member_CallbackBody[Client,Member,P]
+cdef extern from "GenApi/IBase.h" namespace "GenApi":
+    cdef cppclass IBase
     
+cdef class __IBase:
+    def __cinit__(self):
+        pass#super(__IBase,self).__init__()
