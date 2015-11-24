@@ -71,6 +71,8 @@ cdef class __IPylonGigEDevice(__IPylonDevice):
         if self._pylonDevice != NULL:
             self.GetNodeMap(visibility)
             self.GetTLNodeMap()
+    cdef IPylonGigEDevice* GetIPylonGigEDevice(self):
+        return self._pylonGigEDevice
     def __cleanTlNodeMap(self):
         while len(self._TlNodes) > 0:
             self._TlNodes.pop()

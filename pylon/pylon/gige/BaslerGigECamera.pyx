@@ -79,8 +79,8 @@ cdef class __CBaslerGigECamera:#(__CPylonGigECameraT):
         return "%s"%self
     cdef SetBaslerCamera(self,CBaslerGigECamera* baslerCamera):
         self._baslerCamera = baslerCamera
-    cdef Attach(self,IPylonGigEDevice* pylonDevice):
-        self._baslerCamera.Attach(pylonDevice)
+    cdef Attach(self,IPylonDevice* pylonDevice):
+        self._baslerCamera.Attach(<IPylonGigEDevice*>pylonDevice)
     def IsAttached(self):
         if self._baslerCamera is not NULL:
             return <bool>self._baslerCamera.IsAttached()
@@ -94,12 +94,18 @@ cdef class __CBaslerGigECamera:#(__CPylonGigECameraT):
             return self._baslerCamera.PayloadSize.GetValue()
         return -1
 
-cdef BuildBaslerGigECamera(__IPylonDevice pylonDevice):
+cdef BuildBaslerGigECamera(__IPylonDevice pylonDevice,doWithAttach=True):
+    cdef IPylonDevice* pylonPtr
     wrapper = __CBaslerGigECamera()
-    wrapper.SetBaslerCamera(\
-        BuildAndAttachCBaslerGigECamera(\
-            <IPylonGigEDevice*>pylonDevice.GetIPylonDevice()))
-#     wrapper.SetBaslerCamera(BuildCBaslerGigECamera())
-#     wrapper._baslerCamera.Attach(<IPylonGigEDevice*>pylonDevice.GetIPylonDevice())
+    pylonPtr = pylonDevice.GetIPylonDevice()
+    try:
+        if doWithAttach:
+            wrapper.SetBaslerCamera(BuildCBaslerGigECamera())
+            wrapper.Attach(pylonPtr)
+        else:
+            wrapper.SetBaslerCamera(\
+                BuildAndAttachCBaslerGigECamera(<IPylonGigEDevice*>pylonPtr))
+    except Exception as ex:
+        print_exc()
     return wrapper
 

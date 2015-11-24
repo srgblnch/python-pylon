@@ -47,7 +47,9 @@ source env.sh
 
 echo $LD_LIBRARY_PATH
 
-export CFLAGS="-I$PYLON_ROOT/include -I$PYLON_ROOT/genicam/library/CPP/include "
+export CFLAGS="-I$PYLON_ROOT/include "
+export CFLAGS+="-I$PYLON_ROOT/genicam/library/CPP/include "
+export CFLAGS+="-I./pylon/include "
 export CFLAGS+="-L$PYLONLIBDIR -L$PYLONLIBDIR/pylon/tl/ "
 export CFLAGS+="-lpylonbase -lpylongigesupp -lpylonutility "
 # -lpyloncamemu -lpylongige "
