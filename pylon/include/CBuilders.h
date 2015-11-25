@@ -42,7 +42,7 @@ using namespace Pylon;
  * Transport layer
  ****************************************************************/
 
-inline void _cppBuildTransportLayer(CTlFactory *factory,
+void _cppBuildTransportLayer(CTlFactory *factory,
 		ITransportLayer *_tlptr)
 {
 	_tlptr = factory->CreateTl(CBaslerGigECamera::DeviceClass());
@@ -52,7 +52,7 @@ inline void _cppBuildTransportLayer(CTlFactory *factory,
 // * Device Info
 // ****************************************************************/
 //
-//inline int _cppEnumerateDevices(CTlFactory *factory,
+// int _cppEnumerateDevices(CTlFactory *factory,
 //		DeviceInfoList devicesList)
 //{
 //	int nb_camera_found = 0;
@@ -78,11 +78,11 @@ void _cppBuildBaslerCamera(IPylonGigEDevice *pCamera,
 	mCamera->Attach(pCamera,true);
 }
 
-inline void _cppBuildPylonDeviceAndBaslerCamera(CTlFactory *factory,
-		CBaslerGigEDeviceInfo devInfo, IPylonGigEDevice *pGigECamera,
-		CBaslerGigECamera *mCamera)
+void _cppAlternativeBuildBaslerCamera(CTlFactory *factory,
+		CBaslerGigEDeviceInfo devInfo, CBaslerGigECamera *mCamera)
 {
-	_cppBuildPylonDevice(factory, devInfo, pGigECamera);
-	_cppBuildBaslerCamera(pGigECamera,mCamera);
+	IPylonDevice *pCamera(factory->CreateDevice((devInfo)));
+	mCamera = new CBaslerGigECamera();
+	mCamera->Attach(pCamera,true);
 }
 

@@ -54,13 +54,17 @@ cdef extern from "pylon/TlFactory.h" namespace "Pylon":
 
 cdef extern from "CBuilders.h":
     cdef void _cppBuildTransportLayer(CTlFactory *factory,
-                                      ITransportLayer *_tlptr)
+                                      ITransportLayer *_tlptr)except+
     cdef int _cppEnumerateDevices(CTlFactory *factory,
-                                  DeviceInfoList devicesList)
-    cdef void _cppBuildPylonDeviceAndBaslerCamera(CTlFactory *factory,
-                                                 CBaslerGigEDeviceInfo devInfo,
-                                                 IPylonGigEDevice *pGigECamera,
-                                                 CBaslerGigECamera *mCamera)
+                                  DeviceInfoList devicesList) except+
+    cdef void _cppBuildPylonDevice(CTlFactory *factory,
+                                   CBaslerGigEDeviceInfo devInfo, 
+                                   IPylonGigEDevice *pGigECamera) except+
+    cdef void _cppBuildBaslerCamera(IPylonGigEDevice *pCamera,
+                                    CBaslerGigECamera *mCamera) except+
+    cdef void _cppAlternativeBuildBaslerCamera(CTlFactory *factory,
+                                        CBaslerGigEDeviceInfo devInfo, 
+                                        CBaslerGigECamera *mCamera) except+
 
 cdef class __CTlFactory(__IDeviceFactory):
     cdef:
@@ -132,34 +136,82 @@ cdef class __CTlFactory(__IDeviceFactory):
     cdef IPylonGigEDevice* _CreateGigEDevice(self,CDeviceInfo devInfo):
         return <IPylonGigEDevice*>self._TlFactory.CreateDevice(devInfo)
 
-    def CreateDevice(self,__CDeviceInfo devInfo):
+    def CreateDeviceObj(self,__CDeviceInfo devInfo):
         #FIXME: By now only building GigE cameras but shall support the others
+        if self.__useCpp:
+            return self.__DeviceObjUsingCBuilder(devInfo)
+        else:
+            return self.__DeviceObjWithoutCBuilder(devInfo)
+
+    def __DeviceObjWithoutCBuilder(self,__CBaslerGigEDeviceInfo devInfo):
         wrapper = __IPylonGigEDevice()
         #wrapper.SetIPylonDevice(self._CreateDevice(devInfo.GetDevInfo()))
-        wrapper.SetIPylonGigEDevice(self._CreateGigEDevice(devInfo.GetDevInfo()))
+        wrapper.SetIPylonGigEDevice(\
+            self._CreateGigEDevice(devInfo.GetDevInfo()))
         return wrapper
 
-    def CreateDevice_UsingCbuilder(self,__CBaslerGigEDeviceInfo devInfo):
+    def __DeviceObjUsingCBuilder(self,__CBaslerGigEDeviceInfo devInfo):
         cdef:
             CTlFactory *factory
             CBaslerGigEDeviceInfo gigeDevInfo 
             IPylonGigEDevice *pylonGigEDevice
-            CBaslerGigECamera *baslerGigECamera
         factory = self._TlFactory
         gigeDevInfo = devInfo.GetDevGigEInfo()
         pylonGigEDevice = NULL
-        baslerGigECamera = NULL
-        _cppBuildPylonDeviceAndBaslerCamera(factory,gigeDevInfo,
-                                            pylonGigEDevice,baslerGigECamera)
+        _cppBuildPylonDevice(factory,gigeDevInfo,pylonGigEDevice)
         if pylonGigEDevice == NULL:
             raise ReferenceError("Failed to build the IPylonGigEDevice object")
-        if baslerGigECamera == NULL:
-            raise ReferenceError("Failed to build the CBaslerGigECamera object")
         pylonWrapper = __IPylonGigEDevice()
         pylonWrapper.SetIPylonGigEDevice(pylonGigEDevice)
+        return pylonWrapper 
+
+    def CreateCameraObj(self,__IPylonDevice pylonDevice):
+        try:
+            if self.__useCpp:
+                wrapper = self.__CameraObjUsingCBuilder(pylonDevice)
+            else:
+                wrapper = self.__CameraObjWithoutCBuilder(pylonDevice)
+            return wrapper
+        except Exception as ex:
+            print_exc()
+
+    def __CameraObjWithoutCBuilder(self,__IPylonGigEDevice pylonWrapper,
+                                   doWithAttach=True):
+        cdef:
+            IPylonDevice *pylonDevice
+        pylonDevice = pylonWrapper.GetIPylonDevice()
+        baslerWrapper = __CBaslerGigECamera()
+        if doWithAttach:
+            baslerWrapper.SetBaslerCamera(BuildCBaslerGigECamera())
+            baslerWrapper.Attach(pylonDevice)
+        else:
+            baslerWrapper.SetBaslerCamera(\
+                BuildAndAttachCBaslerGigECamera(\
+                    <IPylonGigEDevice*>pylonDevice))
+
+    def __CameraObjUsingCBuilder(self,__IPylonGigEDevice pylonWrapper):
+        cdef:
+            IPylonGigEDevice *pylonGigEDevice
+            CBaslerGigECamera *baslerGigECamera
+        pylonGigEDevice = pylonWrapper.GetIPylonGigEDevice()
+        baslerGigECamera = NULL
+        _cppBuildBaslerCamera(pylonGigEDevice,baslerGigECamera)
+        if baslerGigECamera == NULL:
+            raise ReferenceError("Failed to build the "\
+                                 "CBaslerGigECamera object")
         baslerWrapper = __CBaslerGigECamera()
         baslerWrapper.SetBaslerCamera(baslerGigECamera)
-        return pylonWrapper,baslerWrapper
+        return baslerWrapper
+
+    def __CameraObjAlternativeBuild(self,__CBaslerGigEDeviceInfo devInfo):
+        cdef:
+            CTlFactory *factory
+            CBaslerGigEDeviceInfo gigeDevInfo
+            CBaslerGigECamera *baslerGigECamera
+        factory = self._TlFactory
+        gigeDevInfo = devInfo.GetDevGigEInfo()
+        baslerGigECamera = NULL
+        
 
     def nCameras(self):
         return self._nCameras

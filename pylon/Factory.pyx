@@ -35,17 +35,12 @@ from Cython.Shadow import NULL
 ###############################################################################
 
 
-cdef extern from "CBuilders.h":
-    cdef void _cppBuildBaslerCamera(IPylonGigEDevice *pCamera,
-        CBaslerGigECamera *mCamera)
-
-
 class Factory(object):
     __TlFactory = None
-    def __init__(self,useCpp=False):
+    def __init__(self,useCpp=True,alternative=False):
         super(Factory,self).__init__()
-        self.__useCpp = useCpp
-        self.__TlFactory = __CTlFactory(self.__useCpp)
+        self._alternative = alternative
+        self.__TlFactory = __CTlFactory(useCpp)
         self._refreshTlInfo()
     def _refreshTlInfo(self):
         self._cameraList = []
@@ -87,14 +82,14 @@ class Factory(object):
         return self._macLst[:]
 
     def __prepareCameraObj(self,camera):
-        if self.__useCpp:
-            camera.pylonDevice, camera.baslerCamera = \
-                self.__TlFactory.CreateDevice_UsingCbuilder(camera.devInfo)
+        camera.pylonDevice = self.__TlFactory.CreateDeviceObj(camera.devInfo)
+        #FIXME: the attach fails, exception says:
+        #       "The attached Pylon Device is not of type IPylonGigEDevice"
+        if self._alternative:
+            camera.baslerCamera = self.__TlFactory.__CameraObjAlternativeBuild(camera.devInfo)
         else:
-            camera.pylonDevice = self.__TlFactory.CreateDevice(camera.devInfo)
-            #FIXME: the attach fails, exception says:
-            #       "The attached Pylon Device is not of type IPylonGigEDevice"
-            camera.baslerCamera = BuildBaslerGigECamera(camera.pylonDevice)
+            camera.baslerCamera = self.__TlFactory.CreateCameraObj(\
+                                    camera.pylonDevice)
         camera.streamGrabber = camera.pylonDevice.GetStreamGrabber()
 
     def getCameraBySerialNumber(self,number):
