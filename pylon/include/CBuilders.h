@@ -48,17 +48,14 @@ void _cppBuildTransportLayer(CTlFactory *factory,
 	_tlptr = factory->CreateTl(CBaslerGigECamera::DeviceClass());
 }
 
-///****************************************************************
-// * Device Info
-// ****************************************************************/
-//
-// int _cppEnumerateDevices(CTlFactory *factory,
-//		DeviceInfoList devicesList)
-//{
-//	int nb_camera_found = 0;
-//	nb_camera_found = factory->EnumerateDevices(devicesList,false);
-//	return nb_camera_found;
-//}
+/****************************************************************
+ * CTlFactory.EnumerateDevices
+ ****************************************************************/
+
+int _cppEnumerateDevices(CTlFactory *factory,DeviceInfoList devicesList)
+{
+	return factory->EnumerateDevices(devicesList,false);
+}
 
 /****************************************************************
  * PylonDevice and BaslerCamera build
@@ -82,6 +79,10 @@ void _cppAlternativeBuildBaslerCamera(CTlFactory *factory,
 		CBaslerGigEDeviceInfo devInfo, CBaslerGigECamera *mCamera)
 {
 	IPylonDevice *pCamera(factory->CreateDevice((devInfo)));
+	if ( ! pCamera )
+	{
+		throw LOGICAL_ERROR_EXCEPTION("Create Device returns NULL!");
+	}
 	mCamera = new CBaslerGigECamera();
 	mCamera->Attach(pCamera,true);
 }

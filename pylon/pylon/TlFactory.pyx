@@ -74,7 +74,7 @@ cdef class __CTlFactory(__IDeviceFactory):
         bool __useCpp
     _camerasList = []
 
-    def __cinit__(self,useCpp=False):
+    def __cinit__(self,useCpp=True):
         super(__CTlFactory,self).__init__()
         self.__useCpp = useCpp
         self._TlFactory = &CTlFactory_GetInstance()
@@ -111,10 +111,10 @@ cdef class __CTlFactory(__IDeviceFactory):
             DeviceInfoList devicesList
             DeviceInfoList.iterator it
         #FIXME: enumerate device doen't work as expected in direct C code
-#         if self.__useCpp:
-#             self._nCameras = _cppEnumerateDevices(self._TlFactory,devicesList)
-#         else:
-        self._nCameras = self._TlFactory.EnumerateDevices(devicesList,False)
+        if self.__useCpp:
+            self._nCameras = _cppEnumerateDevices(self._TlFactory,devicesList)
+        else:
+            self._nCameras = self._TlFactory.EnumerateDevices(devicesList,False)
         while len(self._camerasList) > 0:
             self._camerasList.pop()
         if not devicesList.empty():
@@ -144,10 +144,23 @@ cdef class __CTlFactory(__IDeviceFactory):
             return self.__DeviceObjWithoutCBuilder(devInfo)
 
     def __DeviceObjWithoutCBuilder(self,__CBaslerGigEDeviceInfo devInfo):
+        cdef:
+            IPylonGigEDevice *pylonGigEDevice
+            IPylonDevice *pylonDevice
         wrapper = __IPylonGigEDevice()
         #wrapper.SetIPylonDevice(self._CreateDevice(devInfo.GetDevInfo()))
-        wrapper.SetIPylonGigEDevice(\
-            self._CreateGigEDevice(devInfo.GetDevInfo()))
+        pylonGigEDevice = self._CreateGigEDevice(devInfo.GetDevInfo())
+        if pylonGigEDevice == NULL:
+            pylonDevice = self._CreateDevice(devInfo.GetDevInfo())
+            if pylonDevice == NULL:
+                raise ReferenceError("Failed to build the IPylonDevice object")
+            else:
+                pylonGigEDevice = <IPylonGigEDevice*>pylonDevice
+            if pylonGigEDevice == NULL:
+                wrapper.SetIPylonDevice(pylonDevice)
+#                 raise ReferenceError("Failed to build the IPylonGigEDevice "\
+#                                      "object")
+        wrapper.SetIPylonGigEDevice(pylonGigEDevice)
         return wrapper
 
     def __DeviceObjUsingCBuilder(self,__CBaslerGigEDeviceInfo devInfo):
@@ -203,7 +216,7 @@ cdef class __CTlFactory(__IDeviceFactory):
         baslerWrapper.SetBaslerCamera(baslerGigECamera)
         return baslerWrapper
 
-    def __CameraObjAlternativeBuild(self,__CBaslerGigEDeviceInfo devInfo):
+    def _CameraObjAlternativeBuild(self,__CBaslerGigEDeviceInfo devInfo):
         cdef:
             CTlFactory *factory
             CBaslerGigEDeviceInfo gigeDevInfo
@@ -211,7 +224,13 @@ cdef class __CTlFactory(__IDeviceFactory):
         factory = self._TlFactory
         gigeDevInfo = devInfo.GetDevGigEInfo()
         baslerGigECamera = NULL
-        
+        _cppAlternativeBuildBaslerCamera(factory,gigeDevInfo,baslerGigECamera)
+        if baslerGigECamera == NULL:
+            raise ReferenceError("Failed to build the "\
+                                 "CBaslerGigECamera object")
+        baslerWrapper = __CBaslerGigECamera()
+        baslerWrapper.SetBaslerCamera(baslerGigECamera)
+        return baslerWrapper
 
     def nCameras(self):
         return self._nCameras

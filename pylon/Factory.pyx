@@ -1,5 +1,4 @@
 #!/usr/bin/env cython
-from Cython.Shadow import NULL
 
 #---- licence header
 ###############################################################################
@@ -86,7 +85,7 @@ class Factory(object):
         #FIXME: the attach fails, exception says:
         #       "The attached Pylon Device is not of type IPylonGigEDevice"
         if self._alternative:
-            camera.baslerCamera = self.__TlFactory.__CameraObjAlternativeBuild(camera.devInfo)
+            camera.baslerCamera = self.__TlFactory._CameraObjAlternativeBuild(camera.devInfo)
         else:
             camera.baslerCamera = self.__TlFactory.CreateCameraObj(\
                                     camera.pylonDevice)
