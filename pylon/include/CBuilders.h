@@ -62,6 +62,12 @@ int _cppEnumerateDevices(CTlFactory *factory,DeviceInfoList devicesList)
  ****************************************************************/
 
 void _cppBuildPylonDevice(CTlFactory *factory,
+		CBaslerGigEDeviceInfo devInfo, IPylonDevice *pCamera)
+{
+	pCamera = factory->CreateDevice(devInfo);
+}
+
+void _cppBuildPylonGigEDevice(CTlFactory *factory,
 		CBaslerGigEDeviceInfo devInfo, IPylonGigEDevice *pGigECamera)
 {
 	IPylonDevice *pCamera = factory->CreateDevice(devInfo);

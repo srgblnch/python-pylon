@@ -1,5 +1,4 @@
 #!/usr/bin/env cython
-from Cython.Shadow import NULL
 
 #---- licence header
 ###############################################################################
@@ -59,7 +58,10 @@ cdef extern from "CBuilders.h":
                                   DeviceInfoList devicesList) except+
     cdef void _cppBuildPylonDevice(CTlFactory *factory,
                                    CBaslerGigEDeviceInfo devInfo, 
-                                   IPylonGigEDevice *pGigECamera) except+
+                                   IPylonDevice *pGigECamera) except+
+    cdef void _cppBuildPylonGigEDevice(CTlFactory *factory,
+                                       CBaslerGigEDeviceInfo devInfo, 
+                                       IPylonGigEDevice *pGigECamera) except+
     cdef void _cppBuildBaslerCamera(IPylonGigEDevice *pCamera,
                                     CBaslerGigECamera *mCamera) except+
     cdef void _cppAlternativeBuildBaslerCamera(CTlFactory *factory,
@@ -110,21 +112,31 @@ cdef class __CTlFactory(__IDeviceFactory):
         cdef:
             DeviceInfoList devicesList
             DeviceInfoList.iterator it
+        while len(self._camerasList) > 0:
+            self._camerasList.pop()
         #FIXME: enumerate device doen't work as expected in direct C code
         if self.__useCpp:
             self._nCameras = _cppEnumerateDevices(self._TlFactory,devicesList)
+            if devicesList.empty() and self._nCameras != 0:
+                print("ERROR: couldn't get the devicesList correctly using C"\
+                      "code, trying with cython code.")
+                self._nCameras = self._TlFactory.EnumerateDevices(devicesList,
+                                                                  False)
         else:
-            self._nCameras = self._TlFactory.EnumerateDevices(devicesList,False)
-        while len(self._camerasList) > 0:
-            self._camerasList.pop()
+            self._nCameras = self._TlFactory.EnumerateDevices(devicesList,
+                                                              False)
         if not devicesList.empty():
+            print("INFO: devicesList is not empty")
             it = devicesList.begin()
+            i = 1
             while it != devicesList.end():
+                print("INFO: processing element %d in the deviceList"%(i))
                 #FIXME: By now only build GigE cameras but shall support others
                 devInfo = BuildBaslerGigEDevInfo(\
                     <CBaslerGigEDeviceInfo>deref(it),self._TlFactory)
                 self._camerasList.append(devInfo)
                 inc(it)
+                i += 1
         if len(self._camerasList) != self._nCameras:
             raise AssertionError("The number of cameras listed (%d), doesn't "\
                                  "correspond with the number enumerated (%d)"
@@ -151,6 +163,8 @@ cdef class __CTlFactory(__IDeviceFactory):
         #wrapper.SetIPylonDevice(self._CreateDevice(devInfo.GetDevInfo()))
         pylonGigEDevice = self._CreateGigEDevice(devInfo.GetDevInfo())
         if pylonGigEDevice == NULL:
+            print("WARNING: IPylonGigEDevice cannot be created, trying to "\
+                  "make a IPylonDevice and later cast it.")
             pylonDevice = self._CreateDevice(devInfo.GetDevInfo())
             if pylonDevice == NULL:
                 raise ReferenceError("Failed to build the IPylonDevice object")
@@ -168,12 +182,22 @@ cdef class __CTlFactory(__IDeviceFactory):
             CTlFactory *factory
             CBaslerGigEDeviceInfo gigeDevInfo 
             IPylonGigEDevice *pylonGigEDevice
+            IPylonDevice *pylonDevice
         factory = self._TlFactory
         gigeDevInfo = devInfo.GetDevGigEInfo()
         pylonGigEDevice = NULL
-        _cppBuildPylonDevice(factory,gigeDevInfo,pylonGigEDevice)
+        _cppBuildPylonGigEDevice(factory,gigeDevInfo,pylonGigEDevice)
         if pylonGigEDevice == NULL:
-            raise ReferenceError("Failed to build the IPylonGigEDevice object")
+            print("ERROR: _cppBuildPylonGigEDevice outputs a pointer to NULL")
+            _cppBuildPylonDevice(factory,gigeDevInfo,pylonDevice)
+            if pylonDevice == NULL:
+                raise ReferenceError("Failed to build the IPylonGigEDevice "\
+                                     "object, even trying to build a "\
+                                     "IPylonDevice")
+            pylonGigEDevice = <IPylonGigEDevice*>pylonDevice
+            if pylonGigEDevice == NULL:
+                raise ReferenceError("Failed to build the IPylonGigEDevice "\
+                                     "object, cast failed")
         pylonWrapper = __IPylonGigEDevice()
         pylonWrapper.SetIPylonGigEDevice(pylonGigEDevice)
         return pylonWrapper 
