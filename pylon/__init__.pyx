@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env cython
 
 #---- licence header
 ###############################################################################
-## file :               setup.sh
+## file :               __init__.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,32 +33,4 @@
 ##
 ###############################################################################
 
-if [ "$1" == 'clean' ]; then
-	echo "Proceeding with clean operation."
-	rm -rf ~/.pyxbld > /dev/null 2>&1
-	rm -rf build/ > /dev/null 2>&1
-	rm pylon/*.pyc > /dev/null 2>&1
-	rm pylon/*.c > /dev/null 2>&1
-	rm pylon/*.cpp > /dev/null 2>&1
-	exit
-fi
 
-source env.sh
-
-echo $LD_LIBRARY_PATH
-
-export CFLAGS="-I$PYLON_ROOT/include "
-export CFLAGS+="-I$PYLON_ROOT/genicam/library/CPP/include "
-#export CFLAGS+="-I./pylon/include "
-export CFLAGS+="-L$PYLONLIBDIR -L$PYLONLIBDIR/pylon/tl/ "
-export CFLAGS+="-lpylonbase -lpylongigesupp -lpylonutility "
-# -lpyloncamemu -lpylongige "
-
-export GCCVERSION=$(gcc --version | grep ^gcc | sed 's/^.* //g')
-export CFLAGS+="-I/usr/include/c++/$GCCVERSION "
-export CFLAGS+="-I/usr/include/x86_64-linux-gnu/c++/4.9 "
-#!!!!! hardcoded
-
-export CC='g++'
-
-python setup.py build

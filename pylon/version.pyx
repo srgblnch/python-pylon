@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env cython
 
 #---- licence header
 ###############################################################################
-## file :               setup.sh
+## file :               version.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,32 +33,31 @@
 ##
 ###############################################################################
 
-if [ "$1" == 'clean' ]; then
-	echo "Proceeding with clean operation."
-	rm -rf ~/.pyxbld > /dev/null 2>&1
-	rm -rf build/ > /dev/null 2>&1
-	rm pylon/*.pyc > /dev/null 2>&1
-	rm pylon/*.c > /dev/null 2>&1
-	rm pylon/*.cpp > /dev/null 2>&1
-	exit
-fi
+#https://python-packaging-user-guide.readthedocs.org/en/latest/distributing/#choosing-a-versioning-scheme
 
-source env.sh
+_MAJOR_VERSION=0
+_MINOR_VERSION=0
+_MAINTENANCE_VERSION=0
+_BUILD_VERSION=0
 
-echo $LD_LIBRARY_PATH
+def pyversion():
+    return (_MAJOR_VERSION,_MINOR_VERSION,
+            _MAINTENANCE_VERSION,_BUILD_VERSION)
 
-export CFLAGS="-I$PYLON_ROOT/include "
-export CFLAGS+="-I$PYLON_ROOT/genicam/library/CPP/include "
-#export CFLAGS+="-I./pylon/include "
-export CFLAGS+="-L$PYLONLIBDIR -L$PYLONLIBDIR/pylon/tl/ "
-export CFLAGS+="-lpylonbase -lpylongigesupp -lpylonutility "
-# -lpyloncamemu -lpylongige "
+def pyversionstr():
+    return '%d.%d.%d-%d'%(_MAJOR_VERSION,_MINOR_VERSION,
+                          _MAINTENANCE_VERSION,_BUILD_VERSION)
 
-export GCCVERSION=$(gcc --version | grep ^gcc | sed 's/^.* //g')
-export CFLAGS+="-I/usr/include/c++/$GCCVERSION "
-export CFLAGS+="-I/usr/include/x86_64-linux-gnu/c++/4.9 "
-#!!!!! hardcoded
-
-export CC='g++'
-
-python setup.py build
+cdef extern from "pylon/PylonVersionNumber.h":
+    int PYLON_VERSION_MAJOR
+    int PYLON_VERSION_MINOR
+    int PYLON_VERSION_SUBMINOR
+    int PYLON_VERSION_BUILD
+    
+def pylonversion():
+    return (PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
+            PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
+    
+def pylonversionstr():
+    return '%d.%d.%d-%d'%(PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
+            PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
