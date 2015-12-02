@@ -1,6 +1,6 @@
 /*---- licence header
 ###############################################################################
-## file :               Factory.cpp
+## file :               DevInfo.h
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -32,50 +32,42 @@
 ###############################################################################
 */
 
-#include "Factory.h"
+#ifndef DEVINFO_H
+#define DEVINFO_H
 
-Transport::Transport() { }
+#include "pylon/PylonIncludes.h"
+#include <pylon/gige/BaslerGigECamera.h>
 
-Transport::~Transport() { }
+typedef Pylon::CBaslerGigECamera Camera_t;
 
-void Transport::CreateTl()
+class DeviceInformation
 {
-  _tl = Pylon::CTlFactory::GetInstance().CreateTl( Camera_t::DeviceClass() );
-}
+public:
+  DeviceInformation(const Camera_t::DeviceInfo_t&);
+  ~DeviceInformation();
+  Pylon::String_t GetSerialNumber();
+  Pylon::String_t GetModelName();
+  Pylon::String_t GetUserDefinedName();
+  Pylon::String_t GetDeviceVersion();
+  Pylon::String_t GetDeviceFactory();
+  Pylon::String_t GetAddress();
+  Pylon::String_t GetIpAddress();
+  Pylon::String_t GetDefaultGateway();
+  Pylon::String_t GetSubnetMask();
+  Pylon::String_t GetPortNr();
+  Pylon::String_t GetMacAddress();
+  Pylon::String_t GetInterface();
+  Pylon::String_t GetIpConfigOptions();
+  Pylon::String_t GetIpConfigCurrent();
+  bool IsPersistentIpActive();
+  bool IsDhcpActive();
+  bool IsAutoIpActive();
+  bool IsPersistentIpSupported();
+  bool IsDhcpSupported();
+  bool IsAutoIpSupported();
+//  bool IsSubset(IProperties& Subset);
+private:
+  Camera_t::DeviceInfo_t devInfo;
+};
 
-void Transport::ReleaseTl()
-{
-  Pylon::CTlFactory::GetInstance().ReleaseTl(_tl);
-}
-
-int Transport::DeviceDiscovery()
-{
-  int nCamera = 0;
-
-  if ( _tl != NULL )
-  {
-    nCamera = _tl->EnumerateDevices( deviceList );
-    deviceListIterator = deviceList.begin();
-  }
-  return nCamera;
-}
-
-//Camera_t::DeviceInfo_t* Transport::getNthDeviceInfo(const int position)
-//{
-//  /*FIXME: check if the position is in the list*/
-//  return static_cast<const Camera_t::DeviceInfo_t&>(deviceList[position]);
-//}
-
-DeviceInformation* Transport::getNextDeviceInfo()
-{
-  if ( deviceListIterator != deviceList.end() )
-  {
-    const Camera_t::DeviceInfo_t& pylonDeviceInfo = \
-      static_cast<const Camera_t::DeviceInfo_t&>(*deviceListIterator);
-    DeviceInformation* wrapperDevInfo = new DeviceInformation(pylonDeviceInfo);
-    deviceListIterator++;
-    return wrapperDevInfo;
-  }
-  return NULL;
-}
-
+#endif /* DEVINFO_H */

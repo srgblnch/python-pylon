@@ -60,4 +60,4 @@ export CFLAGS+="-I/usr/include/x86_64-linux-gnu/c++/4.9 "
 
 export CC='g++'
 
-python setup.py build_ext
+python setup.py build

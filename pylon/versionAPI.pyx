@@ -33,7 +33,6 @@
 ##
 ###############################################################################
 
-#from versionWrapper import version_python_pylon,version_python
 
 cdef extern from "pylon/PylonVersionNumber.h":
     int PYLON_VERSION_MAJOR

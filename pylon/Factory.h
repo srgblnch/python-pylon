@@ -32,12 +32,14 @@
 ###############################################################################
 */
 
+#ifndef FACTORY_H
+#define FACTORY_H
+
 #include "pylon/PylonIncludes.h"
 #include <pylon/gige/BaslerGigECamera.h>
+#include <DevInfo.h>
 
 typedef Pylon::CBaslerGigECamera Camera_t;
-
-//using namespace Pylon;
 
 class Transport
 {
@@ -47,9 +49,12 @@ public:
   void CreateTl();
   void ReleaseTl();
   int DeviceDiscovery();
-  Pylon::CBaslerGigECamera::DeviceInfo_t* getNextDeviceInfo();
+//  Camera_t::DeviceInfo_t* getNthDeviceInfo(const int position);
+  DeviceInformation* getNextDeviceInfo();
 private:
   Pylon::ITransportLayer *_tl;
   Pylon::DeviceInfoList_t deviceList;
-  Pylon::DeviceInfoList_t::const_iterator deviceIterator;
+  Pylon::DeviceInfoList_t::const_iterator deviceListIterator;
 };
+
+#endif /* FACTORY_H */

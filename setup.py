@@ -42,7 +42,8 @@ from distutils.core import setup
 from distutils.extension import Extension
 
 pylonExtension = Extension('pylon',['pylon/__init__.pyx',
-                                    'pylon/Factory.cpp'],
+                                    'pylon/Factory.cpp',
+                                    'pylon/DevInfo.cpp'],
                            language="c++")
 
 setup(name = 'pylon',
