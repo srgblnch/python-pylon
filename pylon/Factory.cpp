@@ -1,8 +1,6 @@
-#!/usr/bin/env cython
-
-#---- licence header
+/*---- licence header
 ###############################################################################
-## file :               version.pyx
+## file :               Factory.cpp
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -32,32 +30,50 @@
 ## along with Tango.  If not, see <http:##www.gnu.org/licenses/>.
 ##
 ###############################################################################
+*/
 
-#https://python-packaging-user-guide.readthedocs.org/en/latest/distributing/#choosing-a-versioning-scheme
+#include "Factory.h"
 
-_MAJOR_VERSION=0
-_MINOR_VERSION=0
-_MAINTENANCE_VERSION=0
-_BUILD_VERSION=0
+Transport::Transport() { }
 
-def pyversion():
-    return (_MAJOR_VERSION,_MINOR_VERSION,
-            _MAINTENANCE_VERSION,_BUILD_VERSION)
+Transport::~Transport() { }
 
-def pyversionstr():
-    return '%d.%d.%d-%d'%(_MAJOR_VERSION,_MINOR_VERSION,
-                          _MAINTENANCE_VERSION,_BUILD_VERSION)
+void Transport::CreateTl()
+{
+  _tl = Pylon::CTlFactory::GetInstance().CreateTl( Camera_t::DeviceClass() );
+}
 
-cdef extern from "pylon/PylonVersionNumber.h":
-    int PYLON_VERSION_MAJOR
-    int PYLON_VERSION_MINOR
-    int PYLON_VERSION_SUBMINOR
-    int PYLON_VERSION_BUILD
-    
-def pylonversion():
-    return (PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
-            PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
-    
-def pylonversionstr():
-    return '%d.%d.%d-%d'%(PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
-            PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
+void Transport::ReleaseTl()
+{
+  Pylon::CTlFactory::GetInstance().ReleaseTl(_tl);
+}
+
+int Transport::DeviceDiscovery()
+{
+  int nCamera = 0;
+
+  if ( _tl != NULL )
+  {
+    nCamera = _tl->EnumerateDevices( deviceList );
+    deviceIterator = deviceList.begin();
+  }
+  return nCamera;
+}
+
+Camera_t::DeviceInfo_t* Transport::getNextDeviceInfo()
+{
+  Camera_t::DeviceInfo_t* deviceInfo;
+
+  if ( deviceIterator != deviceList.end() )
+  {
+    deviceInfo = static_cast<const Camera_t::DeviceInfo_t&>(*deviceIterator);
+    deviceIterator++;
+    return deviceInfo;
+  }
+  else
+  {
+    return NULL;
+  }
+}
+
+

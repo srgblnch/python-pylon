@@ -33,24 +33,22 @@
 ##
 ###############################################################################
 
-import pyximport; pyximport.install()
+#import pyximport; pyximport.install()
 
-from pylon.version import pyversionstr
+from pylon.versionWrapper import version_python_pylon_string
 
-from Cython.Build import cythonize
 from Cython.Distutils import build_ext
-from Cython import Distutils
 from distutils.core import setup
 from distutils.extension import Extension
-import numpy as np
 
-pylonExtension = Extension('pylon',['pylon/__init__.pyx'],language="c++")
-
+pylonExtension = Extension('pylon',['pylon/__init__.pyx',
+                                    'pylon/Factory.cpp'],
+                           language="c++")
 
 setup(name = 'pylon',
       license = "GPLv3+",
       description = "Cython module to provide access to Pylon's SDK.",
-      version = pyversionstr(),
+      version = version_python_pylon_string(),
       author = "Sergi Blanch-Torn\'e",
       author_email = "sblanch@cells.es",
       classifiers = ['Development Status :: 1 - Planning',

@@ -1,8 +1,6 @@
-#!/usr/bin/env python
-
-#---- licence header
+/*---- licence header
 ###############################################################################
-## file :               __init__.py
+## file :               Factory.h
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -32,7 +30,26 @@
 ## along with Tango.  If not, see <http:##www.gnu.org/licenses/>.
 ##
 ###############################################################################
+*/
 
-#import pyximport; pyximport.install()
+#include "pylon/PylonIncludes.h"
+#include <pylon/gige/BaslerGigECamera.h>
 
-from versionWrapper import version_python_pylon,version_python_pylon_string
+typedef Pylon::CBaslerGigECamera Camera_t;
+
+//using namespace Pylon;
+
+class Transport
+{
+public:
+  Transport();
+  ~Transport();
+  void CreateTl();
+  void ReleaseTl();
+  int DeviceDiscovery();
+  Pylon::CBaslerGigECamera::DeviceInfo_t* getNextDeviceInfo();
+private:
+  Pylon::ITransportLayer *_tl;
+  Pylon::DeviceInfoList_t deviceList;
+  Pylon::DeviceInfoList_t::const_iterator deviceIterator;
+};

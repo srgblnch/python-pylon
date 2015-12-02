@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env cython
 
 #---- licence header
 ###############################################################################
-## file :               __init__.py
+## file :               version.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,6 +33,19 @@
 ##
 ###############################################################################
 
-#import pyximport; pyximport.install()
+#from versionWrapper import version_python_pylon,version_python
 
-from versionWrapper import version_python_pylon,version_python_pylon_string
+cdef extern from "pylon/PylonVersionNumber.h":
+    int PYLON_VERSION_MAJOR
+    int PYLON_VERSION_MINOR
+    int PYLON_VERSION_SUBMINOR
+    int PYLON_VERSION_BUILD
+
+def version_pylon_API():
+    return (PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
+            PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
+    
+def version_pylon_API_string():
+    return '%d.%d.%d-%d'%(PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
+            PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
+

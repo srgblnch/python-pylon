@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               __init__.py
+## file :               version.py
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -33,6 +33,20 @@
 ##
 ###############################################################################
 
-#import pyximport; pyximport.install()
+#https://python-packaging-user-guide.readthedocs.org/en/latest/distributing/#choosing-a-versioning-scheme
 
-from versionWrapper import version_python_pylon,version_python_pylon_string
+_MAJOR_VERSION=0
+_MINOR_VERSION=0
+_MAINTENANCE_VERSION=0
+_BUILD_VERSION=0
+
+#FIXME: this shall be standarized, there must be many wrappers that already 
+#have develop an smart way for this.
+
+def version_python_pylon():
+    return (_MAJOR_VERSION,_MINOR_VERSION,
+            _MAINTENANCE_VERSION,_BUILD_VERSION)
+
+def version_python_pylon_string():
+    return '%d.%d.%d-%d'%(_MAJOR_VERSION,_MINOR_VERSION,
+                          _MAINTENANCE_VERSION,_BUILD_VERSION)
