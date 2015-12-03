@@ -36,22 +36,22 @@
 
 CppCamera::CppCamera(CppDevInfo *devInfo)
 {
-  *pDevice = Pylon::CTlFactory::GetInstance().CreateDevice(devInfo->_GetDevInfo());
-  if ( ! *pDevice )
+  pDevice = Pylon::CTlFactory::GetInstance().CreateDevice(devInfo->_GetDevInfo());
+  if ( ! pDevice )
   {
     throw LOGICAL_ERROR_EXCEPTION("NULL pointer on CreateDevice IPylonDevice!");
   }
-  Pylon::IPylonGigEDevice* pGigEDevice = dynamic_cast<Pylon::IPylonGigEDevice*>(*pDevice);
+  Pylon::IPylonGigEDevice* pGigEDevice = dynamic_cast<Pylon::IPylonGigEDevice*>(pDevice);
   if ( ! pGigEDevice )
   {
     throw LOGICAL_ERROR_EXCEPTION("NULL pointer on dynamic_cast to IPylonGigEDevice!");
   }
-  *mCamera = new Pylon::CBaslerGigECamera();
-  (*mCamera)->Attach(pGigEDevice,true);
+  mCamera = new Pylon::CBaslerGigECamera();
+  mCamera->Attach(pGigEDevice,true);
 }
 
 CppCamera::~CppCamera()
 {
-  Pylon::CTlFactory::GetInstance().DestroyDevice(*pDevice);
+  Pylon::CTlFactory::GetInstance().DestroyDevice(pDevice);
 }
 

@@ -73,7 +73,7 @@ cdef class __DeviceInformation(Logger):
     def __repr__(self):
         return "%s (%s)"%(self.SerialNumber,self.ModelName)
 
-    cdef SetCppDevInfo(self,CppDevInfo* devInfo):
+    cdef SetCppDevInfo(self,CppDevInfo *devInfo):
         self._devInfo = devInfo
         self._name = "DeviceInformation (%s)"%(self.SerialNumber)
     

@@ -49,8 +49,8 @@ public:
   ~CppCamera();
 
 private:
-  Pylon::IPylonDevice **pDevice;
-  Camera_t **mCamera;
+  Pylon::IPylonDevice *pDevice;
+  Camera_t *mCamera;
 };
 
 #endif /* CAMERA_H */
