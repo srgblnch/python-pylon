@@ -43,7 +43,8 @@ from distutils.extension import Extension
 
 pylonExtension = Extension('pylon',['pylon/__init__.pyx',
                                     'pylon/Factory.cpp',
-                                    'pylon/DevInfo.cpp'],
+                                    'pylon/DevInfo.cpp',
+                                    'pylon/Camera.cpp'],
                            language="c++")
 
 setup(name = 'pylon',
