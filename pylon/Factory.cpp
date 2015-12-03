@@ -34,13 +34,22 @@
 
 #include "Factory.h"
 
-CppFactory::CppFactory() { }
+CppFactory::CppFactory()
+{
+  Pylon::PylonAutoInitTerm autoInitTerm;
+  //Pylon::PylonInitialize();
+}
 
-CppFactory::~CppFactory() { }
+CppFactory::~CppFactory()
+{
+  //ReleaseTl();
+  //Pylon::PylonTerminate();
+}
 
 void CppFactory::CreateTl()
 {
-  _tl = Pylon::CTlFactory::GetInstance().CreateTl( Camera_t::DeviceClass() );
+  _tl = Pylon::CTlFactory::GetInstance().CreateTl( \
+     Pylon::CBaslerGigECamera::DeviceClass() );
 }
 
 void CppFactory::ReleaseTl()
@@ -60,18 +69,13 @@ int CppFactory::DeviceDiscovery()
   return nCamera;
 }
 
-//Camera_t::DeviceInfo_t* Transport::getNthDeviceInfo(const int position)
-//{
-//  /*FIXME: check if the position is in the list*/
-//  return static_cast<const Camera_t::DeviceInfo_t&>(deviceList[position]);
-//}
-
 CppDevInfo* CppFactory::getNextDeviceInfo()
 {
   if ( deviceListIterator != deviceList.end() )
   {
-    const Camera_t::DeviceInfo_t& pylonDeviceInfo = \
-      static_cast<const Camera_t::DeviceInfo_t&>(*deviceListIterator);
+    const Pylon::CBaslerGigECamera::DeviceInfo_t& pylonDeviceInfo = \
+      static_cast<const Pylon::CBaslerGigECamera::DeviceInfo_t&>\
+        (*deviceListIterator);
     CppDevInfo* wrapperDevInfo = new CppDevInfo(pylonDeviceInfo);
     deviceListIterator++;
     return wrapperDevInfo;

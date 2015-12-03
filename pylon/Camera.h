@@ -40,8 +40,6 @@
 #include "DevInfo.h"
 #include "Factory.h"
 
-typedef Pylon::CBaslerGigECamera Camera_t;
-
 class CppCamera
 {
 public:
@@ -50,7 +48,7 @@ public:
 
 private:
   Pylon::IPylonDevice *pDevice;
-  Camera_t *mCamera;
+  Pylon::CBaslerGigECamera *mCamera;
 };
 
 #endif /* CAMERA_H */

@@ -34,10 +34,11 @@
 
 #include "DevInfo.h"
 
-CppDevInfo::CppDevInfo(const Camera_t::DeviceInfo_t& CppDevInfo)
+CppDevInfo::CppDevInfo(const Pylon::CBaslerGigECamera::DeviceInfo_t& CppDevInfo)
   :devInfo(CppDevInfo)
 {
   //devInfo = CppDevInfo;
+  devInfo.SetDeviceClass(Pylon::CBaslerGigECamera::DeviceClass());
 }
 
 CppDevInfo::~CppDevInfo() { }
@@ -147,7 +148,7 @@ bool CppDevInfo::IsAutoIpSupported()
 //  return devInfo.IsSubset(IProperties& Subset)();
 //}
 
-Camera_t::DeviceInfo_t CppDevInfo::_GetDevInfo()
+Pylon::CBaslerGigECamera::DeviceInfo_t CppDevInfo::_GetDevInfo()
 {
   return devInfo;
 }

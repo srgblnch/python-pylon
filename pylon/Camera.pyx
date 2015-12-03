@@ -42,16 +42,25 @@ cdef class Camera(Logger):
     cdef:
         CppDevInfo *_devInfo
         CppCamera *_camera
+        int _serial
 
-    def __cinit__(self,*args,**kwargs):
+    def __init__(self,*args,**kwargs):
         super(Camera,self).__init__(*args,**kwargs)
-        self._name = "Camera"
+        self._name = "AbstractCamera"
+        self._debug("Void Camera Object build, "\
+                    "but it doesn't link with an specific camera")
 
     def __del__(self):
         del self._camera
 
     cdef SetDevInfo(self,CppDevInfo *devInfo):
         self._devInfo = devInfo
+        self._serial = int(<string>self._devInfo.GetSerialNumber())
+        self._debug("Linking the camera object to the camera with the "\
+                    "serial number %d"%(self._serial))
+        self._name = "Camera(%d)"%(self._serial)
+        self.BuildCppCamera()
 
     cdef BuildCppCamera(self):
+        self._debug("Building Camera object and its pylon references")
         self._camera = new CppCamera(self._devInfo)

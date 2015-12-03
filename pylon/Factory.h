@@ -39,7 +39,6 @@
 #include <pylon/gige/BaslerGigECamera.h>
 #include "DevInfo.h"
 
-typedef Pylon::CBaslerGigECamera Camera_t;
 
 class CppFactory
 {
@@ -49,7 +48,6 @@ public:
   void CreateTl();
   void ReleaseTl();
   int DeviceDiscovery();
-//  Camera_t::DeviceInfo_t* getNthDeviceInfo(const int position);
   CppDevInfo* getNextDeviceInfo();
 private:
   Pylon::ITransportLayer *_tl;

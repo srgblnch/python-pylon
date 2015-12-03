@@ -48,8 +48,9 @@ cdef class Factory(Logger):
         int _nCameras
     _camerasLst = []
     _cameraModels = {}
-    _ipLst = []
-    _macLst = []
+    _serialDct = {}
+    _ipDct = {}
+    _macDct = {}
 
     def __init__(self,*args,**kwargs):
         super(Factory,self).__init__(*args,**kwargs)
@@ -59,7 +60,18 @@ cdef class Factory(Logger):
         self._refreshTlInfo()
 
     def __del__(self):
-        self._cppFactory.ReleaseTl()
+        try:
+            self.__cleanLists__()
+            self._debug("Releasing the Transport Layer")
+            self._cppFactory.ReleaseTl()
+            self._debug("Remove the factory")
+            del self._cppFactory
+            self._debug("Factory deletion complete")
+        except Exception as e:
+            self._debug("Factory deletion suffers an exception: %s"(e))
+
+    def __dealloc__(self):
+        self.__del__()
 
     def _refreshTlInfo(self):
         self.__cleanLists__()
@@ -67,16 +79,50 @@ cdef class Factory(Logger):
         self.__populateLists__()
 
     def __cleanLists__(self):
-        while len(self._camerasLst) > 0 or len(self._ipLst) > 0 or \
-        len(self._macLst) > 0:
-            if len(self._camerasLst) > 0:
-                self._camerasLst.pop()
-            if len(self._ipLst) > 0:
-                self._ipLst.pop()
-            if len(self._macLst) > 0:
-                self._macLst.pop()
-        while len(self._cameraModels.keys()) > 0:
-            self._cameraModels.pop(self._cameraModels.keys()[0])
+        i = 0
+        try:
+            while len(self._camerasLst) > 0 or \
+            len(self._cameraModels.keys()) > 0 or \
+            len(self._serialDct.keys()) > 0 or \
+            len(self._ipDct.keys()) > 0 or \
+            len(self._macDct.keys()) > 0:
+                self._debug("Clean lists: loop %d (%d,%d,%d,%d,%d)"
+                            %(i,len(self._camerasLst),
+                              len(self._cameraModels.keys()),
+                              len(self._serialDct.keys()),
+                              len(self._ipDct.keys()),
+                              len(self._macDct.keys())))
+                if len(self._camerasLst) > 0:
+                    bar = self._camerasLst.pop()
+                    self._debug("Removing camera %s"%(bar))
+                    del bar
+                if len(self._cameraModels.keys()) > 0:
+                    model = self._cameraModels.keys()[0]
+                    lst = self._cameraModels.pop(model)
+                    self._debug("Removing list for model %s (%d)"%(model,len(lst)))
+                    while len(lst) > 0:
+                        bar = lst.pop()
+                        self._debug("For model %s Removing %s"%(model,bar))
+                        del bar
+                if len(self._serialDct.keys()) > 0:
+                    serial = self._serialDct.keys()[0]
+                    bar = self._serialDct.pop(serial)
+                    self._debug("Removing serial %s"%(serial))
+                    del bar
+                if len(self._ipDct.keys()) > 0:
+                    ip = self._ipDct.keys()[0]
+                    bar = self._ipDct.pop(ip)
+                    self._debug("Removing ip %s"%(ip))
+                    del bar
+                if len(self._macDct.keys()) > 0:
+                    mac = self._macDct.keys()[0]
+                    bar = self._macDct.pop(mac)
+                    self._debug("Removing mac %s"%(mac))
+                    del bar
+                i += 1
+            self._debug("Clean structures finish ok")
+        except Exception as e:
+            self._warning("Clean the structures had an exception: %s"%(e))
 
     def __populateLists__(self):
         cdef:
@@ -89,11 +135,12 @@ cdef class Factory(Logger):
 #             #next:
             deviceInfo = self._cppFactory.getNextDeviceInfo()
             self._camerasLst.append(pythonDeviceInfo)
-            self._ipLst.append(pythonDeviceInfo.IpAddress)
-            self._macLst.append(pythonDeviceInfo.MacAddress)
             if not pythonDeviceInfo.ModelName in self._cameraModels.keys():
                 self._cameraModels[pythonDeviceInfo.ModelName] = []
             self._cameraModels[pythonDeviceInfo.ModelName].append(pythonDeviceInfo)
+            self._serialDct[int(pythonDeviceInfo.SerialNumber)] = pythonDeviceInfo
+            self._ipDct[pythonDeviceInfo.IpAddress] = pythonDeviceInfo
+            self._macDct[pythonDeviceInfo.MacAddress] = pythonDeviceInfo
 
     @property
     def nCameras(self):
@@ -105,11 +152,11 @@ cdef class Factory(Logger):
 
     @property
     def ipList(self):
-        return self._ipLst[:]
+        return self._ipDct.keys()
 
     @property
     def macList(self):
-        return self._macLst[:]
+        return self._macDct.keys()
 
     @property
     def cameraModels(self):
@@ -121,30 +168,38 @@ cdef class Factory(Logger):
         return []
 
     cdef __prepareCameraObj(self,__DeviceInformation devInfo):
-        camera = Camera()#self._cppFactory,devInfo.GetCppDevInfo())
-        #camera.SetFactory(self._cppFactory)
+        camera = Camera()
         camera.SetDevInfo(devInfo.GetCppDevInfo())
-        camera.BuildCppCamera()
         return camera
 
     def getCameraBySerialNumber(self,number):
-        for i,devInfo in enumerate(self._camerasLst):
-            if devInfo.SerialNumber == int(number):
-                camera = self.__prepareCameraObj(devInfo)
-                return camera
+        number = int(number)
+        if number in self._serialDct.keys():
+            self._debug("Preparing the camera with the serial number %d"%number)
+            return self.__prepareCameraObj(self._serialDct[number])
+#         for i,devInfo in enumerate(self._camerasLst):
+#             if devInfo.SerialNumber == int(number):
+#                 camera = self.__prepareCameraObj(devInfo)
+#                 return camera
         raise KeyError("serial number %s not found"%(number))
 
     def getCameraByIpAddress(self,ipAddress):
-        for devInfo in self._camerasLst:
-            if devInfo.IpAddress == str(ipAddress):
-                camera = self.__prepareCameraObj(devInfo)
-                return camera
+        if ipAddress in self._ipDct.keys():
+            self._debug("Preparing the camera with the ip address %s"%ipAddress)
+            return self.__prepareCameraObj(self._ipDct[ipAddress])
+#         for devInfo in self._camerasLst:
+#             if devInfo.IpAddress == str(ipAddress):
+#                 camera = self.__prepareCameraObj(devInfo)
+#                 return camera
         raise KeyError("ip address %s not found"%(ipAddress))
 
     def getCameraByMacAddress(self,macAddress):
         macAddress = macAddress.replace(':','')
-        for devInfo in self._camerasLst:
-            if devInfo.MacAddress == macAddress:
-                camera = self.__prepareCameraObj(devInfo)
-                return camera
+        if macAddress in self._macDct.keys():
+            self._debug("Preparing the camera with the mac address %s"%macAddress)
+            return self.__prepareCameraObj(self._macDct[macAddress])
+#         for devInfo in self._camerasLst:
+#             if devInfo.MacAddress == macAddress:
+#                 camera = self.__prepareCameraObj(devInfo)
+#                 return camera
         raise KeyError("mac address %s not found"%(macAddress))

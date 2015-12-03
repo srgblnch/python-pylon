@@ -38,12 +38,10 @@
 #include <pylon/PylonIncludes.h>
 #include <pylon/gige/BaslerGigECamera.h>
 
-typedef Pylon::CBaslerGigECamera Camera_t;
-
 class CppDevInfo
 {
 public:
-  CppDevInfo(const Camera_t::DeviceInfo_t&);
+  CppDevInfo(const Pylon::CBaslerGigECamera::DeviceInfo_t&);
   ~CppDevInfo();
   Pylon::String_t GetSerialNumber();
   Pylon::String_t GetModelName();
@@ -66,9 +64,9 @@ public:
   bool IsDhcpSupported();
   bool IsAutoIpSupported();
 //  bool IsSubset(IProperties& Subset);
-  Camera_t::DeviceInfo_t _GetDevInfo();
+  Pylon::CBaslerGigECamera::DeviceInfo_t _GetDevInfo();
 private:
-  Camera_t::DeviceInfo_t devInfo;
+  Pylon::CBaslerGigECamera::DeviceInfo_t devInfo;
 };
 
 #endif /* DEVINFO_H */
