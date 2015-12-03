@@ -36,7 +36,7 @@
 
 class Factory(object):
     __TlFactory = None
-    def __init__(self,useCpp=True,alternative=False):
+    def __init__(self,useCpp=False,alternative=False):
         super(Factory,self).__init__()
         self._alternative = alternative
         self.__TlFactory = __CTlFactory(useCpp)
@@ -84,11 +84,14 @@ class Factory(object):
         camera.pylonDevice = self.__TlFactory.CreateDeviceObj(camera.devInfo)
         #FIXME: the attach fails, exception says:
         #       "The attached Pylon Device is not of type IPylonGigEDevice"
-        if self._alternative:
-            camera.baslerCamera = self.__TlFactory._CameraObjAlternativeBuild(camera.devInfo)
-        else:
-            camera.baslerCamera = self.__TlFactory.CreateCameraObj(\
-                                    camera.pylonDevice)
+        try:
+            if self._alternative:
+                camera.baslerCamera = self.__TlFactory._CameraObjAlternativeBuild(camera.devInfo)
+            else:
+                camera.baslerCamera = self.__TlFactory.CreateCameraObj(\
+                                        camera.pylonDevice)
+        except Exception,e:
+            print("ERROR: baslerCamera exception: %s"%(e))
         camera.streamGrabber = camera.pylonDevice.GetStreamGrabber()
 
     def getCameraBySerialNumber(self,number):

@@ -60,9 +60,8 @@ cdef extern from "GenApi/INode.h" namespace "GenApi":
         bool GetProperty(gcstring& Name, gcstring& ValueStr, 
                          gcstring& AttributeStr)
         EInterfaceType GetPrincipalInterfaceType()
-        
     ctypedef node_vector NodeList_t
-    
+
 cdef class __INode:
     cdef:
         INode* _node

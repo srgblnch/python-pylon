@@ -58,19 +58,20 @@ cdef extern from "CBuilders.h":
                                   DeviceInfoList devicesList) except+
     cdef void _cppBuildPylonDevice(CTlFactory *factory,
                                    CBaslerGigEDeviceInfo devInfo, 
-                                   IPylonDevice *pGigECamera) except+
+                                   IPylonDevice **pGigECamera) except+
     cdef void _cppBuildPylonGigEDevice(CTlFactory *factory,
                                        CBaslerGigEDeviceInfo devInfo, 
-                                       IPylonGigEDevice *pGigECamera) except+
+                                       IPylonGigEDevice **pGigECamera) except+
     cdef void _cppBuildBaslerCamera(IPylonGigEDevice *pCamera,
-                                    CBaslerGigECamera *mCamera) except+
+                                    CBaslerGigECamera **mCamera) except+
     cdef void _cppAlternativeBuildBaslerCamera(CTlFactory *factory,
                                         CBaslerGigEDeviceInfo devInfo, 
-                                        CBaslerGigECamera *mCamera) except+
+                                        CBaslerGigECamera **mCamera) except+
 
 cdef class __CTlFactory(__IDeviceFactory):
     cdef:
         CTlFactory* _TlFactory
+        #DeviceInfoList devicesList
         int _nCameras
         __ITransportLayer _tl
         bool __useCpp
@@ -186,10 +187,10 @@ cdef class __CTlFactory(__IDeviceFactory):
         factory = self._TlFactory
         gigeDevInfo = devInfo.GetDevGigEInfo()
         pylonGigEDevice = NULL
-        _cppBuildPylonGigEDevice(factory,gigeDevInfo,pylonGigEDevice)
+        _cppBuildPylonGigEDevice(factory,gigeDevInfo,&pylonGigEDevice)
         if pylonGigEDevice == NULL:
             print("ERROR: _cppBuildPylonGigEDevice outputs a pointer to NULL")
-            _cppBuildPylonDevice(factory,gigeDevInfo,pylonDevice)
+            _cppBuildPylonDevice(factory,gigeDevInfo,&pylonDevice)
             if pylonDevice == NULL:
                 raise ReferenceError("Failed to build the IPylonGigEDevice "\
                                      "object, even trying to build a "\
@@ -232,7 +233,7 @@ cdef class __CTlFactory(__IDeviceFactory):
             CBaslerGigECamera *baslerGigECamera
         pylonGigEDevice = pylonWrapper.GetIPylonGigEDevice()
         baslerGigECamera = NULL
-        _cppBuildBaslerCamera(pylonGigEDevice,baslerGigECamera)
+        _cppBuildBaslerCamera(pylonGigEDevice,&baslerGigECamera)
         if baslerGigECamera == NULL:
             raise ReferenceError("Failed to build the "\
                                  "CBaslerGigECamera object")
@@ -248,7 +249,7 @@ cdef class __CTlFactory(__IDeviceFactory):
         factory = self._TlFactory
         gigeDevInfo = devInfo.GetDevGigEInfo()
         baslerGigECamera = NULL
-        _cppAlternativeBuildBaslerCamera(factory,gigeDevInfo,baslerGigECamera)
+        _cppAlternativeBuildBaslerCamera(factory,gigeDevInfo,&baslerGigECamera)
         if baslerGigECamera == NULL:
             raise ReferenceError("Failed to build the "\
                                  "CBaslerGigECamera object")

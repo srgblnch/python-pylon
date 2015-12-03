@@ -62,34 +62,34 @@ int _cppEnumerateDevices(CTlFactory *factory,DeviceInfoList devicesList)
  ****************************************************************/
 
 void _cppBuildPylonDevice(CTlFactory *factory,
-		CBaslerGigEDeviceInfo devInfo, IPylonDevice *pCamera)
+		CBaslerGigEDeviceInfo devInfo, IPylonDevice **pCamera)
 {
-	pCamera = factory->CreateDevice(devInfo);
+	*pCamera = factory->CreateDevice(devInfo);
 }
 
 void _cppBuildPylonGigEDevice(CTlFactory *factory,
-		CBaslerGigEDeviceInfo devInfo, IPylonGigEDevice *pGigECamera)
+		CBaslerGigEDeviceInfo devInfo, IPylonGigEDevice **pGigECamera)
 {
 	IPylonDevice *pCamera = factory->CreateDevice(devInfo);
-	pGigECamera = dynamic_cast<IPylonGigEDevice*>(pCamera);
+	*pGigECamera = dynamic_cast<IPylonGigEDevice*>(pCamera);
 }
 
 void _cppBuildBaslerCamera(IPylonGigEDevice *pCamera,
-		CBaslerGigECamera *mCamera)
+		CBaslerGigECamera **mCamera)
 {
-	mCamera = new CBaslerGigECamera();
-	mCamera->Attach(pCamera,true);
+	*mCamera = new CBaslerGigECamera();
+	(*mCamera)->Attach(pCamera,true);
 }
 
 void _cppAlternativeBuildBaslerCamera(CTlFactory *factory,
-		CBaslerGigEDeviceInfo devInfo, CBaslerGigECamera *mCamera)
+		CBaslerGigEDeviceInfo devInfo, CBaslerGigECamera **mCamera)
 {
 	IPylonDevice *pCamera(factory->CreateDevice((devInfo)));
 	if ( ! pCamera )
 	{
 		throw LOGICAL_ERROR_EXCEPTION("Create Device returns NULL!");
 	}
-	mCamera = new CBaslerGigECamera();
-	mCamera->Attach(pCamera,true);
+	*mCamera = new CBaslerGigECamera();
+	(*mCamera)->Attach(pCamera,true);
 }
 
