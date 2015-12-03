@@ -1,6 +1,8 @@
-/*---- licence header
+#!/usr/bin/env cython
+
+#---- licence header
 ###############################################################################
-## file :               Camera.cpp
+## file :               stdinclude.pyx
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -30,28 +32,9 @@
 ## along with Tango.  If not, see <http:##www.gnu.org/licenses/>.
 ##
 ###############################################################################
-*/
 
-#include "Camera.h"
 
-CppCamera::CppCamera(CppDevInfo *devInfo)
-{
-  *pDevice = Pylon::CTlFactory::GetInstance().CreateDevice(devInfo->_GetDevInfo());
-  if ( ! *pDevice )
-  {
-    throw LOGICAL_ERROR_EXCEPTION("NULL pointer on CreateDevice IPylonDevice!");
-  }
-  Pylon::IPylonGigEDevice* pGigEDevice = dynamic_cast<Pylon::IPylonGigEDevice*>(*pDevice);
-  if ( ! pGigEDevice )
-  {
-    throw LOGICAL_ERROR_EXCEPTION("NULL pointer on dynamic_cast to IPylonGigEDevice!");
-  }
-  *mCamera = new Pylon::CBaslerGigECamera();
-  (*mCamera)->Attach(pGigEDevice,true);
-}
-
-CppCamera::~CppCamera()
-{
-  Pylon::CTlFactory::GetInstance().DestroyDevice(*pDevice);
-}
+cdef extern from "pylon/stdinclude.h" namespace "Pylon":
+    cdef cppclass String_t
+    cdef cppclass StringList_t
 

@@ -35,22 +35,22 @@
 #ifndef FACTORY_H
 #define FACTORY_H
 
-#include "pylon/PylonIncludes.h"
+#include <pylon/PylonIncludes.h>
 #include <pylon/gige/BaslerGigECamera.h>
-#include <DevInfo.h>
+#include "DevInfo.h"
 
 typedef Pylon::CBaslerGigECamera Camera_t;
 
-class Transport
+class CppFactory
 {
 public:
-  Transport();
-  ~Transport();
+  CppFactory();
+  ~CppFactory();
   void CreateTl();
   void ReleaseTl();
   int DeviceDiscovery();
 //  Camera_t::DeviceInfo_t* getNthDeviceInfo(const int position);
-  DeviceInformation* getNextDeviceInfo();
+  CppDevInfo* getNextDeviceInfo();
 private:
   Pylon::ITransportLayer *_tl;
   Pylon::DeviceInfoList_t deviceList;

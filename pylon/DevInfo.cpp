@@ -34,115 +34,120 @@
 
 #include "DevInfo.h"
 
-DeviceInformation::DeviceInformation(const Camera_t::DeviceInfo_t& deviceInformation)
-  :devInfo(deviceInformation)
+CppDevInfo::CppDevInfo(const Camera_t::DeviceInfo_t& CppDevInfo)
+  :devInfo(CppDevInfo)
 {
-  //devInfo = deviceInformation;
+  //devInfo = CppDevInfo;
 }
 
-DeviceInformation::~DeviceInformation() { }
+CppDevInfo::~CppDevInfo() { }
 
-Pylon::String_t DeviceInformation::GetSerialNumber()
+Pylon::String_t CppDevInfo::GetSerialNumber()
 {
   return devInfo.GetSerialNumber();
 }
 
-Pylon::String_t DeviceInformation::GetModelName()
+Pylon::String_t CppDevInfo::GetModelName()
 {
   return devInfo.GetModelName();
 }
 
-Pylon::String_t DeviceInformation::GetUserDefinedName()
+Pylon::String_t CppDevInfo::GetUserDefinedName()
 {
   return devInfo.GetUserDefinedName();
 }
 
-Pylon::String_t DeviceInformation::GetDeviceVersion()
+Pylon::String_t CppDevInfo::GetDeviceVersion()
 {
   return devInfo.GetDeviceVersion();
 }
 
-Pylon::String_t DeviceInformation::GetDeviceFactory()
+Pylon::String_t CppDevInfo::GetDeviceFactory()
 {
   return devInfo.GetDeviceFactory();
 }
 
-Pylon::String_t DeviceInformation::GetAddress()
+Pylon::String_t CppDevInfo::GetAddress()
 {
   return devInfo.GetAddress();
 }
 
-Pylon::String_t DeviceInformation::GetIpAddress()
+Pylon::String_t CppDevInfo::GetIpAddress()
 {
   return devInfo.GetIpAddress();
 }
 
-Pylon::String_t DeviceInformation::GetDefaultGateway()
+Pylon::String_t CppDevInfo::GetDefaultGateway()
 {
   return devInfo.GetDefaultGateway();
 }
 
-Pylon::String_t DeviceInformation::GetSubnetMask()
+Pylon::String_t CppDevInfo::GetSubnetMask()
 {
   return devInfo.GetSubnetMask();
 }
 
-Pylon::String_t DeviceInformation::GetPortNr()
+Pylon::String_t CppDevInfo::GetPortNr()
 {
   return devInfo.GetPortNr();
 }
 
-Pylon::String_t DeviceInformation::GetMacAddress()
+Pylon::String_t CppDevInfo::GetMacAddress()
 {
   return devInfo.GetMacAddress();
 }
 
-Pylon::String_t DeviceInformation::GetInterface()
+Pylon::String_t CppDevInfo::GetInterface()
 {
   return devInfo.GetInterface();
 }
 
-Pylon::String_t DeviceInformation::GetIpConfigOptions()
+Pylon::String_t CppDevInfo::GetIpConfigOptions()
 {
   return devInfo.GetIpConfigOptions();
 }
 
-Pylon::String_t DeviceInformation::GetIpConfigCurrent()
+Pylon::String_t CppDevInfo::GetIpConfigCurrent()
 {
   return devInfo.GetIpConfigCurrent();
 }
 
-bool DeviceInformation::IsPersistentIpActive()
+bool CppDevInfo::IsPersistentIpActive()
 {
   return devInfo.IsPersistentIpActive();
 }
 
-bool DeviceInformation::IsDhcpActive()
+bool CppDevInfo::IsDhcpActive()
 {
   return devInfo.IsDhcpActive();
 }
 
-bool DeviceInformation::IsAutoIpActive()
+bool CppDevInfo::IsAutoIpActive()
 {
   return devInfo.IsAutoIpActive();
 }
 
-bool DeviceInformation::IsPersistentIpSupported()
+bool CppDevInfo::IsPersistentIpSupported()
 {
   return devInfo.IsPersistentIpSupported();
 }
 
-bool DeviceInformation::IsDhcpSupported()
+bool CppDevInfo::IsDhcpSupported()
 {
   return devInfo.IsDhcpSupported();
 }
 
-bool DeviceInformation::IsAutoIpSupported()
+bool CppDevInfo::IsAutoIpSupported()
 {
   return devInfo.IsAutoIpSupported();
 }
 
-//bool DeviceInformation::IsSubset(IProperties& Subset)
+//bool CppDevInfo::IsSubset(IProperties& Subset)
 //{
 //  return devInfo.IsSubset(IProperties& Subset)();
 //}
+
+Camera_t::DeviceInfo_t CppDevInfo::_GetDevInfo()
+{
+  return devInfo;
+}

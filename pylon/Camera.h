@@ -35,20 +35,22 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "pylon/PylonIncludes.h"
+#include <pylon/PylonIncludes.h>
 #include <pylon/gige/BaslerGigECamera.h>
-#include <DevInfo.h>
+#include "DevInfo.h"
+#include "Factory.h"
 
 typedef Pylon::CBaslerGigECamera Camera_t;
 
-class Camera
+class CppCamera
 {
 public:
-  Camera();
-  ~Camera();
+  CppCamera( CppDevInfo* );
+  ~CppCamera();
 
 private:
-
+  Pylon::IPylonDevice **pDevice;
+  Camera_t **mCamera;
 };
 
 #endif /* CAMERA_H */

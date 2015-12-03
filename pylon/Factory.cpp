@@ -34,21 +34,21 @@
 
 #include "Factory.h"
 
-Transport::Transport() { }
+CppFactory::CppFactory() { }
 
-Transport::~Transport() { }
+CppFactory::~CppFactory() { }
 
-void Transport::CreateTl()
+void CppFactory::CreateTl()
 {
   _tl = Pylon::CTlFactory::GetInstance().CreateTl( Camera_t::DeviceClass() );
 }
 
-void Transport::ReleaseTl()
+void CppFactory::ReleaseTl()
 {
   Pylon::CTlFactory::GetInstance().ReleaseTl(_tl);
 }
 
-int Transport::DeviceDiscovery()
+int CppFactory::DeviceDiscovery()
 {
   int nCamera = 0;
 
@@ -66,13 +66,13 @@ int Transport::DeviceDiscovery()
 //  return static_cast<const Camera_t::DeviceInfo_t&>(deviceList[position]);
 //}
 
-DeviceInformation* Transport::getNextDeviceInfo()
+CppDevInfo* CppFactory::getNextDeviceInfo()
 {
   if ( deviceListIterator != deviceList.end() )
   {
     const Camera_t::DeviceInfo_t& pylonDeviceInfo = \
       static_cast<const Camera_t::DeviceInfo_t&>(*deviceListIterator);
-    DeviceInformation* wrapperDevInfo = new DeviceInformation(pylonDeviceInfo);
+    CppDevInfo* wrapperDevInfo = new CppDevInfo(pylonDeviceInfo);
     deviceListIterator++;
     return wrapperDevInfo;
   }

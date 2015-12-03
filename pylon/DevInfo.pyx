@@ -34,7 +34,7 @@
 ###############################################################################
 
 cdef extern from "DevInfo.h":
-    cdef cppclass DeviceInformation:
+    cdef cppclass CppDevInfo:
         String_t GetSerialNumber() except+
         String_t GetModelName() except+
         String_t GetUserDefinedName() except+
@@ -59,7 +59,7 @@ cdef extern from "DevInfo.h":
 
 cdef class __DeviceInformation(Logger):
     cdef:
-        DeviceInformation* _devInfo
+        CppDevInfo *_devInfo
 
     def __init__(self,*args,**kwargs):
         super(__DeviceInformation,self).__init__(*args,**kwargs)
@@ -73,9 +73,13 @@ cdef class __DeviceInformation(Logger):
     def __repr__(self):
         return "%s (%s)"%(self.SerialNumber,self.ModelName)
 
-    cdef SetDevInfo(self,DeviceInformation* devInfo):
+    cdef SetCppDevInfo(self,CppDevInfo* devInfo):
         self._devInfo = devInfo
         self._name = "DeviceInformation (%s)"%(self.SerialNumber)
+    
+    cdef CppDevInfo* GetCppDevInfo(self):
+        return self._devInfo
+    
     @property
     def SerialNumber(self):
         return int(<string>self._devInfo.GetSerialNumber())

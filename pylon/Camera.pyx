@@ -34,17 +34,24 @@
 ###############################################################################
 
 cdef extern from "Camera.h":
-    cdef cppclass CCamera
+    cdef cppclass CppCamera:
+        CppCamera( CppDevInfo *devInfo ) except+
 
 
 cdef class Camera(Logger):
-    
+    cdef:
+        CppDevInfo *_devInfo
+        CppCamera *_camera
 
-    def __init__(self,*args,**kwargs):
+    def __cinit__(self,*args,**kwargs):
         super(Camera,self).__init__(*args,**kwargs)
         self._name = "Camera"
 
     def __del__(self):
-        pass
+        del self._camera
 
-    
+    cdef SetDevInfo(self,CppDevInfo *devInfo):
+        self._devInfo = devInfo
+
+    cdef BuildCppCamera(self):
+        self._camera = new CppCamera(self._devInfo)

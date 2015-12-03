@@ -33,6 +33,10 @@
 ##
 ###############################################################################
 
+#---- In this init file there are included the cython files needed. They are 
+#     separated in different descendant levels to have this distinshion as 
+#     well as have each level alphabetically sorted.
+
 from libcpp cimport bool
 from libcpp.string cimport string
 
@@ -46,6 +50,7 @@ include "logger.pyx"
 include "DevInfo.pyx"
 
 #third level of python module includes
+include "Camera.pyx"
 include "Factory.pyx"
 include "versionAPI.pyx"
 include "versionWrapper.py"
