@@ -46,18 +46,41 @@
 
 using namespace Pylon;
 
-inline bool _cppBuildPylonDeviceAndBaslerCamera(CTlFactory* _TlFactory,
+inline bool _cppBuildUsingSimplePointer(CTlFactory* _TlFactory,
                  CDeviceInfo devInfo, IPylonDevice *pCamera,
-                 CBaslerGigECamera* mCamera)
+                 CBaslerGigECamera *mCamera)
 {
   try
   {
-    std::cout << "Create device for " << devInfo.GetSerialNumber() << std::endl;
+    std::cout << "Create device for " << devInfo.GetSerialNumber()
+        << std::endl;
     pCamera = _TlFactory->CreateDevice(devInfo);
     std::cout << "Create camera" << std::endl;
     mCamera = new CBaslerGigECamera();
     std::cout << "Attach device to camera" << std::endl;
     mCamera->Attach(pCamera,true);
+    return true;
+  }
+  catch(std::exception& e)
+  {
+    std::cout << "Exception: " << e.what() << std::endl;
+    return false;
+  }
+}
+
+inline bool _cppBuildUsingTwicePointer(CTlFactory* _TlFactory,
+                 CDeviceInfo devInfo, IPylonDevice **pCamera,
+                 CBaslerGigECamera **mCamera)
+{
+  try
+  {
+    std::cout << "Create device for " << devInfo.GetSerialNumber()
+        << std::endl;
+    *pCamera = _TlFactory->CreateDevice(devInfo);
+    std::cout << "Create camera" << std::endl;
+    *mCamera = new CBaslerGigECamera();
+    std::cout << "Attach device to camera" << std::endl;
+    (*mCamera)->Attach(*pCamera,true);
     return true;
   }
   catch(std::exception& e)
@@ -97,15 +120,19 @@ int main(int argc, char* argv[])
     exitCode = -1;
     goto exit;
   }
-  std::cout << "iterate searching " << pylon_camera_ip << " camera" << std::endl;
+  std::cout << "iterate searching " << pylon_camera_ip << " camera"
+      << std::endl;
   for (it = devices.begin(); it != devices.end(); it++)
   {
-    const CBaslerGigECamera::DeviceInfo_t& gige_device_info = static_cast<const CBaslerGigECamera::DeviceInfo_t&>(*it);
+    const CBaslerGigECamera::DeviceInfo_t& gige_device_info = \
+        static_cast<const CBaslerGigECamera::DeviceInfo_t&>(*it);
     Pylon::String_t current_ip = gige_device_info.GetIpAddress();
-    std::cout << "\tFound a "<<gige_device_info.GetModelName()<<" with ip "<<current_ip << std::endl;
+    std::cout << "\tFound a " << gige_device_info.GetModelName()
+        << " with ip " << current_ip << std::endl;
     if (current_ip == pylon_camera_ip)
     {
-      std::cout << "\t\tThis is the camera wanted ("<<current_ip<<")" << std::endl;
+      std::cout << "\t\tThis is the camera wanted (" << current_ip << ")"
+          << std::endl;
       devInfo = gige_device_info;
       break;
     }
@@ -116,13 +143,21 @@ int main(int argc, char* argv[])
     exitCode = -2;
     goto exit;
   }
-  std::cout << "Set device class: " << CBaslerGigECamera::DeviceClass() << std::endl;
+  std::cout << "Set device class: " << CBaslerGigECamera::DeviceClass()
+  << std::endl;
   devInfo.SetDeviceClass(CBaslerGigECamera::DeviceClass());
 
-  if (not _cppBuildPylonDeviceAndBaslerCamera(_TlFactory, devInfo, pCamera, mCamera))
+  if (not _cppBuildUsingSimplePointer(_TlFactory, devInfo, pCamera, mCamera))
   {
-    exitCode = -3;
-    goto exit;
+    std::cout << "Simple pointer didn't work, try with twice indirection!"
+        << std::endl;
+    if (not _cppBuildUsingTwicePointer(_TlFactory, devInfo, &pCamera, &mCamera))
+    {
+      std::cout << "Pointer twice indirection did work" << std::endl;
+      exitCode = -3;
+      goto exit;
+    }
+    std::cout << "Continue with twice indirection!" << std::endl;
   }
   // Open PylonDevice
   std::cout << "Open device" << std::endl;
