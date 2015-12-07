@@ -37,10 +37,13 @@
 
 #include <pylon/PylonIncludes.h>
 #include <pylon/gige/BaslerGigECamera.h>
+#include "logger.h"
 #include "DevInfo.h"
 #include "Factory.h"
 
-class CppCamera
+#include <iostream>
+
+class CppCamera : public Logger
 {
 public:
   CppCamera( CppDevInfo* );

@@ -37,8 +37,9 @@
 
 #include <pylon/PylonIncludes.h>
 #include <pylon/gige/BaslerGigECamera.h>
+#include "logger.h"
 
-class CppDevInfo
+class CppDevInfo : public Logger
 {
 public:
   CppDevInfo(const Pylon::CBaslerGigECamera::DeviceInfo_t&);

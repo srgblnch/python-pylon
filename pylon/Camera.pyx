@@ -58,7 +58,9 @@ cdef class Camera(Logger):
         self._serial = int(<string>self._devInfo.GetSerialNumber())
         self._debug("Linking the camera object to the camera with the "\
                     "serial number %d"%(self._serial))
-        self._name = "Camera(%d)"%(self._serial)
+        name = "Camera(%d)"%(self._serial)
+        self._debug("New name: %s"%name)
+        self._name = name
         self.BuildCppCamera()
 
     cdef BuildCppCamera(self):
