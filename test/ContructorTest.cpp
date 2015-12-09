@@ -55,15 +55,15 @@ inline bool _cppBuildUsingSimplePointer(CTlFactory* _TlFactory,
     std::cout << "Create device for " << devInfo.GetSerialNumber()
         << std::endl;
     pCamera = _TlFactory->CreateDevice(devInfo);
-    std::cout << "Create camera" << std::endl;
+    std::cout << "\tCreate camera" << std::endl;
     mCamera = new CBaslerGigECamera();
-    std::cout << "Attach device to camera" << std::endl;
+    std::cout << "\tAttach device to camera" << std::endl;
     mCamera->Attach(pCamera,true);
     return true;
   }
   catch(std::exception& e)
   {
-    std::cout << "Exception: " << e.what() << std::endl;
+    std::cout << "** Exception: " << e.what() << std::endl;
     return false;
   }
 }
@@ -77,15 +77,15 @@ inline bool _cppBuildUsingTwicePointer(CTlFactory* _TlFactory,
     std::cout << "Create device for " << devInfo.GetSerialNumber()
         << std::endl;
     *pCamera = _TlFactory->CreateDevice(devInfo);
-    std::cout << "Create camera" << std::endl;
+    std::cout << "\tCreate camera" << std::endl;
     *mCamera = new CBaslerGigECamera();
-    std::cout << "Attach device to camera" << std::endl;
+    std::cout << "\tAttach device to camera" << std::endl;
     (*mCamera)->Attach(*pCamera,true);
     return true;
   }
   catch(std::exception& e)
   {
-    std::cout << "Exception: " << e.what() << std::endl;
+    std::cout << "** Exception: " << e.what() << std::endl;
     return false;
   }
 }
@@ -104,7 +104,8 @@ int main(int argc, char* argv[])
   Pylon::DeviceInfoList_t devices;
   int nCameras = 0;
   Pylon::DeviceInfoList_t::const_iterator it;
-  CDeviceInfo devInfo;
+  //CDeviceInfo devInfo;
+  CBaslerGigECamera::DeviceInfo_t devInfo;
   IPylonDevice *pCamera = NULL;
   CBaslerGigECamera *mCamera = NULL;
   Pylon::String_t pylon_camera_ip(argv[1]);
@@ -143,6 +144,9 @@ int main(int argc, char* argv[])
     exitCode = -2;
     goto exit;
   }
+  std::cout << "\tdevInfo.GetDeviceFactory(): \"" << devInfo.GetDeviceFactory() << "\""<< std::endl;
+  std::cout << "\tdevInfo.GetIpConfigOptions(): \"" << devInfo.GetIpConfigOptions() << "\""<< std::endl;
+
   std::cout << "Set device class: " << CBaslerGigECamera::DeviceClass()
   << std::endl;
   devInfo.SetDeviceClass(CBaslerGigECamera::DeviceClass());
@@ -160,13 +164,13 @@ int main(int argc, char* argv[])
     std::cout << "Continue with twice indirection!" << std::endl;
   }
   // Open PylonDevice
-  std::cout << "Open device" << std::endl;
+  std::cout << "\t\tOpen device" << std::endl;
   pCamera->Open();
 
   //CBaslerGigECamera should be opened now...
   if (mCamera->IsOpen())
   {
-    std::cout << "Close camera" << std::endl;
+    std::cout << "\t\tClose camera" << std::endl;
     mCamera->Close();
     delete(mCamera);
   }
