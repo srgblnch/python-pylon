@@ -56,9 +56,9 @@ inline bool _cppBuildUsingSimplePointer(CTlFactory* _TlFactory,
         << std::endl;
     pCamera = _TlFactory->CreateDevice(devInfo);
     std::cout << "\tCreate camera" << std::endl;
-    mCamera = new CBaslerGigECamera();
-    std::cout << "\tAttach device to camera" << std::endl;
-    mCamera->Attach(pCamera,true);
+    mCamera = new CBaslerGigECamera(_TlFactory->CreateDevice(devInfo));
+    //std::cout << "\tAttach device to camera" << std::endl;
+    //mCamera->Attach(pCamera,true);
     return true;
   }
   catch(std::exception& e)
@@ -78,9 +78,9 @@ inline bool _cppBuildUsingTwicePointer(CTlFactory* _TlFactory,
         << std::endl;
     *pCamera = _TlFactory->CreateDevice(devInfo);
     std::cout << "\tCreate camera" << std::endl;
-    *mCamera = new CBaslerGigECamera();
-    std::cout << "\tAttach device to camera" << std::endl;
-    (*mCamera)->Attach(*pCamera,true);
+    *mCamera = new CBaslerGigECamera(_TlFactory->CreateDevice(devInfo));
+    //std::cout << "\tAttach device to camera" << std::endl;
+    //(*mCamera)->Attach(*pCamera,true);
     return true;
   }
   catch(std::exception& e)
