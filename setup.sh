@@ -50,7 +50,8 @@ export CFLAGS="-I$PYLON_ROOT/include "
 export CFLAGS+="-I$PYLON_ROOT/genicam/library/CPP/include "
 export CFLAGS+="-I./pylon "
 export CFLAGS+="-L$PYLONLIBDIR -L$GCLIBDIR -L$PYLONLIBDIR/pylon/tl/ "
-export CFLAGS+="-lpylonbase -lpylongigesupp -lpylonutility -lpyloncamemu -lpylongige "
+export CFLAGS+="-lpylonbase -lpylongigesupp -lpylonutility "
+#"-lpyloncamemu -lpylongige "
 
 export GCCVERSION=$(gcc --version | grep ^gcc | sed 's/^.* //g')
 export CFLAGS+="-I/usr/include/c++/$GCCVERSION "

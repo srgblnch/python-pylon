@@ -1,6 +1,6 @@
 /*---- licence header
 ###############################################################################
-## file :               Factory.h
+## file :               Logger.h
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -32,28 +32,36 @@
 ###############################################################################
 */
 
-#ifndef FACTORY_H
-#define FACTORY_H
+#ifndef LOGGER_H
+#define LOGGER_H
 
-#include <pylon/PylonIncludes.h>
-#include <pylon/gige/BaslerGigECamera.h>
-#include "Logger.h"
-#include "DevInfo.h"
+#include <iostream>
+#if __cplusplus > 199711L
+#include <thread>
+#include <chrono>
+#endif
 
+typedef enum {
+  _logger_ERROR = 1,
+  _logger_WARNING = 2,
+  _logger_INFO    = 3,
+  _logger_DEBUG   = 4,
+} LogLevel;
 
-class CppFactory : public Logger
+class Logger
 {
 public:
-  CppFactory();
-  ~CppFactory();
-  void CreateTl();
-  void ReleaseTl();
-  int DeviceDiscovery();
-  CppDevInfo* getNextDeviceInfo();
+  Logger();
+  Logger(LogLevel);
+  ~Logger();
+  void _error(std::string);
+  void _warning(std::string);
+  void _info(std::string);
+  void _debug(std::string);
+  void _print(std::string,std::string);
 private:
-  Pylon::ITransportLayer *_tl;
-  Pylon::DeviceInfoList_t deviceList;
-  Pylon::DeviceInfoList_t::const_iterator deviceListIterator;
+  LogLevel _logLevel;
+  std::string _name;
 };
 
-#endif /* FACTORY_H */
+#endif /* LOGGER_H */

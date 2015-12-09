@@ -42,13 +42,15 @@ from distutils.core import setup
 from distutils.extension import Extension
 
 pylonExtension = Extension('pylon',['pylon/__init__.pyx',
-                                    'pylon/logger.cpp',
+                                    'pylon/Logger.cpp',
                                     'pylon/Factory.cpp',
                                     'pylon/DevInfo.cpp',
                                     'pylon/Camera.cpp'],
                            language="c++",
                            #extra_compile_args=["-std=c++11"]
                            )
+
+#FIXME: check how can be know if c++11 is available to be used
 
 setup(name = 'pylon',
       license = "GPLv3+",

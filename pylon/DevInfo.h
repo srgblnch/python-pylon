@@ -37,7 +37,7 @@
 
 #include <pylon/PylonIncludes.h>
 #include <pylon/gige/BaslerGigECamera.h>
-#include "logger.h"
+#include "Logger.h"
 
 class CppDevInfo : public Logger
 {

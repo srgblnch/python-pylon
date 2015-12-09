@@ -37,7 +37,7 @@
 
 #include <pylon/PylonIncludes.h>
 #include <pylon/gige/BaslerGigECamera.h>
-#include "logger.h"
+#include "Logger.h"
 #include "DevInfo.h"
 #include "Factory.h"
 

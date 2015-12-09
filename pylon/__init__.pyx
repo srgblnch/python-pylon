@@ -44,7 +44,7 @@ from libcpp.string cimport string
 include "pylon/stdinclude.pyx"
 
 #highest level of python module includes
-include "logger.pyx"
+include "Logger.pyx"
 
 #second level of python module includes
 include "DevInfo.pyx"
