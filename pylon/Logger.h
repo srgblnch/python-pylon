@@ -37,8 +37,11 @@
 
 #include <iostream>
 #if __cplusplus > 199711L
-#include <thread>
-#include <chrono>
+#include <thread>       /* std::thread::id */
+#include <chrono>       /* std::chrono::system_clock::now */
+#else
+#include <pthread.h>
+#include <ctime>
 #endif
 
 typedef enum {
@@ -59,9 +62,10 @@ public:
   void _info(std::string);
   void _debug(std::string);
   void _print(std::string,std::string);
+protected:
+  std::string _name;
 private:
   LogLevel _logLevel;
-  std::string _name;
 };
 
 #endif /* LOGGER_H */

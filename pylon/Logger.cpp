@@ -91,8 +91,16 @@ void Logger::_print(std::string msg,std::string levelTag)
       << msg << "\t" \
       << std::endl;
 #else
+  time_t     now = time(0);
+  struct tm  tstruct;
+  char       buf[80];
+  tstruct = *localtime(&now);
+  strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
+
   std::cout \
+      << pthread_self() << "\t" \
       << levelTag << "\t" \
+      << buf << "\t" \
       << _name << "\t" \
       << msg << "\t" \
       << std::endl;

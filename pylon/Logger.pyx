@@ -53,7 +53,7 @@ cdef class Logger(object):
              _logger_INFO:   'INFO',
              _logger_DEBUG:  'DEBUG'}
     cdef string _name
-    cdef bool _debugFlag
+    cdef bool _debugFlag#FIXME: should be an integer
 
     def __init__(self,debug=True):
         super(Logger,self).__init__()
