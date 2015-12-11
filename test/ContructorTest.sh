@@ -42,7 +42,13 @@ export CFLAGS+="-I$PYLON_ROOT/genicam/library/CPP/include "
 export CFLAGS+="-I./pylon "
 export CFLAGS+="-L$PYLONLIBDIR -L$PYLONLIBDIR/pylon/tl/ "
 export CFLAGS+="-L$GCLIBDIR "
-export CFLAGS+="-lpylonbase -lpylongigesupp -lpylonutility -lGCBase_gcc40_v2_1 "
+export CFLAGS+="-lpylonbase -lpylongigesupp -lpylonutility "
+
+if [[ "$1" == 'pylon' && "$2" != '2' ]]; then
+	export CFLAGS+="-lGCBase_gcc40_v2_3 "
+else
+	export CFLAGS+="-lGCBase_gcc40_v2_1 "
+fi
 
 export GCCVERSION=$(gcc --version | grep ^gcc | sed 's/^.* //g')
 export CFLAGS+="-I/usr/include/c++/$GCCVERSION "

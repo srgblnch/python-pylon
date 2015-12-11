@@ -42,20 +42,22 @@ fi
 
 if [ "$PYLON_MAJORVERSION" == '2' ]; then
 	export PYLON_ROOT=$PYLON_BASE/pylon
+	export GENICAM_ROOT_V2_1=$PYLON_ROOT/genicam
 else
 	export PYLON_ROOT=$PYLON_BASE/pylon$PYLON_MAJORVERSION
+	export GENICAM_ROOT_V2_3=$PYLON_ROOT/genicam
 fi
 
-export GENICAM_ROOT_V2_1=$PYLON_ROOT/genicam
+export GENICAM_ROOT=$PYLON_ROOT/genicam
 
 if [ -d /lib64 ] ; then
     echo "Environment for Pylon $PYLON_MAJORVERSION arch64"
     PYLONLIBDIR=$PYLON_ROOT/lib64
-    GCLIBDIR=$GENICAM_ROOT_V2_1/bin/Linux64_x64
+    GCLIBDIR=$GENICAM_ROOT/bin/Linux64_x64
 else
     echo "Environment for Pylon $PYLON_MAJORVERSION arch32"
     PYLONLIBDIR=$PYLON_ROOT/lib
-    GCLIBDIR=$GENICAM_ROOT_V2_1/bin/Linux32_i86
+    GCLIBDIR=$GENICAM_ROOT/bin/Linux32_i86
 fi
 export LD_LIBRARY_PATH=$GCLIBDIR:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=$PYLONLIBDIR:$PYLONLIBDIR/pylon/tl/:$LD_LIBRARY_PATH
