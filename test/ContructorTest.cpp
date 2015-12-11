@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
   std::cout << "Continue with twice indirection!" << std::endl;
   if (not _cppBuildUsingTwicePointer(_TlFactory, devInfo, &pCamera, &mCamera))
   {
-    std::cout << "Pointer twice indirection did work" << std::endl;
+    std::cout << "Pointer twice indirection didn't work!" << std::endl;
   }
   if (pCamera == NULL)
   {
