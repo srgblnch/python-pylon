@@ -39,19 +39,24 @@
 #include <pylon/gige/BaslerGigECamera.h>
 #include "Logger.h"
 #include "DevInfo.h"
-#include "Factory.h"
+//#include "Factory.h"
 
 #include <iostream>
 
 class CppCamera : public Logger
 {
 public:
-  CppCamera( CppDevInfo* );
+  CppCamera( Pylon::CBaslerGigECamera::DeviceInfo_t,
+             Pylon::IPylonDevice*, Pylon::CBaslerGigECamera* );
+  //CppCamera( CppFactory*, CppDevInfo* );
   ~CppCamera();
+  Pylon::String_t GetSerialNumber();
 
 private:
+  //Pylon::CTlFactory *tlFactory;
+  Pylon::CBaslerGigECamera::DeviceInfo_t gigeDevInfo;
   Pylon::IPylonDevice *pDevice;
-  Pylon::CBaslerGigECamera *mCamera;
+  Pylon::CBaslerGigECamera *bCamera;
 };
 
 #endif /* CAMERA_H */

@@ -65,7 +65,7 @@ public:
   bool IsDhcpSupported();
   bool IsAutoIpSupported();
 //  bool IsSubset(IProperties& Subset);
-  Pylon::CBaslerGigECamera::DeviceInfo_t _GetDevInfo();
+  Pylon::CBaslerGigECamera::DeviceInfo_t GetDeviceInfo();
 private:
   Pylon::CBaslerGigECamera::DeviceInfo_t devInfo;
 };

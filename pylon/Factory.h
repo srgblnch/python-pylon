@@ -39,6 +39,7 @@
 #include <pylon/gige/BaslerGigECamera.h>
 #include "Logger.h"
 #include "DevInfo.h"
+#include "Camera.h"
 
 
 class CppFactory : public Logger
@@ -50,7 +51,10 @@ public:
   void ReleaseTl();
   int DeviceDiscovery();
   CppDevInfo* getNextDeviceInfo();
+  Pylon::CTlFactory* getTlFactory();
+  CppCamera* CreateCamera(CppDevInfo* wrapperDevInfo);
 private:
+  Pylon::CTlFactory *_tlFactory;
   Pylon::ITransportLayer *_tl;
   Pylon::DeviceInfoList_t deviceList;
   Pylon::DeviceInfoList_t::const_iterator deviceListIterator;

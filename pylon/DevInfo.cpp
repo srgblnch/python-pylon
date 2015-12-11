@@ -38,7 +38,8 @@ CppDevInfo::CppDevInfo(const Pylon::CBaslerGigECamera::DeviceInfo_t& CppDevInfo)
   :devInfo(CppDevInfo)
 {
   //devInfo = CppDevInfo;
-  devInfo.SetDeviceClass(Pylon::CBaslerGigECamera::DeviceClass());
+  //devInfo.SetDeviceClass(Pylon::CBaslerGigECamera::DeviceClass());
+  _name = "CppDevInfo(" + GetSerialNumber() + ")";
 }
 
 CppDevInfo::~CppDevInfo() { }
@@ -148,7 +149,7 @@ bool CppDevInfo::IsAutoIpSupported()
 //  return devInfo.IsSubset(IProperties& Subset)();
 //}
 
-Pylon::CBaslerGigECamera::DeviceInfo_t CppDevInfo::_GetDevInfo()
+Pylon::CBaslerGigECamera::DeviceInfo_t CppDevInfo::GetDeviceInfo()
 {
   return devInfo;
 }

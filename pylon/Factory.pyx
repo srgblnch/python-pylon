@@ -40,8 +40,10 @@ cdef extern from "Factory.h":
         void ReleaseTl() except+
         int DeviceDiscovery() except+
         CppDevInfo* getNextDeviceInfo() except+
+        CppCamera* CreateCamera(CppDevInfo* wrapperDevInfo) except+
 
 #TODO: make it python singleton
+#FIXME: build again the factory produces a segmentation fault!
 cdef class Factory(Logger):
     cdef:
         CppFactory *_cppFactory
@@ -51,89 +53,99 @@ cdef class Factory(Logger):
     _serialDct = {}
     _ipDct = {}
     _macDct = {}
+    _buildCameras = {}
 
     def __init__(self,*args,**kwargs):
         super(Factory,self).__init__(*args,**kwargs)
-        self._name = "Factory"
-        self._cppFactory = new CppFactory()
-        self._cppFactory.CreateTl()
-        self._refreshTlInfo()
+        self._name = "Factory()"
+        self._debug("Called __init__()")
+        if not self.__structuresHaveInfo__():
+            if self._cppFactory == NULL:
+                self._cppFactory = new CppFactory()
+                self._cppFactory.CreateTl()
+            self._refreshTlInfo()
+        self._debug("__init__() done")
 
     def __del__(self):
+        self._debug("Called __del__()")
         try:
-            self.__cleanLists__()
-            self._debug("Releasing the Transport Layer")
-            self._cppFactory.ReleaseTl()
-            self._debug("Remove the factory")
-            del self._cppFactory
+            self.__cleanStructures__()
+            if self._cppFactory != NULL:
+                self._debug("Releasing the Transport Layer")
+                self._cppFactory.ReleaseTl()
+                self._debug("Remove the factory")
+                del self._cppFactory
             self._debug("Factory deletion complete")
         except Exception as e:
             self._debug("Factory deletion suffers an exception: %s"(e))
+        self._debug("__del__() done")
 
     def __dealloc__(self):
+        self._debug("Called __dealloc__()")
         self.__del__()
+        self._debug("__dealloc__() done")
 
     def _refreshTlInfo(self):
-        self.__cleanLists__()
+        if self.__structuresHaveInfo__():
+            self.__cleanStructures__()
         self._nCameras = self._cppFactory.DeviceDiscovery()
         self.__populateLists__()
 
-    def __cleanLists__(self):
+    def __structuresHaveInfo__(self):
+        return len(self._camerasLst) > 0 or \
+                len(self._cameraModels.keys()) > 0 or \
+                len(self._serialDct.keys()) > 0 or \
+                len(self._ipDct.keys()) > 0 or \
+                len(self._macDct.keys()) > 0 or \
+                len(self._buildCameras.keys()) > 0
+
+    def __cleanStructures__(self):
         i = 0
         try:
-            while len(self._camerasLst) > 0 or \
-            len(self._cameraModels.keys()) > 0 or \
-            len(self._serialDct.keys()) > 0 or \
-            len(self._ipDct.keys()) > 0 or \
-            len(self._macDct.keys()) > 0:
-                self._debug("Clean lists: loop %d (%d,%d,%d,%d,%d)"
+            while self.__structuresHaveInfo__():
+                self._debug("Clean lists: loop %d (%d,%d,%d,%d,%d,%d)"
                             %(i,len(self._camerasLst),
                               len(self._cameraModels.keys()),
                               len(self._serialDct.keys()),
                               len(self._ipDct.keys()),
-                              len(self._macDct.keys())))
-                if len(self._camerasLst) > 0:
-                    bar = self._camerasLst.pop()
-                    self._debug("Removing camera %s"%(bar))
-                    del bar
-                if len(self._cameraModels.keys()) > 0:
-                    model = self._cameraModels.keys()[0]
-                    lst = self._cameraModels.pop(model)
-                    self._debug("Removing list for model %s (%d)"%(model,len(lst)))
-                    while len(lst) > 0:
-                        bar = lst.pop()
-                        self._debug("For model %s Removing %s"%(model,bar))
-                        del bar
-                if len(self._serialDct.keys()) > 0:
-                    serial = self._serialDct.keys()[0]
-                    bar = self._serialDct.pop(serial)
-                    self._debug("Removing serial %s"%(serial))
-                    del bar
-                if len(self._ipDct.keys()) > 0:
-                    ip = self._ipDct.keys()[0]
-                    bar = self._ipDct.pop(ip)
-                    self._debug("Removing ip %s"%(ip))
-                    del bar
-                if len(self._macDct.keys()) > 0:
-                    mac = self._macDct.keys()[0]
-                    bar = self._macDct.pop(mac)
-                    self._debug("Removing mac %s"%(mac))
-                    del bar
+                              len(self._macDct.keys()),
+                              len(self._buildCameras.keys())))
+                self.__cleanLst__(self._camerasLst,"cameraLst")
+                self.__cleanDict1key__(self._cameraModels,"cameraModels")
+                self.__cleanDict1key__(self._serialDct,"serialDct")
+                self.__cleanDict1key__(self._ipDct,"ipDct")
+                self.__cleanDict1key__(self._macDct,"macDct")
+                self.__cleanDict1key__(self._buildCameras,"instance")
                 i += 1
             self._debug("Clean structures finish ok")
         except Exception as e:
             self._warning("Clean the structures had an exception: %s"%(e))
+
+    def __cleanLst__(self,lst,name):
+        if len(lst) > 0:
+            obj = lst.pop()
+            self._debug("Removing %s object %s"%(name,obj))
+            del obj
+
+    def __cleanDict1key__(self,dct,name):
+        if len(dct) > 0:
+            key = dct.keys()[0]
+            obj = dct.pop(key)
+            self._debug("Removing %s key %s: object %s"%(name,key,obj))
+            if type(obj) == list:
+                while len(obj) > 0:
+                    self.__cleanLst__(obj,key)
+            del obj
 
     def __populateLists__(self):
         cdef:
             CppDevInfo* deviceInfo
         deviceInfo = self._cppFactory.getNextDeviceInfo()
         while deviceInfo != NULL:
+            #build wrapper object
             pythonDeviceInfo = __DeviceInformation()
             pythonDeviceInfo.SetCppDevInfo(deviceInfo)
-#             self._debug("--- %s"%pythonDeviceInfo.GetIpAddress())
-#             #next:
-            deviceInfo = self._cppFactory.getNextDeviceInfo()
+            #populate structures
             self._camerasLst.append(pythonDeviceInfo)
             if not pythonDeviceInfo.ModelName in self._cameraModels.keys():
                 self._cameraModels[pythonDeviceInfo.ModelName] = []
@@ -141,6 +153,8 @@ cdef class Factory(Logger):
             self._serialDct[int(pythonDeviceInfo.SerialNumber)] = pythonDeviceInfo
             self._ipDct[pythonDeviceInfo.IpAddress] = pythonDeviceInfo
             self._macDct[pythonDeviceInfo.MacAddress] = pythonDeviceInfo
+            #next:
+            deviceInfo = self._cppFactory.getNextDeviceInfo()
 
     @property
     def nCameras(self):
@@ -167,9 +181,26 @@ cdef class Factory(Logger):
             return self._cameraModels[model][:]
         return []
 
-    cdef __prepareCameraObj(self,__DeviceInformation devInfo):
+    cdef __BuildCameraObj(self,__DeviceInformation devInfo):
+        cdef:
+            CppCamera* cppCamera
         camera = Camera()
-        camera.SetDevInfo(devInfo.GetCppDevInfo())
+        cppCamera = self._cppFactory.CreateCamera(devInfo.GetCppDevInfo())
+        if cppCamera != NULL:
+            camera.SetCppCamera(cppCamera)
+        return camera
+    
+    def __prepareCameraObj(self,__DeviceInformation devInfo):
+        if not devInfo.SerialNumber in self._buildCameras.keys():
+            self._debug("Building instance for the camera with the "\
+                        "serial number %d"%(devInfo.SerialNumber))
+            camera = self.__BuildCameraObj(devInfo)
+            self._buildCameras[devInfo.SerialNumber] = camera
+            return camera
+        else:
+            self._debug("Camera with the serial number %d already instanciated"
+                        %(devInfo.SerialNumber))
+            camera = self._buildCameras[devInfo.SerialNumber]
         return camera
 
     def getCameraBySerialNumber(self,number):
