@@ -51,43 +51,58 @@ inline bool _cppBuildUsingTwicePointer(CTlFactory* _TlFactory,
                  CDeviceInfo devInfo, IPylonDevice **pDevice,
                  CBaslerGigECamera **bCamera)
 {
+//  try
+//  {
+//    cout << "\tCreate IPylonDevice object for " << devInfo.GetSerialNumber() \
+//        << endl;
+//    *pDevice = _TlFactory->CreateDevice(devInfo);
+//  }
+//  catch(exception& e)
+//  {
+//    cout << "\t\tFailed!\n\t\t" << e.what() << endl;
+//    return false;
+//  }
+//  try
+//  {
+//    cout << "\tWith the IPylonDevice object build the CBaslerGigECamera"<<endl;
+//    *bCamera = new CBaslerGigECamera(*pDevice);
+//    return true;
+//  }
+//  catch(exception& e)
+//  {
+//    cout << "\t\tFailed!\n\t\t" << e.what() << endl;
+//    cout << "\tTry in the opposite way" << endl << endl;
+//    try
+//    {
+//      cout << "\tCreate CBaslerGigECamera object for " \
+//          << devInfo.GetSerialNumber() << " from the factory" << endl;
+//      *bCamera = new CBaslerGigECamera(_TlFactory->CreateDevice(devInfo));
+//      cout << "\tGet the IPylonDevice by requesting it "\
+//          "to the CBaslerGigECamera" << endl;
+//      *pDevice = (*bCamera)->GetDevice();
+//      return true;
+//    }
+//    catch(exception& e)
+//    {
+//      cout << "\t\tFailed!\n\t\t" << e.what() << endl;
+//    }
+//  }
+//  return false;
   try
   {
-    cout << "\tCreate IPylonDevice object for " << devInfo.GetSerialNumber() \
-        << endl;
-    *pDevice = _TlFactory->CreateDevice(devInfo);
+    cout << "\tCreate a CBaslerGigECamera object" << endl;
+    *bCamera = new CBaslerGigECamera();
+    cout << "\tAttach the IPylonDevice created by the factory singleton "\
+        "using the CDeviceInfo of the camera with the serial number " \
+        << devInfo.GetSerialNumber() << endl;
+    (*bCamera)->Attach(_TlFactory->CreateDevice(devInfo));
+    cout << "\tFrom the CBaslerGigECamera get the IPylonDevice object" << endl;
+    *pDevice = (*bCamera)->GetDevice();
   }
   catch(exception& e)
   {
     cout << "\t\tFailed!\n\t\t" << e.what() << endl;
-    return false;
   }
-  try
-  {
-    cout << "\tWith the IPylonDevice object build the CBaslerGigECamera"<<endl;
-    *bCamera = new CBaslerGigECamera(*pDevice);
-    return true;
-  }
-  catch(exception& e)
-  {
-    cout << "\t\tFailed!\n\t\t" << e.what() << endl;
-    cout << "\tTry in the opposite way" << endl << endl;
-    try
-    {
-      cout << "\tCreate CBaslerGigECamera object for " \
-          << devInfo.GetSerialNumber() << " from the factory" << endl;
-      *bCamera = new CBaslerGigECamera(_TlFactory->CreateDevice(devInfo));
-      cout << "\tGet the IPylonDevice by requesting it "\
-          "to the CBaslerGigECamera" << endl;
-      *pDevice = (*bCamera)->GetDevice();
-      return true;
-    }
-    catch(exception& e)
-    {
-      cout << "\t\tFailed!\n\t\t" << e.what() << endl;
-    }
-  }
-  return false;
 }
 
 int main(int argc, char* argv[])
