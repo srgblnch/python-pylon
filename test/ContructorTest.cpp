@@ -34,11 +34,12 @@
 
 #include <iostream>
 #include <exception>
+#include <boost/smart_ptr.hpp>
 #include <pylon/PylonIncludes.h>
 #include <pylon/gige/BaslerGigECamera.h>
 
 /****************
- * This is a test made to understand the issue creating the CBaslerGigECamera
+ * This is a test made to understand the issue creating the Camera_t
  * object that gives us the exception:
  * > The attached Pylon Device is not of type IPylonGigEDevice!
  * > (/opt/pylon/include/pylon/gige/PylonGigEDeviceProxy.h:169)
@@ -47,63 +48,10 @@
 using namespace std;
 using namespace Pylon;
 
-inline bool _cppBuildUsingTwicePointer(CTlFactory* _TlFactory,
-                 CDeviceInfo devInfo, IPylonDevice **pDevice,
-                 CBaslerGigECamera **bCamera)
-{
-//  try
-//  {
-//    cout << "\tCreate IPylonDevice object for " << devInfo.GetSerialNumber() \
-//        << endl;
-//    *pDevice = _TlFactory->CreateDevice(devInfo);
-//  }
-//  catch(exception& e)
-//  {
-//    cout << "\t\tFailed!\n\t\t" << e.what() << endl;
-//    return false;
-//  }
-//  try
-//  {
-//    cout << "\tWith the IPylonDevice object build the CBaslerGigECamera"<<endl;
-//    *bCamera = new CBaslerGigECamera(*pDevice);
-//    return true;
-//  }
-//  catch(exception& e)
-//  {
-//    cout << "\t\tFailed!\n\t\t" << e.what() << endl;
-//    cout << "\tTry in the opposite way" << endl << endl;
-//    try
-//    {
-//      cout << "\tCreate CBaslerGigECamera object for " \
-//          << devInfo.GetSerialNumber() << " from the factory" << endl;
-//      *bCamera = new CBaslerGigECamera(_TlFactory->CreateDevice(devInfo));
-//      cout << "\tGet the IPylonDevice by requesting it "\
-//          "to the CBaslerGigECamera" << endl;
-//      *pDevice = (*bCamera)->GetDevice();
-//      return true;
-//    }
-//    catch(exception& e)
-//    {
-//      cout << "\t\tFailed!\n\t\t" << e.what() << endl;
-//    }
-//  }
-//  return false;
-  try
-  {
-    cout << "\tCreate a CBaslerGigECamera object" << endl;
-    *bCamera = new CBaslerGigECamera();
-    cout << "\tAttach the IPylonDevice created by the factory singleton "\
-        "using the CDeviceInfo of the camera with the serial number " \
-        << devInfo.GetSerialNumber() << endl;
-    (*bCamera)->Attach(_TlFactory->CreateDevice(devInfo));
-    cout << "\tFrom the CBaslerGigECamera get the IPylonDevice object" << endl;
-    *pDevice = (*bCamera)->GetDevice();
-  }
-  catch(exception& e)
-  {
-    cout << "\t\tFailed!\n\t\t" << e.what() << endl;
-  }
-}
+typedef Pylon::CBaslerGigECamera Camera_t;
+using namespace Basler_GigECameraParams;
+
+using boost::scoped_ptr;
 
 int main(int argc, char* argv[])
 {
@@ -123,10 +71,66 @@ int main(int argc, char* argv[])
   int nCameras = 0;
   Pylon::DeviceInfoList_t::const_iterator it;
   //CDeviceInfo devInfo;
-  CBaslerGigECamera::DeviceInfo_t devInfo;
+  Camera_t::DeviceInfo_t devInfo;
   IPylonDevice *pDevice = NULL;
-  CBaslerGigECamera *bCamera = NULL;
+  Camera_t *bCamera;
+  scoped_ptr<Camera_t> scoped_bCamera;
+
+  //FIXME: this arguments haven't been checked
   Pylon::String_t pylon_camera_ip(argv[1]);
+  Pylon::String_t devInfoSource(argv[2]);
+  Pylon::String_t devInfoIterator("it");
+  int devInfoOptions = 0;
+  if (devInfoSource == "")
+  {
+    cout << "Second argument not specified, using default" << endl;
+    devInfoSource = devInfoIterator;
+  }
+  if (devInfoSource == "it")
+  {
+    cout << "To build the objects, the iterator reference will be used" << endl;
+    devInfoOptions = 1;
+  }
+  else if (devInfoSource == "devInfo")
+  {
+    cout << "To build the objects, the devInfo object will be used" << endl;
+    devInfoOptions = 2;
+  }
+  else
+  {
+    cout << "invalid device information source" << endl;
+    goto exit;
+  }
+
+goto continueNormal;
+
+exit://Moved from the bottom to avoid declarations with
+     //initialisations in the middle.
+  cout << "exit(" << exitCode << ")" << endl;
+  try
+  {
+    _TlFactory->ReleaseTl(tl_);
+  }
+  catch(exception& e)
+  {
+    cout << "couldn't release the transport layer" << endl;
+  }
+  try
+  {
+    scoped_bCamera.reset();
+  }
+  catch(exception& e)
+  {
+    cout << "couldn't reset the scoped_ptr" << endl;
+  }
+  cout << endl;
+  return exitCode;
+
+continueNormal:
+  VersionInfo pylonVersionInfo;
+  cout << endl << "Working with Pylon version " \
+       << pylonVersionInfo.getMajor() << " (" \
+       << pylonVersionInfo.getVersionString() << ")" << endl;
 
   cout << endl << "Get factory instance" << endl;
   _TlFactory = &CTlFactory::GetInstance();
@@ -136,12 +140,12 @@ int main(int argc, char* argv[])
   {
     const Pylon::CTlInfo& tl_info = \
               static_cast<const Pylon::CTlInfo&>(*tl_it);
-    cout << "\t" << tl_info.GetFullName() << endl;
+    cout << "\t- " << tl_info.GetFullName() << endl;
   }
 
   cout << endl << "Create a transport layer to access " \
-      << CBaslerGigECamera::DeviceClass() << " cameras" << endl;
-  tl_ = _TlFactory->CreateTl( CBaslerGigECamera::DeviceClass() );
+      << Camera_t::DeviceClass() << " cameras" << endl;
+  tl_ = _TlFactory->CreateTl( Camera_t::DeviceClass() );
 
   nCameras = tl_->EnumerateDevices( devices );
   cout << "Found " << nCameras << " cameras" << endl;
@@ -150,19 +154,19 @@ int main(int argc, char* argv[])
     exitCode = -1;
     goto exit;
   }
-  cout << "\titerate searching " << pylon_camera_ip << " camera"
+  cout << "\tIterate searching " << pylon_camera_ip << " camera"
       << endl;
   for (it = devices.begin(); it != devices.end(); it++)
   {
-    const CBaslerGigECamera::DeviceInfo_t& gige_device_info = \
-        static_cast<const CBaslerGigECamera::DeviceInfo_t&>(*it);
+    const Camera_t::DeviceInfo_t& gige_device_info = \
+        static_cast<const Camera_t::DeviceInfo_t&>(*it);
     Pylon::String_t current_ip = gige_device_info.GetIpAddress();
-    cout << "\t\tFound a " << gige_device_info.GetModelName()
-        << " with ip " << current_ip << " (" \
-        << gige_device_info.GetSerialNumber() << ")" << endl;
+    cout << "\t\t- Found a " << gige_device_info.GetModelName() << " (" \
+        << gige_device_info.GetSerialNumber() << ")" \
+        << " with ip " << current_ip << endl;
     if (current_ip == pylon_camera_ip)
     {
-      cout << "\t\t\tThis is the camera wanted (" << current_ip << ")"
+      cout << "\t\t\t** This is the camera wanted (" << current_ip << ") **"
           << endl;
       devInfo = gige_device_info;
       break;
@@ -174,80 +178,117 @@ int main(int argc, char* argv[])
     exitCode = -2;
     goto exit;
   }
-  cout << endl << "Given camera information:" << endl;
-  cout << "\tdevInfo.GetFullName(): \"" << devInfo.GetFullName() \
+  cout << endl << "Wanted camera information:" << endl;
+  cout << "\t- FullName: \"" << devInfo.GetFullName() \
       << "\""<< endl;
-  cout << "\tdevInfo.GetSerialNumber(): \"" << devInfo.GetSerialNumber() \
+  cout << "\t- SerialNumber: \"" << devInfo.GetSerialNumber() \
         << "\""<< endl;
-  cout << "\tdevInfo.GetModelName(): \"" << devInfo.GetModelName() \
+  cout << "\t- ModelName: \"" << devInfo.GetModelName() \
       << "\""<< endl;
-  cout << "\tdevInfo.GetDeviceClass(): \"" << devInfo.GetDeviceClass() \
+  cout << "\t- DeviceClass: \"" << devInfo.GetDeviceClass() \
       << "\""<< endl;
-  cout << "\tdevInfo.GetDeviceVersion(): \"" << devInfo.GetDeviceVersion() \
+  cout << "\t- DeviceVersion: \"" << devInfo.GetDeviceVersion() \
       << "\""<< endl;
-  cout << "\tdevInfo.GetDeviceFactory(): \"" << devInfo.GetDeviceFactory() \
+  cout << "\t- DeviceFactory: \"" << devInfo.GetDeviceFactory() \
       << "\""<< endl;
-  cout << "\tdevInfo.GetInterface(): \"" << devInfo.GetInterface() \
+  cout << "\t- Interface: \"" << devInfo.GetInterface() \
       << "\""<< endl;
 
   cout << endl << "Connect to the Camera for further control" << endl;
-  if (not _cppBuildUsingTwicePointer(_TlFactory, devInfo, &pDevice, &bCamera))
-  {
-    cout << "Pointer twice indirection didn't work!" << endl;
-  }
-  if (pDevice == NULL)
-  {
-    exitCode = -3;
-    goto exit;
-  }
-  cout << endl << "Play with IPylon[GigE]Device" << endl;
-  cout << "Pylon device has " << pDevice->GetNumStreamGrabberChannels() \
-      << " stream grabber channels" << endl;
 
-// Open PylonDevice
-  cout << "\tOpen Pylon Device" << endl;
-  pDevice->Open();
-  if (bCamera == NULL)
+  try
   {
-    cout << "\t\tNo BaslerGigECamera to check" << endl;
-    exitCode = -4;
-    goto close;
+    cout << "Build and attach in one step" << endl;
+
+    if (devInfoOptions == 1)
+    {
+      bCamera = new Camera_t(_TlFactory->CreateDevice(*it));
+    }
+    else
+    {
+      bCamera = new Camera_t(_TlFactory->CreateDevice(devInfo));
+    }
+    scoped_bCamera.reset(bCamera);
   }
-  if (not bCamera->IsAttached())
+  catch(exception& e)
   {
-    cout << "\t\tNot attached BaslerGigECamera to check" << endl;
+    cout << "\tIt doesn't work!\n\t" << e.what() << endl \
+         << "Try an alternative" << endl;
     try
     {
-      cout << "\t\tTry again with the constructor" << endl;
-      bCamera = new CBaslerGigECamera(_TlFactory->CreateDevice(devInfo));
-      goto cont;
+      cout << "\tFirst build..." << endl;
+      bCamera = new Camera_t();
+      scoped_ptr<Camera_t> camera(new Camera_t());
+      scoped_bCamera.reset(bCamera);
+      cout << "\tThen attach..." << endl;
+      if (devInfoOptions == 1)
+      {
+        bCamera->Attach(_TlFactory->CreateDevice(*it));
+      }
+      else
+      {
+        bCamera->Attach(_TlFactory->CreateDevice(devInfo));
+      }
     }
     catch(exception& e)
     {
-      cout << "\t\t** Exception:\n\t\t" << e.what() << endl;
+      cout << "\t\tFailed!\n\t" << e.what() << endl;
+      exitCode = -3;
+      goto exit;
     }
-    exitCode = -5;
-    goto close;
   }
-cont:
-  //CBaslerGigECamera should be opened now...
-  if (bCamera->IsOpen())
+
+  if (scoped_bCamera.get() == NULL)
   {
-    cout << "\t\tFirmware version: " \
-        << bCamera->DeviceFirmwareVersion.GetValue() << endl;
-    cout << "\t\tClose BaslerGigECamera" << endl;
-    bCamera->Close();
-    cout << "\t\tDelete BaslerGigECamera" << endl;
-    delete(bCamera);
+    cout << "\t* Camera object points to NULL" << endl;
+    exitCode = -4;
+    goto exit;
   }
-close:
+  else if (not scoped_bCamera.get()->IsAttached())
+  {
+    cout << "\t* Camera object build but not attached to a Device object" \
+         << endl;
+    exitCode = -5;
+    goto exit;
+  }
+
+  pDevice = scoped_bCamera.get()->GetDevice();
+  if (!pDevice)
+  {
+    cout << "\tPylon Device points to NULL" << endl;
+    exitCode = -6;
+    goto exit;
+  }
+
+  cout << endl << "Play with the build objects" << endl;
+  cout << "\t- Pylon device has " << pDevice->GetNumStreamGrabberChannels() \
+       << " stream grabber channels" << endl;
+  Camera_t::TlParams_t TlParams(scoped_bCamera->GetTLNodeMap());
+  cout << "\t- TL read timeout:" << dec << TlParams.ReadTimeout.GetValue() \
+       << endl;
+  cout << "\t- TL write timeout:" << dec << TlParams.WriteTimeout.GetValue() \
+       << endl;
+  cout << "\t- TL heartbeat timeout:" << dec \
+       << TlParams.HeartbeatTimeout.GetValue() << endl;
+
+  cout << "\t- Open Pylon Device" << endl;
+  pDevice->Open();
+  if (not scoped_bCamera.get()->IsOpen())
+  {
+    cout << "\t* Open the Device object didn't show the Camera Object open" \
+         << endl;
+    exitCode = -7;
+    goto exit;
+  }
+
+  cout << endl << "Information requested directly to the camera:" << endl;
+  cout << "\t\t- Firmware version: " \
+          << scoped_bCamera.get()->DeviceFirmwareVersion.GetValue() << endl;
+
+//close: //TODO: label to be used in the checks after the communication is open.
   cout << "\tClose Pylon Device" << endl;
   pDevice->Close();
   cout << "\tDetele Pylon Device object" << endl;
   _TlFactory->DestroyDevice(pDevice);
-exit:
-  cout << "exit(" << exitCode << ")" << endl;
-  _TlFactory->ReleaseTl(tl_);
-  cout << endl;
-  return exitCode;
+  goto exit;//with exitCode = 0, that means "everything went well"!
 }

@@ -1,0 +1,37 @@
+Working with Pylon version 4 (04.00.00.0062)
+
+Get factory instance
+Available 3 transport layers
+        - CamEmu/BaslerCamEmu 04.00.00.0062
+        - GigE/BaslerGigE 04.00.00.0062
+        - USB/BaslerUsb 04.00.00.0062
+
+Create a transport layer to access BaslerGigE cameras
+Found 5 cameras
+        Iterate searching 10.0.35.10 camera
+                - Found a scA1300-32gm (21585321) with ip 10.0.35.5
+                - Found a scA1000-30gm (20904100) with ip 10.0.34.39
+                - Found a acA1300-30gc (21714463) with ip 10.0.35.9
+                - Found a acA1300-30gm (21586964) with ip 10.0.35.3
+                - Found a acA1300-30gc (21714465) with ip 10.0.35.10
+                        ** This is the camera wanted (10.0.35.10) **
+
+Wanted camera information:
+        - FullName: "Basler acA1300-30gc#0030531A2921#10.0.35.10:3956"
+        - SerialNumber: "21714465"
+        - ModelName: "acA1300-30gc"
+        - DeviceClass: "BaslerGigE"
+        - DeviceVersion: "104846-18"
+        - DeviceFactory: "GigE/BaslerGigE 04.00.00.0062"
+        - Interface: "10.0.38.82"
+
+Connect to the Camera for further control
+Build and attach in one step
+        It doesn't work!
+        Timeout when trying to acquire hash specific lock for nodemap creation. Lock name = 'GenICam_XML_0xccc16d9f7e184356e18692846d94316c' : RuntimeException thrown (file 'NodeMapDyn.cpp', line 498)
+Try an alternative
+        First build...
+        Then attach...
+                Failed!
+        Timeout when trying to acquire hash specific lock for nodemap creation. Lock name = 'GenICam_XML_0xccc16d9f7e184356e18692846d94316c' : RuntimeException thrown (file 'NodeMapDyn.cpp', line 498)
+exit(-3)
