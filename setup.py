@@ -7,7 +7,7 @@
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
 ##
-## project :            TANGO
+## project :            python-pylon
 ##
 ## author(s) :          S.Blanch-Torn\'e
 ##
@@ -16,20 +16,20 @@
 ##                      08290 Bellaterra,
 ##                      Spain
 ##
-## This file is part of Tango.
+## This file is part of python-pylon.
 ##
-## Tango is free software: you can redistribute it and/or modify
+## python-pylon is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU Lesser General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
 ##
-## Tango is distributed in the hope that it will be useful,
+## python-pylon is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU Lesser General Public License for more details.
 ##
 ## You should have received a copy of the GNU Lesser General Public License
-## along with Tango.  If not, see <http:##www.gnu.org/licenses/>.
+## along with python-pylon.  If not, see <http://www.gnu.org/licenses/>.
 ##
 ###############################################################################
 
@@ -53,7 +53,7 @@ pylonExtension = Extension('pylon',['pylon/__init__.pyx',
 #FIXME: check how can be know if c++11 is available to be used
 
 setup(name = 'pylon',
-      license = "GPLv3+",
+      license = "LGPLv3+",
       description = "Cython module to provide access to Pylon's SDK.",
       version = version_python_pylon_string(),
       author = "Sergi Blanch-Torn\'e",
@@ -61,7 +61,7 @@ setup(name = 'pylon',
       classifiers = ['Development Status :: 1 - Planning',
                      'Intended Audience :: Science/Research',
                      'License :: OSI Approved :: '\
-                        'GNU General Public License v3 or later (GPLv3+)',
+                     'GNU Lesser General Public License v3 or later (LGPLv3+)',
                      'Operating System :: POSIX',
                      'Programming Language :: Cython',
                      'Programming Language :: Python',
