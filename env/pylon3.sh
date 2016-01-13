@@ -2,7 +2,7 @@
 
 #---- licence header
 ###############################################################################
-## file :               env.sh
+## file :               pylon3.sh
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -31,29 +31,20 @@
 ## You should have received a copy of the GNU Lesser General Public License
 ## along with python-pylon.  If not, see <http://www.gnu.org/licenses/>.
 ##
-###############################################################################
+#############################################################################
 
-export PYLON_BASE=/opt
-if [[ "$1" == 'pylon' && "$2" != '' ]]; then
-	export PYLON_MAJORVERSION=$2
-else
-	echo "Not understood the pylon's major release."
-	echo "First argument is expected to be 'pylon' followed by the "\
-	     "major release number to be used."
-	exit
-fi
+export PYLON_MAJORVERSION=3
 
-if [ "$PYLON_MAJORVERSION" == '2' ]; then
-	. env/pylon2.sh
-elif [ "$PYLON_MAJORVERSION" == '3' ]; then
-	. env/pylon3.sh
-elif [ "$PYLON_MAJORVERSION" == '4' ]; then
-	. env/pylon4.sh
-elif [ "$PYLON_MAJORVERSION" == '5' ]; then
-	. env/pylon5.sh
-else
-	echo "$PYLON_MAJORVERSION pylon's major release is not supported."
-fi
+export PYLON_ROOT=$PYLON_BASE/pylon$PYLON_MAJORVERSION
+export GENICAM_ROOT_V2_3=$PYLON_ROOT/genicam
+export GENICAM_ROOT=$PYLON_ROOT/genicam
 
-echo "Environment for Pylon $PYLON_MAJORVERSION $PYLONARCH"
+. env/arch.sh
 
+export LD_LIBRARY_PATH=$GCLIBDIR:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$PYLONLIBDIR:$PYLONLIBDIR/pylon/tl/:$LD_LIBRARY_PATH
+
+export CFLAGS+="-I$PYLON_ROOT/genicam/library/CPP/include "
+export CFLAGS+="-L$GCLIBDIR "
+export CFLAGS+="-L$PYLONLIBDIR/pylon/tl/ "
+export CFLAGS+="-lpylonbase -lpylongigesupp -lpylonutility "

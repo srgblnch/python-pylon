@@ -44,20 +44,12 @@ fi
 
 source env.sh
 
+if [ "$PYLON_MAJORVERSION" == '' ]; then
+	exit
+fi
+
 echo $LD_LIBRARY_PATH
 
-export CFLAGS="-I$PYLON_ROOT/include "
-export CFLAGS+="-I$PYLON_ROOT/genicam/library/CPP/include "
-export CFLAGS+="-I./pylon "
-export CFLAGS+="-L$PYLONLIBDIR -L$GCLIBDIR -L$PYLONLIBDIR/pylon/tl/ "
-export CFLAGS+="-lpylonbase -lpylongigesupp -lpylonutility "
-#"-lpyloncamemu -lpylongige "
-
-export GCCVERSION=$(gcc --version | grep ^gcc | sed 's/^.* //g')
-export CFLAGS+="-I/usr/include/c++/$GCCVERSION "
-export CFLAGS+="-I/usr/include/x86_64-linux-gnu/c++/4.9 "
-#!!!!! hardcoded
-
-export CC='g++'
+export CFLAGS+="-I./pylon -I$PYLON_ROOT/include -L$PYLONLIBDIR"
 
 python setup.py build
