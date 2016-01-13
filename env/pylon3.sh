@@ -33,13 +33,11 @@
 ##
 #############################################################################
 
-export PYLON_MAJORVERSION=3
-
 export PYLON_ROOT=$PYLON_BASE/pylon$PYLON_MAJORVERSION
 export GENICAM_ROOT_V2_3=$PYLON_ROOT/genicam
 export GENICAM_ROOT=$PYLON_ROOT/genicam
 
-. env/arch.sh
+. $BASEDIR/env/arch.sh
 
 export LD_LIBRARY_PATH=$GCLIBDIR:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=$PYLONLIBDIR:$PYLONLIBDIR/pylon/tl/:$LD_LIBRARY_PATH

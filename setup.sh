@@ -42,13 +42,11 @@ if [ "$1" == 'clean' ]; then
 	exit
 fi
 
-source env.sh
+. env.sh
 
 if [ "$PYLON_MAJORVERSION" == '' ]; then
 	exit
 fi
-
-echo $LD_LIBRARY_PATH
 
 export CFLAGS+="-I./pylon -I$PYLON_ROOT/include -L$PYLONLIBDIR"
 

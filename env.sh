@@ -40,20 +40,22 @@ else
 	echo "Not understood the pylon's major release."
 	echo "First argument is expected to be 'pylon' followed by the "\
 	     "major release number to be used."
-	exit
+	return
 fi
 
+export BASEDIR=`dirname $0`
+
 if [ "$PYLON_MAJORVERSION" == '2' ]; then
-	. env/pylon2.sh
+	. $BASEDIR/env/pylon2.sh
 elif [ "$PYLON_MAJORVERSION" == '3' ]; then
-	. env/pylon3.sh
+	. $BASEDIR/env/pylon3.sh
 elif [ "$PYLON_MAJORVERSION" == '4' ]; then
-	. env/pylon4.sh
+	. $BASEDIR/env/pylon4.sh
 elif [ "$PYLON_MAJORVERSION" == '5' ]; then
-	. env/pylon5.sh
+	. $BASEDIR/env/pylon5.sh
 else
 	echo "$PYLON_MAJORVERSION pylon's major release is not supported."
 fi
 
-echo "Environment for Pylon $PYLON_MAJORVERSION $PYLONARCH"
+echo "Environment for Pylon $PYLON_MAJORVERSION $SYSTEMARCH."
 

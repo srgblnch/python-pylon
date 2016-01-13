@@ -33,10 +33,8 @@
 ##
 #############################################################################
 
-export PYLON_MAJORVERSION=5
-
 export PYLON_ROOT=$PYLON_BASE/pylon$PYLON_MAJORVERSION
 
-. env/arch.sh
+. $BASEDIR/env/arch.sh
 
 export LD_LIBRARY_PATH=$PYLONLIBDIR:$LD_LIBRARY_PATH

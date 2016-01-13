@@ -34,7 +34,7 @@
 #############################################################################
 
 if [ -d /lib64 ] ; then
-	. env/64bit.sh
+	. $BASEDIR/env/64bit.sh
 else
-	. env/32bit.sh
+	. $BASEDIR/env/32bit.sh
 fi

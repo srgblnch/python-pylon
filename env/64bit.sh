@@ -33,9 +33,9 @@
 ##
 #############################################################################
 
-export PYLONARCH="arch64"
+export SYSTEMARCH="arch64"
 
-PYLONLIBDIR=$PYLON_ROOT/lib64
+export PYLONLIBDIR=$PYLON_ROOT/lib64
 if [ -z ${GENICAM_ROOT} ]; then
 	GCLIBDIR=$GENICAM_ROOT/bin/Linux64_x64
 fi
