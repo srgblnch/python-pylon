@@ -36,7 +36,6 @@
 #define FACTORY_H
 
 #include <pylon/PylonIncludes.h>
-#include <pylon/gige/BaslerGigECamera.h>
 #include "Logger.h"
 #include "DevInfo.h"
 #include "Camera.h"
@@ -55,7 +54,6 @@ public:
   CppCamera* CreateCamera(CppDevInfo* wrapperDevInfo);
 private:
   Pylon::CTlFactory *_tlFactory;
-  Pylon::ITransportLayer *_tl;
   Pylon::DeviceInfoList_t deviceList;
   Pylon::DeviceInfoList_t::const_iterator deviceListIterator;
 };

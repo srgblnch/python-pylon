@@ -37,28 +37,23 @@
 CppFactory::CppFactory()
 {
   Pylon::PylonAutoInitTerm autoInitTerm;
-  //Pylon::PylonInitialize();
+  Pylon::PylonInitialize();
   _name = "CppFactory()";
 }
 
 CppFactory::~CppFactory()
 {
   //ReleaseTl();
-  //Pylon::PylonTerminate();
+  Pylon::PylonTerminate();
 }
 
 void CppFactory::CreateTl()
 {
   _tlFactory = &Pylon::CTlFactory::GetInstance();
-  _tl = _tlFactory->CreateTl( Pylon::CBaslerGigECamera::DeviceClass() );
 }
 
 void CppFactory::ReleaseTl()
 {
-  if (_tl != NULL)
-  {
-    _tlFactory->ReleaseTl(_tl);
-  }
 }
 
 int CppFactory::DeviceDiscovery()
@@ -66,18 +61,17 @@ int CppFactory::DeviceDiscovery()
   std::stringstream msg;
   int nCameras = 0;
 
-  if ( _tl != NULL )
+  if ( _tlFactory != NULL )
   {
-    nCameras = _tl->EnumerateDevices( deviceList );
+    nCameras = _tlFactory->EnumerateDevices( deviceList );
     deviceListIterator = deviceList.begin();
-    msg << "Found " << nCameras << " within the transport layer "
-        << Pylon::CBaslerGigECamera::DeviceClass();
+    msg << "Found " << nCameras << " cameras";
     _debug(msg.str());
     return nCameras;
   }
   else
   {
-    _error("No transport layer created");
+    _error("No transport factory created");
     return nCameras;
   }
 }
@@ -88,8 +82,8 @@ CppDevInfo* CppFactory::getNextDeviceInfo()
 
   if ( deviceListIterator != deviceList.end() )
   {
-    const Pylon::CBaslerGigECamera::DeviceInfo_t& pylonDeviceInfo = \
-      static_cast<const Pylon::CBaslerGigECamera::DeviceInfo_t&>\
+    const Pylon::CInstantCamera::DeviceInfo_t& pylonDeviceInfo = \
+      static_cast<const Pylon::CInstantCamera::DeviceInfo_t&>\
         (*deviceListIterator);
     CppDevInfo* wrapperDevInfo = new CppDevInfo(pylonDeviceInfo);
     msg << "Found a " << pylonDeviceInfo.GetModelName()
@@ -106,64 +100,23 @@ Pylon::CTlFactory* CppFactory::getTlFactory()
   return _tlFactory;
 }
 
-//CppCamera* CppFactory::CreateCamera(CppDevInfo* wrapperDevInfo)
-//{
-//  Pylon::DeviceInfoList_t::const_iterator it;
-//  Pylon::CBaslerGigECamera::DeviceInfo_t gigeDevInfo;
-//  Pylon::String_t wantedSerial;
-//
-//  gigeDevInfo = wrapperDevInfo->GetDeviceInfo();
-//  wantedSerial = gigeDevInfo.GetSerialNumber();
-//
-//  for (it = deviceList.begin(); it != deviceList.end(); it++)
-//  {
-//    const Pylon::CBaslerGigECamera::DeviceInfo_t& IteratorInfo = static_cast<const Pylon::CBaslerGigECamera::DeviceInfo_t&>(*it);
-//    Pylon::String_t iteratorSerial = IteratorInfo.GetSerialNumber();
-//    if (iteratorSerial == wantedSerial)
-//    {
-//      gigeDevInfo = IteratorInfo;
-//      break;
-//    }
-//  }
-//  if (it != deviceList.end())
-//  {
-//    Pylon::IPylonDevice *pDevice = NULL;
-//    Pylon::CBaslerGigECamera *bCamera = NULL;
-//    try
-//    {
-//      _debug("Creating CBaslerGigECamera object");
-//      bCamera = new Pylon::CBaslerGigECamera(_tlFactory->CreateDevice(gigeDevInfo));
-//      _debug("Getting the IPylonDevice object");
-//      pDevice = bCamera->GetDevice();
-//    }
-//    catch(std::exception& e)
-//    {
-//      std::stringstream msg;
-//      msg << "CppCamera Constructor exception: " << e.what();
-//      _error(msg.str()); msg.str("");
-//    }
-//    return new CppCamera(gigeDevInfo,pDevice,bCamera);
-//  }
-//  return NULL;
-//}
-
 CppCamera* CppFactory::CreateCamera(CppDevInfo* wrapperDevInfo)
 {
   std::stringstream msg;
-  Pylon::CBaslerGigECamera::DeviceInfo_t gigeDevInfo;
-  Pylon::IPylonDevice **pDevice = NULL;
-  Pylon::CBaslerGigECamera **bCamera = NULL;
+  Pylon::CInstantCamera::DeviceInfo_t devInfo;
+  Pylon::IPylonDevice *pDevice = NULL;
+  Pylon::CInstantCamera *bCamera = NULL;
 
-  gigeDevInfo = wrapperDevInfo->GetDeviceInfo();
+  devInfo = wrapperDevInfo->GetDeviceInfo();
   msg << "Creating a Camera object from the information of the camera with "\
-      "the serial number " << gigeDevInfo.GetSerialNumber();
+      "the serial number " << devInfo.GetSerialNumber();
   _debug(msg.str()); msg.str("");
   try
   {
-    _debug("Creating CBaslerGigECamera object");
-    *bCamera = new Pylon::CBaslerGigECamera(_tlFactory->CreateDevice(gigeDevInfo));
-    _debug("Getting the IPylonDevice object");
-    *pDevice = (*bCamera)->GetDevice();
+    _debug("Creating IPylonDevice object");
+    pDevice = _tlFactory->CreateDevice(devInfo);
+    _debug("Creating CInstantCamera object");
+    bCamera = new Pylon::CInstantCamera(pDevice);
   }
   catch(std::exception& e)
   {
@@ -171,5 +124,5 @@ CppCamera* CppFactory::CreateCamera(CppDevInfo* wrapperDevInfo)
     _error(msg.str()); msg.str("");
     return NULL;
   }
-  return new CppCamera(gigeDevInfo,*pDevice,*bCamera);
+  return new CppCamera(devInfo,pDevice,bCamera);
 }

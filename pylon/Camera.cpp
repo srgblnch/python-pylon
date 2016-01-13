@@ -34,12 +34,12 @@
 
 #include "Camera.h"
 
-CppCamera::CppCamera(Pylon::CBaslerGigECamera::DeviceInfo_t _gigeDevInfo,
+CppCamera::CppCamera(Pylon::CInstantCamera::DeviceInfo_t _devInfo,
                      Pylon::IPylonDevice *_pDevice,
-                     Pylon::CBaslerGigECamera* _bCamera)
-  :gigeDevInfo(_gigeDevInfo),pDevice(_pDevice),bCamera(_bCamera)
+                     Pylon::CInstantCamera* _bCamera)
+  :devInfo(_devInfo),pDevice(_pDevice),bCamera(_bCamera)
 {
-  _name = "CppCamera(" + _gigeDevInfo.GetSerialNumber() + ")";
+  _name = "CppCamera(" + _devInfo.GetSerialNumber() + ")";
 }
 
 CppCamera::~CppCamera()
@@ -52,7 +52,7 @@ Pylon::String_t CppCamera::GetSerialNumber()
 {
   try
   {
-    return gigeDevInfo.GetSerialNumber();
+    return devInfo.GetSerialNumber();
   }
   catch(std::exception& e)
   {
