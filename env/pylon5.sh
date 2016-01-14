@@ -38,3 +38,5 @@ export PYLON_ROOT=$PYLON_BASE/pylon$PYLON_MAJORVERSION
 source arch.sh
 
 export LD_LIBRARY_PATH=$PYLONLIBDIR:$LD_LIBRARY_PATH
+
+export CFLAGS+="-lpylonbase "
