@@ -23,10 +23,14 @@ Where 'X' means the pylon SDK major version installed in the system.
 
 ##Build
 
+Get the sources from a git repository, like can be:
+
 ```bash
 $ git clone git@github.com:srgblnch/python-pylon.git
 $ cd python-pylon
 ```
+
+Call the *setup.sh* that will stablish the environment for itself to call the *python setup.py build* for you.
 
 ```bash
 $ ./setup.sh pylon 5
