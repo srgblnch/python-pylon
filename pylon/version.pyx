@@ -40,11 +40,27 @@ cdef extern from "pylon/PylonVersionNumber.h":
     int PYLON_VERSION_SUBMINOR
     int PYLON_VERSION_BUILD
 
-def version_pylon_API():
+#from version import version_python_pylon,version_python_pylon_string
+
+cdef class Version(object):
+    def __init__(self,*args,**kwargs):
+        super(Version,self).__init__(*args,**kwargs)
+    def pylonAPI(self):
+        return (PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
+                PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
+    def pylonAPI_str(self):
+        return '%d.%d.%d-%d'%(PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
+                              PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
+    def wrapper(self):
+        return version_python_pylon()
+    def wrapper_str(self):
+        return version_python_pylon_string()
+
+def version_pylonAPI():
     return (PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
             PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
     
-def version_pylon_API_string():
+def version_pylonAPI_str():
     return '%d.%d.%d-%d'%(PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
             PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
 

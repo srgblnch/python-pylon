@@ -41,7 +41,7 @@ from libcpp cimport bool
 from libcpp.string cimport string
 
 #necessary includes from pylonAPI
-include "pylon/stdinclude.pyx"
+include "pylonWrap/stdinclude.pyx"
 
 #highest level of python module includes
 include "Logger.pyx"
@@ -52,6 +52,7 @@ include "DevInfo.pyx"
 #third level of python module includes
 include "Camera.pyx"
 include "Factory.pyx"
-include "versionAPI.pyx"
-include "versionWrapper.py"
+include "version.py"
+include "version.pyx"
+
 

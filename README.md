@@ -40,8 +40,10 @@ Then a python console should return this:
 
 ```python
 >>> import pylon
->>> pylon.pylonversionstr()
+>>> pylon.Version().pylonAPI_str()
     '5.0.1-6388'
+>>> pylon.Version().wrapper_str()
+    '0.0.0-0'
 ```
 
 There is no default compilation version and it must be specified in the *setup.sh* and the *env.sh* scripts. For example, with pylon 4:
@@ -54,7 +56,7 @@ To have a python answer like:
 
 ```python
 >>> import pylon
->>> pylon.pylonversionstr()
+>>> pylon.Version().pylonAPI_str()
     '4.0.0-62'
 ```
 
@@ -68,7 +70,7 @@ With the answer:
 
 ```python
 >>> import pylon
->>> pylon.pylonversionstr()
+>>> pylon.Version().pylonAPI_str()
     '3.2.1-0'
 ```
 
@@ -82,7 +84,7 @@ And the working version say:
 
 ```python
 >>> import pylon
->>> pylon.pylonversionstr()
+>>> pylon.Version().pylonAPI_str()
     '2.3.3-1337'
 ```
 
