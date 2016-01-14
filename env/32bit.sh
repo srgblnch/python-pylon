@@ -36,6 +36,9 @@
 export SYSTEMARCH="arch32"
 
 export PYLONLIBDIR=$PYLON_ROOT/lib
-if [ -z ${GENICAM_ROOT} ]; then
-	GCLIBDIR=$GENICAM_ROOT/bin/Linux32_i86
+if [ -d $GENICAM_ROOT ]; then
+	export CFLAGS+="-I$GENICAM_ROOT/library/CPP/include "
+	export GCLIBDIR=$GENICAM_ROOT/bin/Linux32_i86
+	export LD_LIBRARY_PATH=$GCLIBDIR:$LD_LIBRARY_PATH
+	export CFLAGS+="-L$GCLIBDIR "
 fi

@@ -36,6 +36,11 @@
 export SYSTEMARCH="arch64"
 
 export PYLONLIBDIR=$PYLON_ROOT/lib64
-if [ -z ${GENICAM_ROOT} ]; then
-	GCLIBDIR=$GENICAM_ROOT/bin/Linux64_x64
+if [ -d $GENICAM_ROOT ]; then
+	export CFLAGS+="-I$GENICAM_ROOT/library/CPP/include "
+	export GCLIBDIR=$GENICAM_ROOT/bin/Linux64_x64
+	export LD_LIBRARY_PATH=$GCLIBDIR:$LD_LIBRARY_PATH
+	export CFLAGS+="-L$GCLIBDIR "
+else
+	echo "No genicam root"
 fi

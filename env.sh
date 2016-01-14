@@ -34,6 +34,7 @@
 ###############################################################################
 
 export PYLON_BASE=/opt
+
 if [[ "$1" == 'pylon' && "$2" != '' ]]; then
 	export PYLON_MAJORVERSION=$2
 else
@@ -43,19 +44,36 @@ else
 	return
 fi
 
-export BASEDIR=`dirname $0`
+echo "Preparing a work environment for pylon $PYLON_MAJORVERSION..."
+echo "Python version `python -c 'import sys; print(".".join(map(str, sys.version_info[:3])))'`"
+echo "gcc version `gcc -dumpversion`"
+echo $(cython -V)
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+pushd $SCRIPT_DIR/env > /dev/null
 
 if [ "$PYLON_MAJORVERSION" == '2' ]; then
-	. $BASEDIR/env/pylon2.sh
+	source pylon2.sh
 elif [ "$PYLON_MAJORVERSION" == '3' ]; then
-	. $BASEDIR/env/pylon3.sh
+	source pylon3.sh
 elif [ "$PYLON_MAJORVERSION" == '4' ]; then
-	. $BASEDIR/env/pylon4.sh
+	source pylon4.sh
 elif [ "$PYLON_MAJORVERSION" == '5' ]; then
-	. $BASEDIR/env/pylon5.sh
+	source pylon5.sh
 else
-	echo "$PYLON_MAJORVERSION pylon's major release is not supported."
+	echo "Pylon's major release $PYLON_MAJORVERSION is not supported."
+	return
 fi
 
-echo "Environment for Pylon $PYLON_MAJORVERSION $SYSTEMARCH."
+echo "Environment set for Pylon $PYLON_MAJORVERSION $SYSTEMARCH."
+#echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
 
+
+if [ ! -d $PYLON_ROOT ]; then
+	echo -e "\e[31mNot found Pylon installed in $PYLON_ROOT\e[0m"
+    echo "At least it is necessary to have a symbolic link in /opt"
+    exit -1
+fi
+
+popd > /dev/null

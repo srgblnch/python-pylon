@@ -35,6 +35,6 @@
 
 export PYLON_ROOT=$PYLON_BASE/pylon$PYLON_MAJORVERSION
 
-. $BASEDIR/env/arch.sh
+source arch.sh
 
 export LD_LIBRARY_PATH=$PYLONLIBDIR:$LD_LIBRARY_PATH
