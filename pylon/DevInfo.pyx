@@ -63,7 +63,7 @@ cdef class __DeviceInformation(Logger):
 
     def __init__(self,*args,**kwargs):
         super(__DeviceInformation,self).__init__(*args,**kwargs)
-        self._name = "DeviceInformation()"
+        self._setName("DeviceInformation()")
     
     def __del__(self):
         pass
@@ -75,7 +75,7 @@ cdef class __DeviceInformation(Logger):
 
     cdef SetCppDevInfo(self,CppDevInfo *devInfo):
         self._devInfo = devInfo
-        self._name = "DeviceInformation(%s)"%(self.SerialNumber)
+        self._setName("DeviceInformation(%s)"%(self.SerialNumber))
     
     cdef CppDevInfo* GetCppDevInfo(self):
         return self._devInfo

@@ -36,7 +36,6 @@
 #define CAMERA_H
 
 #include <pylon/PylonIncludes.h>
-#include <pylon/gige/BaslerGigECamera.h>
 #include "Logger.h"
 #include "DevInfo.h"
 
@@ -49,6 +48,7 @@ public:
              Pylon::IPylonDevice*, Pylon::CInstantCamera* );
   ~CppCamera();
   Pylon::String_t GetSerialNumber();
+  Pylon::String_t GetModelName();
 
 private:
   Pylon::CInstantCamera::DeviceInfo_t devInfo;

@@ -62,3 +62,18 @@ Pylon::String_t CppCamera::GetSerialNumber()
     return "";
   }
 }
+
+Pylon::String_t CppCamera::GetModelName()
+{
+  try
+  {
+    return devInfo.GetModelName();
+  }
+  catch(std::exception& e)
+  {
+    std::stringstream msg;
+    msg << "CppCamera GetModelName exception: " << e.what();
+    _error(msg.str()); msg.str("");
+    return "";
+  }
+}

@@ -57,7 +57,7 @@ cdef class Factory(Logger):
 
     def __init__(self,*args,**kwargs):
         super(Factory,self).__init__(*args,**kwargs)
-        self._name = "Factory()"
+        self._setName("Factory()")
         self._debug("Called __init__()")
         if not self.__structuresHaveInfo__():
             if self._cppFactory == NULL:
@@ -84,6 +84,10 @@ cdef class Factory(Logger):
         self._debug("Called __dealloc__()")
         self.__del__()
         self._debug("__dealloc__() done")
+
+    def __repr__(self):
+        self._debug("repr of %s"%self._name)
+        return "%s"%self._name
 
     def _refreshTlInfo(self):
         if self.__structuresHaveInfo__():

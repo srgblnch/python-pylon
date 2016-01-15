@@ -37,6 +37,7 @@ cdef extern from "Camera.h":
     cdef cppclass CppCamera:
         CppCamera( CppFactory *factory, CppDevInfo *devInfo ) except+
         String_t GetSerialNumber() except+
+        String_t GetModelName() except+
 
 
 cdef class Camera(Logger):
@@ -46,16 +47,28 @@ cdef class Camera(Logger):
 
     def __init__(self,*args,**kwargs):
         super(Camera,self).__init__(*args,**kwargs)
-        self._name = "Camera()"
+        self._setName("Camera()")
         self._debug("Void Camera Object build, "\
                     "but it doesn't link with an specific camera")
 
     def __del__(self):
         del self._camera
 
+    def __str__(self):
+        return "%d"%self.SerialNumber
+    def __repr__(self):
+        return "%s (%s)"%(self.SerialNumber,self.ModelName)
+
     cdef SetCppCamera(self,CppCamera* cppCamera):
         self._camera = cppCamera
-        self._serial = int(<string>self._camera.GetSerialNumber())
-        name = "Camera(%d)"%(self._serial)
+        name = "Camera(%d)"%(self.SerialNumber)
         self._debug("New name: %s"%name)
-        self._name = name
+        self._setName(name)
+
+    @property
+    def SerialNumber(self):
+        return int(<string>self._camera.GetSerialNumber())
+    
+    @property
+    def ModelName(self):
+        return <string>self._camera.GetModelName()
