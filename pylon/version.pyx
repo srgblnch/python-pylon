@@ -42,6 +42,13 @@ cdef extern from "pylon/PylonVersionNumber.h":
 
 #from version import version_python_pylon,version_python_pylon_string
 
+#TODO: this should behave like:
+#>>> pylon.Version
+#    '0.0.0-0'
+#>>> repr(pylon.Version)
+#    '0.0.0-0 (pylonAPI X.Y.Z-B)'
+#As well as allow an access that gives a list of integers.
+
 cdef class Version(object):
     def __init__(self,*args,**kwargs):
         super(Version,self).__init__(*args,**kwargs)

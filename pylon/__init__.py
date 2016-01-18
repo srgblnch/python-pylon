@@ -35,4 +35,4 @@
 
 #import pyximport; pyximport.install()
 
-from versionWrapper import version_python_pylon,version_python_pylon_string
+from .version import version_python_pylon,version_python_pylon_string
