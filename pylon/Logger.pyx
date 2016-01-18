@@ -46,6 +46,25 @@ _handler.setFormatter(_formatter)
 logger.addHandler(_handler)
 
 
+def trace(func):
+    def decorated(self,*args):
+        try:
+            logger.debug("TRACE: enter %s"%(func.__name__),
+                         extra={'objname':self._name,
+                                'threadId':self._threadId})
+            ret = func(self,*args)
+            logger.debug("TRACE: %s done %s"%(func.__name__,ret),
+                         extra={'objname':self._name,
+                                'threadId':self._threadId})
+            return ret
+        except Exception as e:
+            logger.warning("TRACE: %s exception %s"%(func.__name__,e),
+                           extra={'objname':self._name,
+                                  'threadId':self._threadId})
+            raise e
+    return decorated
+
+
 cdef class Logger(object):
     '''This class is a very basic debugging flag mode used as a super class
        for the other classes in this library.
@@ -54,17 +73,15 @@ cdef class Logger(object):
     cdef public:
         string _name
 #         bool _debugFlag
-        object _logger#,_handler,_formatter
 
     def __init__(self,debug=True):
         super(Logger,self).__init__()
-        self._logger = logger#logging.getLogger()
         self._setName("Logger")
 #         self._debugFlag = debug
         if debug:
-            self._logger.setLevel(logging.DEBUG)
+            logger.setLevel(logging.DEBUG)
         else:
-            self._logger.setLevel(logging.INFO)
+            logger.setLevel(logging.INFO)
 
     @property
     def name(self):
@@ -76,25 +93,29 @@ cdef class Logger(object):
 
     @property
     def _threadId(self):
-        return _currentThread().getName()
+        try:
+            return _currentThread().getName()
+        except Exception as e:
+            logger.debug("Couldn't get the thread id: %s"%(e))
+        return ""
 
     def _critical(self,msg):
-        self._logger.critical(msg,extra={'objname':self._name,
-                                         'threadId':self._threadId})
+        threadId = self._threadId
+        logger.critical(msg,extra={'objname':self._name,'threadId':threadId})
 
     def _error(self,msg):
-        self._logger.error(msg,extra={'objname':self._name,
-                                      'threadId':self._threadId})
+        threadId = self._threadId
+        logger.error(msg,extra={'objname':self._name,'threadId':threadId})
 
     def _warning(self,msg):
-        self._logger.warning(msg,extra={'objname':self._name,
-                                        'threadId':self._threadId})
+        threadId = self._threadId
+        logger.warning(msg,extra={'objname':self._name,'threadId':threadId})
 
     def _info(self,msg):
-        self._logger.info(msg,extra={'objname':self._name,
-                                     'threadId':self._threadId})
+        threadId = self._threadId
+        logger.info(msg,extra={'objname':self._name,'threadId':threadId})
 
     def _debug(self,msg):
-        self._logger.debug(msg,extra={'objname':self._name,
-                                      'threadId':self._threadId})
+        threadId = self._threadId
+        logger.debug(msg,extra={'objname':self._name,'threadId':threadId})
 
