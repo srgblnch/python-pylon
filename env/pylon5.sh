@@ -39,4 +39,18 @@ source arch.sh
 
 export LD_LIBRARY_PATH=$PYLONLIBDIR:$LD_LIBRARY_PATH
 
-export CFLAGS+="-lpylonbase "
+export CFLAGS+="-Wl,-E "
+export CFLAGS+="-I$PYLON_ROOT/include "
+export CFLAGS+="-lpylonbase -lpylonutility "
+export CFLAGS+="-lGenApi_gcc_v3_0_Basler_pylon_v5_0 "
+export CFLAGS+="-lGCBase_gcc_v3_0_Basler_pylon_v5_0 "
+
+GENTLPATH=$PYLONLIBDIR/gentlproducer/gtl
+if [ -d "$GENTLPATH" ]; then
+	if [ -z "$GENICAM_GENTL32_PATH" ] && [ "$SYSTEMARCH" = "arch32" ]; then
+		export GENICAM_GENTL32_PATH="$GENTLPATH"
+	fi
+	if [ -z "$GENICAM_GENTL64_PATH" ] && [ "$SYSTEMARCH" = "arch64" ]; then
+		export GENICAM_GENTL64_PATH="$GENTLPATH"
+	fi
+fi

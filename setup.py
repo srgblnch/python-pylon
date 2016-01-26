@@ -35,7 +35,7 @@
 
 #import pyximport; pyximport.install()
 
-from pylon.versionWrapper import version_python_pylon_string
+from pylon.version import version_python_pylon_string
 
 from Cython.Distutils import build_ext
 from distutils.core import setup
@@ -45,7 +45,8 @@ pylonExtension = Extension('pylon',['pylon/__init__.pyx',
                                     'pylon/Logger.cpp',
                                     'pylon/Factory.cpp',
                                     'pylon/DevInfo.cpp',
-                                    'pylon/Camera.cpp'],
+                                    'pylon/Camera.cpp',
+                                    'pylon/TransportLayer.cpp',],
                            language="c++",
                            #extra_compile_args=["-std=c++11"]
                            )

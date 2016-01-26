@@ -99,7 +99,7 @@ Once have the *pylon.so* build and placed in the python path, the use can began:
 >>> factory = pylon.Factory()
 >>> factory.nCameras
     3
->>> factory.cameraList
+>>> factory.camerasList
     [2NNNNNN0 (scA1000-30gm), 2NNNNNN1 (acA1300-30gc), 2NNNNNN3 (acA1300-30gc)]
 >>> factory.cameraModels
     ['scA1000-30gm', 'acA1300-30gc']

@@ -41,4 +41,6 @@ if [ -d $GENICAM_ROOT ]; then
 	export GCLIBDIR=$GENICAM_ROOT/bin/Linux32_i86
 	export LD_LIBRARY_PATH=$GCLIBDIR:$LD_LIBRARY_PATH
 	export CFLAGS+="-L$GCLIBDIR "
+else
+	echo "No genicam root"
 fi
