@@ -47,7 +47,7 @@ cdef class Camera(Logger):
 
     def __init__(self,*args,**kwargs):
         super(Camera,self).__init__(*args,**kwargs)
-        self._setName("Camera()")
+        self.name = "Camera()"
         self._debug("Void Camera Object build, "\
                     "but it doesn't link with an specific camera")
 

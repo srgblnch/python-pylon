@@ -40,21 +40,21 @@ cdef extern from "DevInfo.h":
         String_t GetUserDefinedName() except+
         String_t GetDeviceVersion() except+
         String_t GetDeviceFactory() except+
-        String_t GetAddress() except+
-        String_t GetIpAddress() except+
-        String_t GetDefaultGateway() except+
-        String_t GetSubnetMask() except+
-        String_t GetPortNr() except+
-        String_t GetMacAddress() except+
-        String_t GetInterface() except+
-        String_t GetIpConfigOptions() except+
-        String_t GetIpConfigCurrent() except+
-        bool IsPersistentIpActive() except+
-        bool IsDhcpActive() except+
-        bool IsAutoIpActive() except+
-        bool IsPersistentIpSupported() except+
-        bool IsDhcpSupported() except+
-        bool IsAutoIpSupported() except+
+#         String_t GetAddress() except+
+#         String_t GetIpAddress() except+
+#         String_t GetDefaultGateway() except+
+#         String_t GetSubnetMask() except+
+#         String_t GetPortNr() except+
+#         String_t GetMacAddress() except+
+#         String_t GetInterface() except+
+#         String_t GetIpConfigOptions() except+
+#         String_t GetIpConfigCurrent() except+
+#         bool IsPersistentIpActive() except+
+#         bool IsDhcpActive() except+
+#         bool IsAutoIpActive() except+
+#         bool IsPersistentIpSupported() except+
+#         bool IsDhcpSupported() except+
+#         bool IsAutoIpSupported() except+
 
 
 cdef class __DeviceInformation(Logger):
@@ -63,7 +63,7 @@ cdef class __DeviceInformation(Logger):
 
     def __init__(self,*args,**kwargs):
         super(__DeviceInformation,self).__init__(*args,**kwargs)
-        self._setName("DeviceInformation()")
+        self.name = "DeviceInformation()"
     
     def __del__(self):
         pass
@@ -100,63 +100,63 @@ cdef class __DeviceInformation(Logger):
     def DeviceVersion(self):
         return <string>self._devInfo.GetDeviceVersion()
     
-    @property
-    def Address(self):
-        return <string>self._devInfo.GetAddress()
-    
-    @property
-    def IpAddress(self):
-        return <string>self._devInfo.GetIpAddress()
-    
-    @property
-    def DefaultGateway(self):
-        return <string>self._devInfo.GetDefaultGateway()
-    
-    @property
-    def SubnetMask(self):
-        return <string>self._devInfo.GetSubnetMask()
-    
-    @property
-    def PortNr(self):
-        return int(<string>self._devInfo.GetPortNr())
-    
-    @property
-    def MacAddress(self):
-        return <string>self._devInfo.GetMacAddress()
-    
-    @property
-    def Interface(self):
-        return <string>self._devInfo.GetInterface()
-    
-    @property
-    def IpConfigOptions(self):
-        return <string>self._devInfo.GetIpConfigOptions()
-    
-    @property
-    def IpConfigCurrent(self):
-        return <string>self._devInfo.GetIpConfigCurrent()
-    
-    @property
-    def IsPersistentIpActive(self):
-        return <bool>self._devInfo.IsPersistentIpActive()
-    
-    @property
-    def IsDhcpActive(self):
-        return <bool>self._devInfo.IsDhcpActive()
-    
-    @property
-    def IsAutoIpActive(self):
-        return <bool>self._devInfo.IsAutoIpActive()
-    
-    @property
-    def IsPersistentIpSupported(self):
-        return <bool>self._devInfo.IsPersistentIpSupported()
-    
-    @property
-    def IsDhcpSupported(self):
-        return <bool>self._devInfo.IsDhcpSupported()
-    
-    @property
-    def IsAutoIpSupported(self):
-        return <bool>self._devInfo.IsAutoIpSupported()
+#     @property
+#     def Address(self):
+#         return <string>self._devInfo.GetAddress()
+#     
+#     @property
+#     def IpAddress(self):
+#         return <string>self._devInfo.GetIpAddress()
+#     
+#     @property
+#     def DefaultGateway(self):
+#         return <string>self._devInfo.GetDefaultGateway()
+#     
+#     @property
+#     def SubnetMask(self):
+#         return <string>self._devInfo.GetSubnetMask()
+#     
+#     @property
+#     def PortNr(self):
+#         return int(<string>self._devInfo.GetPortNr())
+#     
+#     @property
+#     def MacAddress(self):
+#         return <string>self._devInfo.GetMacAddress()
+#     
+#     @property
+#     def Interface(self):
+#         return <string>self._devInfo.GetInterface()
+#     
+#     @property
+#     def IpConfigOptions(self):
+#         return <string>self._devInfo.GetIpConfigOptions()
+#     
+#     @property
+#     def IpConfigCurrent(self):
+#         return <string>self._devInfo.GetIpConfigCurrent()
+#     
+#     @property
+#     def IsPersistentIpActive(self):
+#         return <bool>self._devInfo.IsPersistentIpActive()
+#     
+#     @property
+#     def IsDhcpActive(self):
+#         return <bool>self._devInfo.IsDhcpActive()
+#     
+#     @property
+#     def IsAutoIpActive(self):
+#         return <bool>self._devInfo.IsAutoIpActive()
+#     
+#     @property
+#     def IsPersistentIpSupported(self):
+#         return <bool>self._devInfo.IsPersistentIpSupported()
+#     
+#     @property
+#     def IsDhcpSupported(self):
+#         return <bool>self._devInfo.IsDhcpSupported()
+#     
+#     @property
+#     def IsAutoIpSupported(self):
+#         return <bool>self._devInfo.IsAutoIpSupported()
     

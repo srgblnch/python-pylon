@@ -49,11 +49,14 @@ public:
   ~CppCamera();
   Pylon::String_t GetSerialNumber();
   Pylon::String_t GetModelName();
+//  uint32_t GetNumStreamGrabberChannels();
 
 private:
   Pylon::CInstantCamera::DeviceInfo_t devInfo;
   Pylon::IPylonDevice *pDevice;
   Pylon::CInstantCamera *bCamera;
+  GenApi::INodeMap *control;
+//  Pylon::IStreamGrabber *streamGrabber;
 };
 
 #endif /* CAMERA_H */

@@ -34,16 +34,31 @@
 
 #include "DevInfo.h"
 
-CppDevInfo::CppDevInfo(const Pylon::CBaslerGigECamera::DeviceInfo_t& CppDevInfo)
+/****
+ * Constructors
+ */
+CppDevInfo::CppDevInfo(const Pylon::CInstantCamera::DeviceInfo_t& CppDevInfo)
   :devInfo(CppDevInfo)
 {
   //devInfo = CppDevInfo;
-  //devInfo.SetDeviceClass(Pylon::CBaslerGigECamera::DeviceClass());
+  //devInfo.SetDeviceClass(Pylon::CInstantCamera::DeviceClass());
   _name = "CppDevInfo(" + GetSerialNumber() + ")";
 }
 
+//CppGigEInfo::CppGigEInfo(const Pylon::CInstantCamera::DeviceInfo_t& CppDevInfo)
+//{
+//  _name = "CppGigEInfo(" + GetSerialNumber() + ")";
+//}
+
+/****
+ * Destructor
+ */
 CppDevInfo::~CppDevInfo() { }
 
+
+/****
+ * General attributes area
+ */
 Pylon::String_t CppDevInfo::GetSerialNumber()
 {
   return devInfo.GetSerialNumber();
@@ -69,87 +84,92 @@ Pylon::String_t CppDevInfo::GetDeviceFactory()
   return devInfo.GetDeviceFactory();
 }
 
-Pylon::String_t CppDevInfo::GetAddress()
+Pylon::CInstantCamera::DeviceInfo_t CppDevInfo::GetDeviceInfo()
 {
-  return devInfo.GetAddress();
+  return devInfo;
 }
 
-Pylon::String_t CppDevInfo::GetIpAddress()
-{
-  return devInfo.GetIpAddress();
-}
 
-Pylon::String_t CppDevInfo::GetDefaultGateway()
-{
-  return devInfo.GetDefaultGateway();
-}
+/****
+ * GigE attributes area
+ */
+//Pylon::String_t CppGigEInfo::GetAddress()
+//{
+//  return devInfo.GetAddress();
+//}
+//
+//Pylon::String_t CppGigEInfo::GetIpAddress()
+//{
+//  return devInfo.GetIpAddress();
+//}
+//
+//Pylon::String_t CppGigEInfo::GetDefaultGateway()
+//{
+//  return devInfo.GetDefaultGateway();
+//}
+//
+//Pylon::String_t CppGigEInfo::GetSubnetMask()
+//{
+//  return devInfo.GetSubnetMask();
+//}
+//
+//Pylon::String_t CppGigEInfo::GetPortNr()
+//{
+//  return devInfo.GetPortNr();
+//}
+//
+//Pylon::String_t CppGigEInfo::GetMacAddress()
+//{
+//  return devInfo.GetMacAddress();
+//}
+//
+//Pylon::String_t CppGigEInfo::GetInterface()
+//{
+//  return devInfo.GetInterface();
+//}
+//
+//Pylon::String_t CppGigEInfo::GetIpConfigOptions()
+//{
+//  return devInfo.GetIpConfigOptions();
+//}
+//
+//Pylon::String_t CppGigEInfo::GetIpConfigCurrent()
+//{
+//  return devInfo.GetIpConfigCurrent();
+//}
+//
+//bool CppGigEInfo::IsPersistentIpActive()
+//{
+//  return devInfo.IsPersistentIpActive();
+//}
+//
+//bool CppGigEInfo::IsDhcpActive()
+//{
+//  return devInfo.IsDhcpActive();
+//}
+//
+//bool CppGigEInfo::IsAutoIpActive()
+//{
+//  return devInfo.IsAutoIpActive();
+//}
+//
+//bool CppGigEInfo::IsPersistentIpSupported()
+//{
+//  return devInfo.IsPersistentIpSupported();
+//}
+//
+//bool CppGigEInfo::IsDhcpSupported()
+//{
+//  return devInfo.IsDhcpSupported();
+//}
+//
+//bool CppGigEInfo::IsAutoIpSupported()
+//{
+//  return devInfo.IsAutoIpSupported();
+//}
 
-Pylon::String_t CppDevInfo::GetSubnetMask()
-{
-  return devInfo.GetSubnetMask();
-}
-
-Pylon::String_t CppDevInfo::GetPortNr()
-{
-  return devInfo.GetPortNr();
-}
-
-Pylon::String_t CppDevInfo::GetMacAddress()
-{
-  return devInfo.GetMacAddress();
-}
-
-Pylon::String_t CppDevInfo::GetInterface()
-{
-  return devInfo.GetInterface();
-}
-
-Pylon::String_t CppDevInfo::GetIpConfigOptions()
-{
-  return devInfo.GetIpConfigOptions();
-}
-
-Pylon::String_t CppDevInfo::GetIpConfigCurrent()
-{
-  return devInfo.GetIpConfigCurrent();
-}
-
-bool CppDevInfo::IsPersistentIpActive()
-{
-  return devInfo.IsPersistentIpActive();
-}
-
-bool CppDevInfo::IsDhcpActive()
-{
-  return devInfo.IsDhcpActive();
-}
-
-bool CppDevInfo::IsAutoIpActive()
-{
-  return devInfo.IsAutoIpActive();
-}
-
-bool CppDevInfo::IsPersistentIpSupported()
-{
-  return devInfo.IsPersistentIpSupported();
-}
-
-bool CppDevInfo::IsDhcpSupported()
-{
-  return devInfo.IsDhcpSupported();
-}
-
-bool CppDevInfo::IsAutoIpSupported()
-{
-  return devInfo.IsAutoIpSupported();
-}
-
-//bool CppDevInfo::IsSubset(IProperties& Subset)
+//bool CppGigEInfo::IsSubset(IProperties& Subset)
 //{
 //  return devInfo.IsSubset(IProperties& Subset)();
 //}
 
-Pylon::CBaslerGigECamera::DeviceInfo_t CppDevInfo::GetDeviceInfo()
-{
-  return devInfo;
-}

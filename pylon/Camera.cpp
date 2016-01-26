@@ -40,11 +40,18 @@ CppCamera::CppCamera(Pylon::CInstantCamera::DeviceInfo_t _devInfo,
   :devInfo(_devInfo),pDevice(_pDevice),bCamera(_bCamera)
 {
   _name = "CppCamera(" + _devInfo.GetSerialNumber() + ")";
+  control = &_bCamera->GetNodeMap();
+//  streamGrabber = pDevice.GetStreamGrabber(0);//FIXME: if there are more than 1?
 }
 
 CppCamera::~CppCamera()
 {
   //TODO: move it to the factory cleaner
+  //bCamera.DestroyDevice();
+  //if ( bCamera.IsPylonDeviceAttached() )
+  //{
+  //  bCamera.DetachDevice();
+  //}
   //tlFactory->DestroyDevice(pDevice);
 }
 
@@ -77,3 +84,8 @@ Pylon::String_t CppCamera::GetModelName()
     return "";
   }
 }
+
+//uint32_t CppCamera::GetNumStreamGrabberChannels()
+//{
+//  return pDevice.GetNumStreamGrabberChannels();
+//}

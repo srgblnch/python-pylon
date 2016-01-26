@@ -1,6 +1,6 @@
 /*---- licence header
 ###############################################################################
-## file :               Factory.h
+## file :               TransportLayer.h
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -32,33 +32,26 @@
 ###############################################################################
 */
 
-#ifndef FACTORY_H
-#define FACTORY_H
+#ifndef TRANSPORTLAYER_H
+#define TRANSPORTLAYER_H
 
 #include <pylon/PylonIncludes.h>
 #include "Logger.h"
-#include "TransportLayer.h"
-#include "DevInfo.h"
-#include "Camera.h"
-#include <vector>
 
-class CppFactory : public Logger
+class CppTransportLayer : public Logger
 {
 public:
-  CppFactory();
-  ~CppFactory();
-  void CreateTl();
-  void ReleaseTl();
-  int DeviceDiscovery();
-  CppDevInfo* getNextDeviceInfo();
-  Pylon::CTlFactory* getTlFactory();
-  CppCamera* CreateCamera(CppDevInfo* wrapperDevInfo);
+  CppTransportLayer(Pylon::CTlInfo);
+  ~CppTransportLayer();
+  Pylon::String_t getTlClass();
+  int EnumerateDevices();
+  Pylon::DeviceInfoList_t::iterator getFirst();
+  Pylon::DeviceInfoList_t::iterator getLast();
 private:
-  void prepareDeviceIteration();
-  Pylon::CTlFactory *_tlFactory;
-  std::vector<CppTransportLayer*> _tlList;
-  std::vector<CppTransportLayer*>::iterator _tlLstIt;
-  Pylon::DeviceInfoList_t::iterator _devLstIt;
+  Pylon::ITransportLayer *tl;
+  Pylon::CTlInfo info;
+  Pylon::DeviceInfoList_t _deviceList;
+  Pylon::DeviceInfoList_t::iterator _deviceIterator;
 };
 
-#endif /* FACTORY_H */
+#endif /* TRANSPORTLAYER_H */

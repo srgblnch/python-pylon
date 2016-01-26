@@ -35,7 +35,7 @@
 #include "Logger.h"
 
 //FIXME: subclasses shall set value to _name variable
-
+//FIXME: default log level should not be debug in production
 Logger::Logger()
   :_logLevel(_logger_DEBUG) { }
 

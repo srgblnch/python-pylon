@@ -39,7 +39,7 @@ from weakref import ref as _weakref
 cdef object _logger,_handler,_formatter
 global logger
 logger = logging.getLogger()
-_formatter = logging.Formatter('%(threadId)s\t%(asctime)s\t%(levelname)s\t'\
+_formatter = logging.Formatter('%(threadId)s\t%(levelname)s\t%(asctime)s\t'\
                                '%(objname)s\t%(message)s')
 _handler = logging.StreamHandler(sys.stdout)
 _handler.setFormatter(_formatter)
@@ -49,18 +49,21 @@ logger.addHandler(_handler)
 def trace(func):
     def decorated(self,*args):
         try:
-            logger.debug("TRACE: enter %s"%(func.__name__),
-                         extra={'objname':self._name,
-                                'threadId':self._threadId})
+            if self._trace:
+                logger.debug("TRACE: enter %s"%(func.__name__),
+                             extra={'objname':self._name,
+                                    'threadId':self._threadId})
             ret = func(self,*args)
-            logger.debug("TRACE: %s done %s"%(func.__name__,ret),
-                         extra={'objname':self._name,
-                                'threadId':self._threadId})
+            if self._trace:
+                logger.debug("TRACE: %s done %s"%(func.__name__,ret),
+                             extra={'objname':self._name,
+                                    'threadId':self._threadId})
             return ret
         except Exception as e:
-            logger.warning("TRACE: %s exception %s"%(func.__name__,e),
-                           extra={'objname':self._name,
-                                  'threadId':self._threadId})
+            if self._trace:
+                logger.warning("TRACE: %s exception %s"%(func.__name__,e),
+                               extra={'objname':self._name,
+                                      'threadId':self._threadId})
             raise e
     return decorated
 
@@ -72,24 +75,26 @@ cdef class Logger(object):
 
     cdef public:
         string _name
-#         bool _debugFlag
+        bool _trace
 
-    def __init__(self,debug=True):
+    #FIXME: default log level should not be debug in production
+    def __init__(self,debug=True,trace=False):
         super(Logger,self).__init__()
-        self._setName("Logger")
-#         self._debugFlag = debug
-        if debug:
+        self.name = "Logger"
+        self._trace = trace
+        if debug or trace:
             logger.setLevel(logging.DEBUG)
+            if not debug and trace:
+                self._warning("Trace forces to have debug level")
         else:
             logger.setLevel(logging.INFO)
 
-    @property
-    def name(self):
+    #Instead of property decorator, because the setter didn't work.
+    def _getName(self):
         return self._name
-    #@name.setter
-    #def name(self,name):
     def _setName(self,name):
         self._name = name
+    name = property(_getName,_setName)
 
     @property
     def _threadId(self):
