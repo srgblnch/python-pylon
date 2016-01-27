@@ -102,4 +102,10 @@ Pylon::DeviceInfoList_t::iterator CppTransportLayer::getLast()
   return _deviceList.end();
 }
 
-
+/****
+ *
+ */
+CppDevInfo* CppTransportLayer::buildDeviceInfo(Pylon::CDeviceInfo pylonDeviceInfo)
+{
+  return new CppDevInfo(pylonDeviceInfo);
+}

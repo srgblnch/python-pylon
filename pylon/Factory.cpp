@@ -174,9 +174,10 @@ CppDevInfo* CppFactory::getNextDeviceInfo()
         << (*_tlLstIt)->getTlClass() << " transport layer";
     _debug(msg.str()); msg.str("");
   }
-  const Pylon::CInstantCamera::DeviceInfo_t& pylonDeviceInfo = \
+  const Pylon::CDeviceInfo& pylonDeviceInfo = \
     static_cast<const Pylon::CInstantCamera::DeviceInfo_t&>(*_devLstIt);
-  CppDevInfo* wrapperDevInfo = new CppDevInfo(pylonDeviceInfo);
+  CppDevInfo* wrapperDevInfo = (*_tlLstIt)->buildDeviceInfo(pylonDeviceInfo);
+                               //new CppDevInfo(pylonDeviceInfo);
   msg << "Found a " << pylonDeviceInfo.GetModelName()
       << " Camera, with serial number " << pylonDeviceInfo.GetSerialNumber();
   _debug(msg.str());
@@ -187,7 +188,7 @@ CppDevInfo* CppFactory::getNextDeviceInfo()
 CppCamera* CppFactory::CreateCamera(CppDevInfo* wrapperDevInfo)
 {
   std::stringstream msg;
-  Pylon::CInstantCamera::DeviceInfo_t devInfo;
+  Pylon::CDeviceInfo devInfo;
   Pylon::IPylonDevice *pDevice = NULL;
   Pylon::CInstantCamera *bCamera = NULL;
 

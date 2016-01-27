@@ -37,6 +37,7 @@
 
 #include <pylon/PylonIncludes.h>
 #include "Logger.h"
+#include "DevInfo.h"
 
 class CppTransportLayer : public Logger
 {
@@ -47,6 +48,7 @@ public:
   int EnumerateDevices();
   Pylon::DeviceInfoList_t::iterator getFirst();
   Pylon::DeviceInfoList_t::iterator getLast();
+  CppDevInfo* buildDeviceInfo(Pylon::CDeviceInfo);
 private:
   Pylon::ITransportLayer *tl;
   Pylon::CTlInfo info;
