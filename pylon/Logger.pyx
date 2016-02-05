@@ -47,25 +47,31 @@ logger.addHandler(_handler)
 
 
 def trace(func):
-    def decorated(self,*args):
-        try:
-            if self._trace:
-                logger.debug("TRACE: enter %s"%(func.__name__),
-                             extra={'objname':self._name,
-                                    'threadId':self._threadId})
-            ret = func(self,*args)
-            if self._trace:
-                logger.debug("TRACE: %s done %s"%(func.__name__,ret),
-                             extra={'objname':self._name,
-                                    'threadId':self._threadId})
-            return ret
-        except Exception as e:
-            if self._trace:
-                logger.warning("TRACE: %s exception %s"%(func.__name__,e),
-                               extra={'objname':self._name,
-                                      'threadId':self._threadId})
-            raise e
-    return decorated
+    try:
+        def decorated(self,*args,**kwargs):
+            try:
+                if self._trace:
+                    logger.debug("TRACE: enter %s"%(func.__name__),
+                                 extra={'objname':self._name,
+                                        'threadId':self._threadId})
+                ret = func(self,*args,**kwargs)
+                if self._trace:
+                    logger.debug("TRACE: %s done %s"%(func.__name__,ret),
+                                 extra={'objname':self._name,
+                                        'threadId':self._threadId})
+                return ret
+            except Exception as e:
+                if self._trace:
+                    logger.warning("TRACE: %s exception %s"%(func.__name__,e),
+                                   extra={'objname':self._name,
+                                          'threadId':self._threadId})
+                raise e
+        return decorated
+    except Exception as e:
+        logger.error("TRACE: Decorator for %s exception: %s"%(func.__name__,e),
+                     extra={'objname':None,
+                            'threadId':_currentThread().getName()})
+        return func
 
 
 cdef class Logger(object):
@@ -84,6 +90,10 @@ cdef class Logger(object):
         self._trace = trace
         if debug or trace:
             logger.setLevel(logging.DEBUG)
+            if self._trace:
+                self._info("set logging level to TRACE")
+            else:
+                self._info("set logging level to DEBUG")
             if not debug and trace:
                 self._warning("Trace forces to have debug level")
         else:

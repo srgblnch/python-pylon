@@ -37,32 +37,55 @@
 /****
  * Constructors
  */
+//Superclass constructor
 CppDevInfo::CppDevInfo(const Pylon::CInstantCamera::DeviceInfo_t& devInfo)
   :_devInfo(devInfo)
 {
-  //devInfo = CppDevInfo;
-  //devInfo.SetDeviceClass(Pylon::CInstantCamera::DeviceClass());
   _name = "CppDevInfo(" + GetSerialNumber() + ")";
 }
 
-CppGigEInfo::CppGigEInfo(const Pylon::CInstantCamera::DeviceInfo_t& devInfo)
-  :CppDevInfo(devInfo)
+//Subclass constructor for GigE cameras
+CppGigEDevInfo::CppGigEDevInfo(const Pylon::CInstantCamera::DeviceInfo_t& \
+                               devInfo)
+  :CppDevInfo(devInfo),_gige(devInfo)
 {
-  _name = "CppGigEInfo(" + GetSerialNumber() + ")";
+  //call to the superclass constructor without parameters because the _devInfo
+  // is different for each superclass and subclass as they are private.
+  //_devInfo = devInfo;
+  _name = "CppGigEDevInfo(" + GetSerialNumber() + ")";
 }
+
+//TODO: subclass constructor for usb cameras and any other type.
 
 /****
  * Destructor
  */
 CppDevInfo::~CppDevInfo() { }
+CppGigEDevInfo::~CppGigEDevInfo() { }
 
+/****
+ *
+ */
+CppGigEDevInfo* dynamic_cast_CppGigEDevInfo_ptr(CppDevInfo* devInfo)
+{
+  return dynamic_cast<CppGigEDevInfo*>(devInfo);
+}
 
 /****
  * General attributes area
  */
 Pylon::String_t CppDevInfo::GetSerialNumber()
 {
-  return _devInfo.GetSerialNumber();
+  Pylon::String_t sn;
+  std::stringstream msg;
+
+  sn = _devInfo.GetSerialNumber();
+  msg << "GetSerialNumber " << sn;
+  _debug(msg.str()); msg.str("");
+
+  return sn;
+
+  //return _devInfo.GetSerialNumber();
 }
 
 Pylon::String_t CppDevInfo::GetModelName()
@@ -94,83 +117,83 @@ Pylon::CInstantCamera::DeviceInfo_t CppDevInfo::GetDeviceInfo()
 /****
  * GigE attributes area
  */
-Pylon::String_t CppGigEInfo::GetAddress()
+Pylon::String_t CppGigEDevInfo::GetAddress()
 {
-  return _devInfo.GetAddress();
+  return _gige.GetAddress();
 }
 
-Pylon::String_t CppGigEInfo::GetIpAddress()
+Pylon::String_t CppGigEDevInfo::GetIpAddress()
 {
-  return _devInfo.GetIpAddress();
+  return _gige.GetIpAddress();
 }
 
-Pylon::String_t CppGigEInfo::GetDefaultGateway()
+Pylon::String_t CppGigEDevInfo::GetDefaultGateway()
 {
-  return _devInfo.GetDefaultGateway();
+  return _gige.GetDefaultGateway();
 }
 
-Pylon::String_t CppGigEInfo::GetSubnetMask()
+Pylon::String_t CppGigEDevInfo::GetSubnetMask()
 {
-  return _devInfo.GetSubnetMask();
+  return _gige.GetSubnetMask();
 }
 
-Pylon::String_t CppGigEInfo::GetPortNr()
+Pylon::String_t CppGigEDevInfo::GetPortNr()
 {
-  return _devInfo.GetPortNr();
+  return _gige.GetPortNr();
 }
 
-Pylon::String_t CppGigEInfo::GetMacAddress()
+Pylon::String_t CppGigEDevInfo::GetMacAddress()
 {
-  return _devInfo.GetMacAddress();
+  return _gige.GetMacAddress();
 }
 
-Pylon::String_t CppGigEInfo::GetInterface()
+Pylon::String_t CppGigEDevInfo::GetInterface()
 {
-  return _devInfo.GetInterface();
+  return _gige.GetInterface();
 }
 
-Pylon::String_t CppGigEInfo::GetIpConfigOptions()
+Pylon::String_t CppGigEDevInfo::GetIpConfigOptions()
 {
-  return _devInfo.GetIpConfigOptions();
+  return _gige.GetIpConfigOptions();
 }
 
-Pylon::String_t CppGigEInfo::GetIpConfigCurrent()
+Pylon::String_t CppGigEDevInfo::GetIpConfigCurrent()
 {
-  return _devInfo.GetIpConfigCurrent();
+  return _gige.GetIpConfigCurrent();
 }
 
-bool CppGigEInfo::IsPersistentIpActive()
+bool CppGigEDevInfo::IsPersistentIpActive()
 {
-  return _devInfo.IsPersistentIpActive();
+  return _gige.IsPersistentIpActive();
 }
 
-bool CppGigEInfo::IsDhcpActive()
+bool CppGigEDevInfo::IsDhcpActive()
 {
-  return _devInfo.IsDhcpActive();
+  return _gige.IsDhcpActive();
 }
 
-bool CppGigEInfo::IsAutoIpActive()
+bool CppGigEDevInfo::IsAutoIpActive()
 {
-  return _devInfo.IsAutoIpActive();
+  return _gige.IsAutoIpActive();
 }
 
-bool CppGigEInfo::IsPersistentIpSupported()
+bool CppGigEDevInfo::IsPersistentIpSupported()
 {
-  return _devInfo.IsPersistentIpSupported();
+  return _gige.IsPersistentIpSupported();
 }
 
-bool CppGigEInfo::IsDhcpSupported()
+bool CppGigEDevInfo::IsDhcpSupported()
 {
-  return _devInfo.IsDhcpSupported();
+  return _gige.IsDhcpSupported();
 }
 
-bool CppGigEInfo::IsAutoIpSupported()
+bool CppGigEDevInfo::IsAutoIpSupported()
 {
-  return _devInfo.IsAutoIpSupported();
+  return _gige.IsAutoIpSupported();
 }
 
-//bool CppGigEInfo::IsSubset(IProperties& Subset)
+//bool CppGigEDevInfo::IsSubset(IProperties& Subset)
 //{
-//  return devInfo.IsSubset(IProperties& Subset)();
+//  return _gige.IsSubset(IProperties& Subset)();
 //}
 

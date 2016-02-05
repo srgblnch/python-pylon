@@ -39,26 +39,30 @@
 #include <pylon/gige/BaslerGigEDeviceInfo.h>
 #include "Logger.h"
 
+//TODO: add other DevInfo subclasses (like the usb)
+
 class CppDevInfo : public Logger
 {
+protected:
+  CppDevInfo(){};
 public:
   CppDevInfo(const Pylon::CInstantCamera::DeviceInfo_t&);
-  ~CppDevInfo();
+  virtual ~CppDevInfo();
   Pylon::String_t GetSerialNumber();
   Pylon::String_t GetModelName();
   Pylon::String_t GetUserDefinedName();
   Pylon::String_t GetDeviceVersion();
   Pylon::String_t GetDeviceFactory();
   Pylon::CDeviceInfo GetDeviceInfo();
-private:
+protected:
   Pylon::CDeviceInfo _devInfo;
 };
 
-class CppGigEInfo : public CppDevInfo
+class CppGigEDevInfo : public CppDevInfo
 {
 public:
-  CppGigEInfo(const Pylon::CInstantCamera::DeviceInfo_t&);
-  ~CppGigEInfo();
+  CppGigEDevInfo(const Pylon::CInstantCamera::DeviceInfo_t&);
+  ~CppGigEDevInfo();
   Pylon::String_t GetAddress();
   Pylon::String_t GetIpAddress();
   Pylon::String_t GetDefaultGateway();
@@ -76,7 +80,9 @@ public:
   bool IsAutoIpSupported();
 //  bool IsSubset(IProperties& Subset);
 private:
-  Pylon::CBaslerGigEDeviceInfo _devInfo;
+  Pylon::CBaslerGigEDeviceInfo _gige;
 };
+
+CppGigEDevInfo* dynamic_cast_CppGigEDevInfo_ptr(CppDevInfo*);
 
 #endif /* DEVINFO_H */

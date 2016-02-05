@@ -107,5 +107,18 @@ Pylon::DeviceInfoList_t::iterator CppTransportLayer::getLast()
  */
 CppDevInfo* CppTransportLayer::buildDeviceInfo(Pylon::CDeviceInfo pylonDeviceInfo)
 {
-  return new CppDevInfo(pylonDeviceInfo);
+  std::stringstream msg;
+  if (info.GetDeviceClass() == "BaslerGigE" )
+  {
+    msg << "buildDeviceInfo as BaslerGigE: "\
+        << pylonDeviceInfo.GetSerialNumber();
+    _debug(msg.str()); msg.str("");
+    return new CppGigEDevInfo(pylonDeviceInfo);
+  }
+  else
+  {
+    msg << "buildDeviceInfo as generic" << pylonDeviceInfo.GetSerialNumber();
+    _debug(msg.str()); msg.str("");
+    return new CppDevInfo(pylonDeviceInfo);
+  }
 }

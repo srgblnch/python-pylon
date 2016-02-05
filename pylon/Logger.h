@@ -56,7 +56,7 @@ class Logger
 public:
   Logger();
   Logger(LogLevel);
-  ~Logger();
+  virtual ~Logger();
   void _error(std::string);
   void _warning(std::string);
   void _info(std::string);

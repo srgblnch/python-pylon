@@ -175,9 +175,8 @@ CppDevInfo* CppFactory::getNextDeviceInfo()
     _debug(msg.str()); msg.str("");
   }
   const Pylon::CDeviceInfo& pylonDeviceInfo = \
-    static_cast<const Pylon::CInstantCamera::DeviceInfo_t&>(*_devLstIt);
+      static_cast<const Pylon::CDeviceInfo&>(*_devLstIt);
   CppDevInfo* wrapperDevInfo = (*_tlLstIt)->buildDeviceInfo(pylonDeviceInfo);
-                               //new CppDevInfo(pylonDeviceInfo);
   msg << "Found a " << pylonDeviceInfo.GetModelName()
       << " Camera, with serial number " << pylonDeviceInfo.GetSerialNumber();
   _debug(msg.str());
