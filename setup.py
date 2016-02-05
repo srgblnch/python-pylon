@@ -48,7 +48,10 @@ pylonExtension = Extension('pylon',['pylon/__init__.pyx',
                                     'pylon/Camera.cpp',
                                     'pylon/TransportLayer.cpp',],
                            language="c++",
-                           #extra_compile_args=["-std=c++11"]
+                           extra_compile_args=[#"-static",
+                                               #"-fPIC",
+                                               #"-std=c++11",
+                                              ]
                            )
 
 #FIXME: check how can be know if c++11 is available to be used

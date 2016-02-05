@@ -96,10 +96,6 @@ cdef class __DeviceInformation(Logger):
     def DeviceVersion(self):
         return <string>self._devInfo.GetDeviceVersion()
     
-    @property
-    def DeviceVersion(self):
-        return <string>self._devInfo.GetDeviceVersion()
-    
 #     @property
 #     def Address(self):
 #         return <string>self._devInfo.GetAddress()

@@ -36,6 +36,7 @@
 #define DEVINFO_H
 
 #include <pylon/PylonIncludes.h>
+#include <pylon/gige/BaslerGigEDeviceInfo.h>
 #include "Logger.h"
 
 class CppDevInfo : public Logger
@@ -48,32 +49,34 @@ public:
   Pylon::String_t GetUserDefinedName();
   Pylon::String_t GetDeviceVersion();
   Pylon::String_t GetDeviceFactory();
-  Pylon::CInstantCamera::DeviceInfo_t GetDeviceInfo();
-protected:
-  Pylon::CInstantCamera::DeviceInfo_t devInfo;
+  Pylon::CDeviceInfo GetDeviceInfo();
+private:
+  Pylon::CDeviceInfo _devInfo;
 };
 
-//class CppGigEInfo : public CppDevInfo
-//{
-//public:
-//  CppGigEInfo(const Pylon::CInstantCamera::DeviceInfo_t&);
-//  ~CppGigEInfo();
-//  Pylon::String_t GetAddress();
-//  Pylon::String_t GetIpAddress();
-//  Pylon::String_t GetDefaultGateway();
-//  Pylon::String_t GetSubnetMask();
-//  Pylon::String_t GetPortNr();
-//  Pylon::String_t GetMacAddress();
-//  Pylon::String_t GetInterface();
-//  Pylon::String_t GetIpConfigOptions();
-//  Pylon::String_t GetIpConfigCurrent();
-//  bool IsPersistentIpActive();
-//  bool IsDhcpActive();
-//  bool IsAutoIpActive();
-//  bool IsPersistentIpSupported();
-//  bool IsDhcpSupported();
-//  bool IsAutoIpSupported();
-////  bool IsSubset(IProperties& Subset);
-//};
+class CppGigEInfo : public CppDevInfo
+{
+public:
+  CppGigEInfo(const Pylon::CInstantCamera::DeviceInfo_t&);
+  ~CppGigEInfo();
+  Pylon::String_t GetAddress();
+  Pylon::String_t GetIpAddress();
+  Pylon::String_t GetDefaultGateway();
+  Pylon::String_t GetSubnetMask();
+  Pylon::String_t GetPortNr();
+  Pylon::String_t GetMacAddress();
+  Pylon::String_t GetInterface();
+  Pylon::String_t GetIpConfigOptions();
+  Pylon::String_t GetIpConfigCurrent();
+  bool IsPersistentIpActive();
+  bool IsDhcpActive();
+  bool IsAutoIpActive();
+  bool IsPersistentIpSupported();
+  bool IsDhcpSupported();
+  bool IsAutoIpSupported();
+//  bool IsSubset(IProperties& Subset);
+private:
+  Pylon::CBaslerGigEDeviceInfo _devInfo;
+};
 
 #endif /* DEVINFO_H */
