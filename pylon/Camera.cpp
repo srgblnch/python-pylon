@@ -115,10 +115,10 @@ bool CppCamera::Stop()
   return !IsGrabbing();
 }
 
-bool CppCamera::getImage(int timeout,Pylon::CPylonImage *image)
+bool CppCamera::getImage(Pylon::CPylonImage *image)
 {
   std::stringstream msg;
-  Pylon::CGrabResultPtr resultPtr;
+  Pylon::GrabResult resultPtr;
   void *buffer;
 
   _debug("CppCamera::getImage()");
@@ -126,15 +126,15 @@ bool CppCamera::getImage(int timeout,Pylon::CPylonImage *image)
   if ( IsGrabbing() )
   {
     _debug("IsGrabbing()");
-    if (bCamera->RetrieveResult(timeout, resultPtr) )
+    if (streamGrabber->RetrieveResult(resultPtr) )
     {
-      _debug("bCamera->RetrieveResult() true");
-      if ( resultPtr->GrabSucceeded() )
+      _debug("streamGrabber->RetrieveResult() true");
+      if ( resultPtr.Succeeded() )
       {
         _debug("resultPtr->GrabSucceeded() true");
         image = new Pylon::CPylonImage();
         _debug("Pylon::CPylonImage()");
-        image->AttachGrabResultBuffer(resultPtr);
+        image->CopyImage(resultPtr.GetImage());
         _debug("AttachGrabResultBuffer()");
         return true;
       }
@@ -142,15 +142,15 @@ bool CppCamera::getImage(int timeout,Pylon::CPylonImage *image)
       {
         _debug("resultPtr->GrabSucceeded() false");
         std::stringstream e;
-        e << "Error in getImage(): " << resultPtr->GetErrorCode() << ":" \
-          << resultPtr->GetErrorDescription();
+        e << "Error in getImage(): " << resultPtr.GetErrorCode() << ":" \
+          << resultPtr.GetErrorDescription();
         throw std::runtime_error(e.str());
         //TODO: review what to do if Grab did not succeed
       }
     }
     else
     {
-      _debug("bCamera->RetrieveResult() false");
+      _debug("streamGrabber->RetrieveResult() false");
     }
   }
   else

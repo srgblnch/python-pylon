@@ -45,7 +45,7 @@ cdef extern from "Camera.h":
         bool IsGrabbing() except+
         bool Start() except+
         bool Stop() except+
-        bool getImage(int timeout,CPylonImage *image) except+
+        bool getImage(CPylonImage *image) except+
         String_t GetSerialNumber() except+
         String_t GetModelName() except+
         uint32_t GetNumStreamGrabberChannels() except+
@@ -100,7 +100,7 @@ cdef class Camera(Logger):
             char *buf = NULL
             int imgSize
         self._debug("getImage()")
-        if self._camera.getImage(5000,img):
+        if self._camera.getImage(img):
             self._debug("done getImage")
             buf = <char*>img.GetBuffer()
             self._debug("GetBuffer()")
