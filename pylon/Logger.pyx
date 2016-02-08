@@ -90,10 +90,10 @@ cdef class Logger(object):
         self._trace = trace
         if debug or trace:
             logger.setLevel(logging.DEBUG)
-            if self._trace:
-                self._info("set logging level to TRACE")
-            else:
-                self._info("set logging level to DEBUG")
+#             if self._trace:
+#                 self._info("set logging level to TRACE")
+#             else:
+#                 self._info("set logging level to DEBUG")
             if not debug and trace:
                 self._warning("Trace forces to have debug level")
         else:

@@ -88,7 +88,7 @@ cdef class __DevInfo(Logger):
         cdef:
             string sn
         sn = <string>(<CppDevInfo*>self._devInfo).GetSerialNumber()
-        self._debug("Found s/n %s"%(sn))
+        #self._debug("Found s/n %s"%(sn))
         return int(sn)
         #return int(<string>(<CppDevInfo*>self._devInfo).GetSerialNumber())
     

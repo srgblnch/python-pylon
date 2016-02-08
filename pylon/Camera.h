@@ -38,8 +38,8 @@
 #include <pylon/PylonIncludes.h>
 #include "Logger.h"
 #include "DevInfo.h"
-
 #include <iostream>
+#include <vector>
 
 class CppCamera : public Logger
 {
@@ -47,16 +47,23 @@ public:
   CppCamera( Pylon::CInstantCamera::DeviceInfo_t,
              Pylon::IPylonDevice*, Pylon::CInstantCamera* );
   ~CppCamera();
+  bool IsOpen();
+  bool Open();
+  bool Close();
+  bool IsGrabbing();
+  bool Start();
+  bool Stop();
+  bool getImage(int timeout, Pylon::CPylonImage *image);
   Pylon::String_t GetSerialNumber();
   Pylon::String_t GetModelName();
-//  uint32_t GetNumStreamGrabberChannels();
-
+  uint32_t GetNumStreamGrabberChannels();
 private:
   Pylon::CInstantCamera::DeviceInfo_t devInfo;
   Pylon::IPylonDevice *pDevice;
   Pylon::CInstantCamera *bCamera;
   GenApi::INodeMap *control;
-//  Pylon::IStreamGrabber *streamGrabber;
+  Pylon::IStreamGrabber* streamGrabber;
+  void PrepareStreamGrabber();
 };
 
 #endif /* CAMERA_H */

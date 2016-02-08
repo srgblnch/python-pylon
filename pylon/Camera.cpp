@@ -42,6 +42,7 @@ CppCamera::CppCamera(Pylon::CInstantCamera::DeviceInfo_t _devInfo,
   _name = "CppCamera(" + _devInfo.GetSerialNumber() + ")";
   control = &_bCamera->GetNodeMap();
 //  streamGrabber = pDevice.GetStreamGrabber(0);//FIXME: if there are more than 1?
+  //TODO: RegisterRemovalCallback
 }
 
 CppCamera::~CppCamera()
@@ -53,6 +54,110 @@ CppCamera::~CppCamera()
   //  bCamera.DetachDevice();
   //}
   //tlFactory->DestroyDevice(pDevice);
+  //TODO: DeregisterRemovalCallback
+}
+
+bool CppCamera::IsOpen()
+{
+  return pDevice->IsOpen();
+}
+bool CppCamera::Open()
+{
+  if (!pDevice->IsOpen())
+  {
+    //TODO: AccessModeSet
+    pDevice->Open();
+  }
+  return pDevice->IsOpen();
+}
+bool CppCamera::Close()
+{
+  if (pDevice->IsOpen())
+  {
+    pDevice->Close();
+  }
+  return !pDevice->IsOpen();
+}
+
+bool CppCamera::IsGrabbing()
+{
+  return pDevice->IsOpen() && streamGrabber && streamGrabber->IsOpen();
+      //bCamera->IsGrabbing();
+}
+
+bool CppCamera::Start()
+{
+  if (pDevice->IsOpen() && !bCamera->IsGrabbing())
+  {
+    //bCamera->StartGrabbing();
+    if ( GetNumStreamGrabberChannels() > 0)
+    {
+      //FIXME:  I'm seen always only 1 stream grabber available and once it's
+      //get no one else can access the camera. But this must be reviewed.
+      streamGrabber = pDevice->GetStreamGrabber(0);
+      PrepareStreamGrabber();
+      streamGrabber->Open();
+    }
+  }
+  return IsGrabbing();
+}
+
+bool CppCamera::Stop()
+{
+  if (IsGrabbing())
+  {
+    //bCamera->StopGrabbing();
+    if ( streamGrabber )
+    {
+      streamGrabber->Close();
+    }
+  }
+  return !IsGrabbing();
+}
+
+bool CppCamera::getImage(int timeout,Pylon::CPylonImage *image)
+{
+  std::stringstream msg;
+  Pylon::CGrabResultPtr resultPtr;
+  void *buffer;
+
+  _debug("CppCamera::getImage()");
+
+  if ( IsGrabbing() )
+  {
+    _debug("IsGrabbing()");
+    if (bCamera->RetrieveResult(timeout, resultPtr) )
+    {
+      _debug("bCamera->RetrieveResult() true");
+      if ( resultPtr->GrabSucceeded() )
+      {
+        _debug("resultPtr->GrabSucceeded() true");
+        image = new Pylon::CPylonImage();
+        _debug("Pylon::CPylonImage()");
+        image->AttachGrabResultBuffer(resultPtr);
+        _debug("AttachGrabResultBuffer()");
+        return true;
+      }
+      else
+      {
+        _debug("resultPtr->GrabSucceeded() false");
+        std::stringstream e;
+        e << "Error in getImage(): " << resultPtr->GetErrorCode() << ":" \
+          << resultPtr->GetErrorDescription();
+        throw std::runtime_error(e.str());
+        //TODO: review what to do if Grab did not succeed
+      }
+    }
+    else
+    {
+      _debug("bCamera->RetrieveResult() false");
+    }
+  }
+  else
+  {
+    _debug("!IsGrabbing()");
+  }
+  return false;
 }
 
 Pylon::String_t CppCamera::GetSerialNumber()
@@ -85,7 +190,12 @@ Pylon::String_t CppCamera::GetModelName()
   }
 }
 
-//uint32_t CppCamera::GetNumStreamGrabberChannels()
-//{
-//  return pDevice.GetNumStreamGrabberChannels();
-//}
+uint32_t CppCamera::GetNumStreamGrabberChannels()
+{
+  return pDevice->GetNumStreamGrabberChannels();
+}
+
+void CppCamera::PrepareStreamGrabber()
+{
+
+}

@@ -38,3 +38,12 @@ cdef extern from "pylon/stdinclude.h" namespace "Pylon":
     cdef cppclass String_t
     cdef cppclass StringList_t
 
+cdef extern from "stdint.h":
+    ctypedef   signed char  int8_t
+    ctypedef   signed short int16_t
+    ctypedef   signed int   int32_t
+    ctypedef   signed long  int64_t
+    ctypedef unsigned char  uint8_t
+    ctypedef unsigned short uint16_t
+    ctypedef unsigned int   uint32_t
+    ctypedef unsigned long long uint64_t

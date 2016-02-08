@@ -76,16 +76,16 @@ CppGigEDevInfo* dynamic_cast_CppGigEDevInfo_ptr(CppDevInfo* devInfo)
  */
 Pylon::String_t CppDevInfo::GetSerialNumber()
 {
-  Pylon::String_t sn;
-  std::stringstream msg;
+//  Pylon::String_t sn;
+//  std::stringstream msg;
+//
+//  sn = _devInfo.GetSerialNumber();
+//  msg << "GetSerialNumber " << sn;
+//  _debug(msg.str()); msg.str("");
+//
+//  return sn;
 
-  sn = _devInfo.GetSerialNumber();
-  msg << "GetSerialNumber " << sn;
-  _debug(msg.str()); msg.str("");
-
-  return sn;
-
-  //return _devInfo.GetSerialNumber();
+  return _devInfo.GetSerialNumber();
 }
 
 Pylon::String_t CppDevInfo::GetModelName()

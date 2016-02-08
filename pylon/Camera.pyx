@@ -33,11 +33,22 @@
 ##
 ###############################################################################
 
+import numpy as np
+#cimport numpy as np
+
 cdef extern from "Camera.h":
     cdef cppclass CppCamera:
         CppCamera( CppFactory *factory, CppDevInfo *devInfo ) except+
+        bool IsOpen() except+
+        bool Open() except+
+        bool Close() except+
+        bool IsGrabbing() except+
+        bool Start() except+
+        bool Stop() except+
+        bool getImage(int timeout,CPylonImage *image) except+
         String_t GetSerialNumber() except+
         String_t GetModelName() except+
+        uint32_t GetNumStreamGrabberChannels() except+
 
 
 cdef class Camera(Logger):
@@ -66,9 +77,53 @@ cdef class Camera(Logger):
         self._setName(name)
 
     @property
+    def isopen(self):
+        return <bool>(self._camera.IsOpen())
+    def Open(self):
+        return <bool>(self._camera.Open())
+    def Close(self):
+        return <bool>(self._camera.Close())
+
+    @property
+    def isgrabbing(self):
+        return <bool>(self._camera.IsGrabbing())
+    def Start(self):
+        if not self.isopen:
+            self.Open()
+        return <bool>(self._camera.Start())
+    def Stop(self):
+        return <bool>(self._camera.Stop())
+
+    def getImage(self):
+        cdef:
+            CPylonImage *img = NULL
+            char *buf = NULL
+            int imgSize
+        self._debug("getImage()")
+        if self._camera.getImage(5000,img):
+            self._debug("done getImage")
+            buf = <char*>img.GetBuffer()
+            self._debug("GetBuffer()")
+            imgSize = img.GetImageSize()
+            self._debug("GetImageSize()")
+            img_np = np.frombuffer(buf[:imgSize], dtype=np.uint8)
+            self._debug("np.frombuffer")
+            # TODO: How to handle multi-byte data here?
+            img_np = img_np.reshape((img.GetHeight(), -1))
+            self._debug("np.reshape")
+            img_np = img_np[:img.GetHeight(), :img.GetWidth()]
+            self._debug("img_np 2D")
+            return img_np
+        return None#TODO: Return a image np-like without data
+
+    @property
     def SerialNumber(self):
         return int(<string>self._camera.GetSerialNumber())
     
     @property
     def ModelName(self):
         return <string>self._camera.GetModelName()
+
+    @property
+    def nStreamGrabbers(self):
+        return int(self._camera.GetNumStreamGrabberChannels())
