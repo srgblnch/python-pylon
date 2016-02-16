@@ -1,15 +1,15 @@
 # python-pylon
 A thin Cython binding of the Basler Pylon SDK.
 
-**'Development Status :: 1 - Planning'**
+<p align="center"> <b>'Development Status :: 1 - Planning'</b> </p>
 
-**'License :: OSI Approved :: 'GNU Lesser General Public License v3 or later (LGPLv3+)'**
+<p align="center"> <b>'License :: OSI Approved :: 'GNU Lesser General Public License v3 or later (LGPLv3+)'</b> </p>
 
 It requires to have pylon SDK installed. Check [Basler site](http://www.baslerweb.com/en/support/downloads/software-downloads). The developers are checking the development in pylon major releases
-from 2 to 5 over linux systems with architectures of 32 and 64 bits. The 
+from 3 and 5 over linux systems with architectures of 32 and 64 bits. The 
 python versions are 2.7 and 3.4.
 
-Highlight that this is underdevelopment and the master branch is **not** stable.
+> Highlight that this is underdevelopment and the master branch is **not** stable.
 
 **Environment load**
 
@@ -46,21 +46,7 @@ Then a python console should return this:
     '0.0.0-0'
 ```
 
-There is no default compilation version and it must be specified in the *setup.sh* and the *env.sh* scripts. For example, with pylon 4:
-
-```bash
-$ ./setup.sh pylon 4
-```
-
-To have a python answer like:
-
-```python
->>> import pylon
->>> pylon.Version().pylonAPI_str()
-    '4.0.0-62'
-```
-
-Or pylon 3:
+There is no default compilation version and it must be specified in the *setup.sh* and the *env.sh* scripts. For example, with pylon 3:
 
 ```bash
 $ ./setup.sh pylon 3
@@ -74,19 +60,7 @@ With the answer:
     '3.2.1-0'
 ```
 
-It is still wanted a support for pylon 2:
-
-```bash
-$ ./setup.sh pylon 2
-```
-
-And the working version say:
-
-```python
->>> import pylon
->>> pylon.Version().pylonAPI_str()
-    '2.3.3-1337'
-```
+It may work with pylon 4 and probably not with pylon2.
 
 Finally there is a command to clean as an argument of the _setup.sh_.
 
@@ -111,4 +85,8 @@ Once have the *pylon.so* build and placed in the python path, the use can began:
 >>> camera.Open()
 >>> camera.isOpen
     True
+>>> acquisition = camera.Snap()
+>>> import matplotlib.pyplot as plt
+>>> plt.imshow(acquisition)
+>>> plt.show()
 ```
