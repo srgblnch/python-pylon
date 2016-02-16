@@ -35,66 +35,94 @@
 #include "Camera.h"
 
 CppCamera::CppCamera(Pylon::CInstantCamera::DeviceInfo_t _devInfo,
-                     Pylon::IPylonDevice *_pDevice,
-                     Pylon::CInstantCamera* _bCamera)
-  :devInfo(_devInfo),pDevice(_pDevice),bCamera(_bCamera)
+                     Pylon::IPylonDevice *_pylonDevice,
+                     Pylon::CInstantCamera* _instantCamera)
+  :devInfo(_devInfo),pylonDevice(_pylonDevice),instantCamera(_instantCamera)
 {
   _name = "CppCamera(" + _devInfo.GetSerialNumber() + ")";
-  control = &_bCamera->GetNodeMap();
-//  streamGrabber = pDevice.GetStreamGrabber(0);//FIXME: if there are more than 1?
+  control = &_instantCamera->GetNodeMap();
+//  streamGrabber = pylonDevice.GetStreamGrabber(0);//FIXME: if there are more than 1?
   //TODO: RegisterRemovalCallback
 }
 
 CppCamera::~CppCamera()
 {
   //TODO: move it to the factory cleaner
-  //bCamera.DestroyDevice();
-  //if ( bCamera.IsPylonDeviceAttached() )
+  //instantCamera.DestroyDevice();
+  //if ( instantCamera.IsPylonDeviceAttached() )
   //{
-  //  bCamera.DetachDevice();
+  //  instantCamera.DetachDevice();
   //}
-  //tlFactory->DestroyDevice(pDevice);
+  //tlFactory->DestroyDevice(pylonDevice);
   //TODO: DeregisterRemovalCallback
 }
 
 bool CppCamera::IsOpen()
 {
-  return pDevice->IsOpen();
+  return pylonDevice->IsOpen();
 }
 bool CppCamera::Open()
 {
-  if (!pDevice->IsOpen())
+  if (!pylonDevice->IsOpen())
   {
     //TODO: AccessModeSet
-    pDevice->Open();
+    pylonDevice->Open();
   }
-  return pDevice->IsOpen();
+  return pylonDevice->IsOpen();
 }
 bool CppCamera::Close()
 {
-  if (pDevice->IsOpen())
+  if (pylonDevice->IsOpen())
   {
-    pDevice->Close();
+    pylonDevice->Close();
   }
-  return !pDevice->IsOpen();
+  return !pylonDevice->IsOpen();
 }
 
 bool CppCamera::IsGrabbing()
 {
-  return pDevice->IsOpen() && streamGrabber && streamGrabber->IsOpen();
-      //bCamera->IsGrabbing();
+  return pylonDevice->IsOpen() && streamGrabber && streamGrabber->IsOpen();
+      //instantCamera->IsGrabbing();
+}
+
+bool CppCamera::Snap(void *buffer,size_t &payloadSize,
+                     uint32_t &width,uint32_t &height)
+{
+  std::stringstream msg;
+  Pylon::CGrabResultPtr grabResult;
+  instantCamera->GrabOne(1000,grabResult);
+  _debug("instantCamera->GrabOne(...)");
+  if ( grabResult->GrabSucceeded() )
+  {
+    _debug("Succeeded");
+    width = grabResult->GetWidth();
+    height = grabResult->GetHeight();
+    payloadSize = grabResult->GetPayloadSize();
+    msg << "Image(" << payloadSize << "): [" << width << "," << height << "]";
+    _debug(msg.str()); msg.str("");
+    buffer = grabResult->GetBuffer();
+    _debug("GetBuffer()");
+  }
+  else
+  {
+    _warning("No succeeded!!");
+    msg << "Error in getImage(): " << grabResult->GetErrorCode() << ":" \
+      << grabResult->GetErrorDescription();
+    _error(msg.str());
+    throw std::runtime_error(msg.str());
+  }
 }
 
 bool CppCamera::Start()
 {
-  if (pDevice->IsOpen() && !bCamera->IsGrabbing())
+  if (pylonDevice->IsOpen() && !instantCamera->IsGrabbing())
   {
-    //bCamera->StartGrabbing();
+    //instantCamera->StartGrabbing();
     if ( GetNumStreamGrabberChannels() > 0)
     {
       //FIXME:  I'm seen always only 1 stream grabber available and once it's
       //get no one else can access the camera. But this must be reviewed.
-      streamGrabber = pDevice->GetStreamGrabber(0);
+      streamGrabber = pylonDevice->GetStreamGrabber(0);
       PrepareStreamGrabber();
       streamGrabber->Open();
     }
@@ -106,7 +134,7 @@ bool CppCamera::Stop()
 {
   if (IsGrabbing())
   {
-    //bCamera->StopGrabbing();
+    //instantCamera->StopGrabbing();
     if ( streamGrabber )
     {
       streamGrabber->Close();
@@ -192,7 +220,7 @@ Pylon::String_t CppCamera::GetModelName()
 
 uint32_t CppCamera::GetNumStreamGrabberChannels()
 {
-  return pDevice->GetNumStreamGrabberChannels();
+  return pylonDevice->GetNumStreamGrabberChannels();
 }
 
 void CppCamera::PrepareStreamGrabber()

@@ -51,16 +51,18 @@ public:
   bool Open();
   bool Close();
   bool IsGrabbing();
+  bool Snap(void*,size_t&,uint32_t&,uint32_t&);
   bool Start();
   bool Stop();
   bool getImage(Pylon::CPylonImage *image);
+
   Pylon::String_t GetSerialNumber();
   Pylon::String_t GetModelName();
   uint32_t GetNumStreamGrabberChannels();
 private:
   Pylon::CInstantCamera::DeviceInfo_t devInfo;
-  Pylon::IPylonDevice *pDevice;
-  Pylon::CInstantCamera *bCamera;
+  Pylon::IPylonDevice *pylonDevice;
+  Pylon::CInstantCamera *instantCamera;
   GenApi::INodeMap *control;
   Pylon::IStreamGrabber* streamGrabber;
   void PrepareStreamGrabber();

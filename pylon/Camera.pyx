@@ -34,6 +34,7 @@
 ###############################################################################
 
 import numpy as np
+from Cython.Shadow import NULL
 #cimport numpy as np
 
 cdef extern from "Camera.h":
@@ -43,6 +44,7 @@ cdef extern from "Camera.h":
         bool Open() except+
         bool Close() except+
         bool IsGrabbing() except+
+        bool Snap(void* buffer,size_t &payload,uint32_t &w,uint32_t &h) except+
         bool Start() except+
         bool Stop() except+
         bool getImage(CPylonImage *image) except+
@@ -63,6 +65,8 @@ cdef class Camera(Logger):
                     "but it doesn't link with an specific camera")
 
     def __del__(self):
+        if self.isopen:
+            self.Close()
         del self._camera
 
     def __str__(self):
@@ -97,24 +101,51 @@ cdef class Camera(Logger):
     def getImage(self):
         cdef:
             CPylonImage *img = NULL
-            char *buf = NULL
-            int imgSize
         self._debug("getImage()")
         if self._camera.getImage(img):
             self._debug("done getImage")
-            buf = <char*>img.GetBuffer()
-            self._debug("GetBuffer()")
-            imgSize = img.GetImageSize()
-            self._debug("GetImageSize()")
-            img_np = np.frombuffer(buf[:imgSize], dtype=np.uint8)
-            self._debug("np.frombuffer")
-            # TODO: How to handle multi-byte data here?
-            img_np = img_np.reshape((img.GetHeight(), -1))
-            self._debug("np.reshape")
-            img_np = img_np[:img.GetHeight(), :img.GetWidth()]
-            self._debug("img_np 2D")
-            return img_np
-        return None#TODO: Return a image np-like without data
+            return self.__fromBuffer(<char*>img.GetBuffer(),img.GetImageSize(),
+                                     img.GetWidth(),img.GetHeight())
+        return np.array([[],[]],dtype=np.uint8)
+
+    def Snap(self):
+        self._debug("Snap()")
+        if not self.isgrabbing:
+            self._debug("It's not grabbing")
+            return self.CSnap()
+        return self.getImage()
+
+    cdef CSnap(self):
+        cdef:
+            char *buffer = NULL
+            size_t payloadSize
+            uint32_t width,height
+        self._camera.Snap(buffer,payloadSize,width,height)
+        self._debug("Get Snap(): (payload %d, width %d, heigth %d)"
+                    %(payloadSize,width,height))
+        return self.__fromBuffer(buffer,payloadSize,width,height)
+
+    cdef __fromBuffer(self,char *buffer,size_t payloadSize,
+                     uint32_t width,uint32_t height):
+        if width*height == payloadSize:
+            pixelType = np.uint8
+            self._debug("pixelType: 8 bits")
+        elif (width*height)*2 == payloadSize:
+            pixelType = np.uint16
+            self._debug("pixelType: 16 bits")
+        else:
+            self._debug("pixelType: unknown")
+            raise BufferError("Not supported pixel type "\
+                              "(payload %d, width %d, heigth %d)"
+                              %(payloadSize,width,height))
+        self._debug("> np.frombuffer(...)")
+        img_np = np.frombuffer(buffer[:payloadSize], dtype=pixelType)
+        self._debug("< np.frombuffer(...)")
+        img_np = img_np.reshape((height, -1))
+        self._debug("np.reshape")
+        img_np = img_np[:height,:width]
+        self._debug("img_np 2D")
+        return img_np
 
     @property
     def SerialNumber(self):
