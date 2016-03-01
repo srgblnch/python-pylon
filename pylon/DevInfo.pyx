@@ -78,7 +78,7 @@ cdef class __DevInfo(Logger):
 
     cdef SetCppDevInfo(self,CppDevInfo *devInfo):
         self._devInfo = devInfo
-        self._setName("DevInfo(%s)"%(self.SerialNumber))
+        self.name = "DevInfo(%s)" % (self.SerialNumber)
     
     cdef CppDevInfo* GetCppDevInfo(self):
         return self._devInfo
@@ -114,7 +114,7 @@ cdef class __GigEDevInfo(__DevInfo):
     cdef SetCppDevInfo(self,CppDevInfo *devInfo):
         __DevInfo.SetCppDevInfo(self,devInfo)
         self._gige = dynamic_cast_CppGigEDevInfo_ptr(devInfo)
-        self._setName("GigEDevInfo(%s)"%(self.SerialNumber))
+        self.name = "GigEDevInfo(%s)" % (self.SerialNumber)
 
     @property
     def Address(self):

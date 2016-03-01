@@ -51,18 +51,23 @@ cdef extern from "Camera.h":
         String_t GetSerialNumber() except+
         String_t GetModelName() except+
         uint32_t GetNumStreamGrabberChannels() except+
-
+        INode *getNextNode() except+
+        #INode *getNode(string name) except+
 
 cdef class Camera(Logger):
     cdef:
         CppCamera *_camera
         int _serial
+        object _visibilityLevel
+    _nodeNamesDict = {}
+    _nodeNamesLst = []
 
     def __init__(self,*args,**kwargs):
         super(Camera,self).__init__(*args,**kwargs)
         self.name = "Camera()"
         self._debug("Void Camera Object build, "\
                     "but it doesn't link with an specific camera")
+        self._visibilityLevel = Visibility()
 
     def __del__(self):
         if self.isopen:
@@ -78,7 +83,58 @@ cdef class Camera(Logger):
         self._camera = cppCamera
         name = "Camera(%d)"%(self.SerialNumber)
         self._debug("New name: %s"%name)
-        self._setName(name)
+        self.name = name
+        self._visibilityLevel.parent = self
+        self._debug("CppCamera attached to a Camera (cython) object")
+        self.populateNodeList()
+
+    property visibility:
+        def __get__(self):
+            return self._visibilityLevel.value
+        def __set__(self,value):
+            self._visibilityLevel.value = value
+            self._debug("Changed node visibility")
+            self._rebuildNodeList()
+
+    def __cleanNodesDictionary(self):
+        for k in self._nodeNamesDict.keys():
+            self._nodeNamesDict.pop(k)
+    def __cleanNodesList(self):
+        while len(self._nodeNamesLst) > 0:
+            self._nodeNamesLst.pop()
+
+    cdef populateNodeList(self):
+        cdef:
+            INode *node
+        self.__cleanNodesDictionary()
+        self.__cleanNodesList()
+        self._debug("collect nodes")
+        node = self._camera.getNextNode()
+        while not node == NULL:
+            if node.IsDeprecated():
+                self._debug("Ignoring %s because it is deprecated")
+            else:
+                nodeVisibility = node.GetVisibility()
+                nodeName = <string>node.GetName()
+                if nodeVisibility not in self._nodeNamesDict.keys():
+                    self._nodeNamesDict[nodeVisibility] = []
+                self._nodeNamesDict[nodeVisibility].append(nodeName)
+                if nodeVisibility <= self._visibilityLevel.numValue:
+                    self._nodeNamesLst.append(nodeName)
+            node = self._camera.getNextNode()
+        msg = "Collected "
+        for v,n in [(Beginner,'Beginner'),(Expert,'Expert'),(Guru,'Guru')]:
+            msg += "%d %s nodes, " % (len(self._nodeNamesDict[v]),n)
+        self._debug(msg[:-2])
+    
+    def _rebuildNodeList(self):
+        self.__cleanNodesList()
+        for key in self._nodeNamesDict.keys():
+            if key <= self._visibilityLevel.numValue:
+                for value in self._nodeNamesDict[key]:
+                    self._nodeNamesLst.append(value)
+        self._debug("rebuild node list, now %d elements on %s visibility"
+                    % (len(self._nodeNamesLst),self._visibilityLevel.value))
 
     @property
     def isopen(self):
@@ -158,3 +214,16 @@ cdef class Camera(Logger):
     @property
     def nStreamGrabbers(self):
         return int(self._camera.GetNumStreamGrabberChannels())
+
+    # dictionary behaviour for the nodes
+    def keys(self):
+        return self._nodeNamesLst
+    
+    def __getitem__(self, key):
+        #if key in self._nodeNamesLst:
+        return None
+    
+    def __setitem__(self, key, item):
+        pass
+    
+    

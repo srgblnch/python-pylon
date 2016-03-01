@@ -40,17 +40,23 @@
 from libcpp cimport bool
 from libcpp.string cimport string
 
-#necessary includes from pylonAPI
+# necessary includes from GenApi
+# -first level
+include "GenApiWrap/Types.pyx"
+# -second level
+include "GenApiWrap/INode.pyx"
+
+# necessary includes from pylonAPI
 include "pylonWrap/stdinclude.pyx"
 include "pylonWrap/PylonImage.pyx"
 
-#highest level of python module includes
+# highest level of python module includes
 include "Logger.pyx"
 
-#second level of python module includes
+# second level of python module includes
 include "DevInfo.pyx"
 
-#third level of python module includes
+# third level of python module includes
 include "Camera.pyx"
 include "Factory.pyx"
 include "version.py"

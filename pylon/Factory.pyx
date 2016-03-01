@@ -219,6 +219,7 @@ cdef class Factory(Logger):
             CppCamera* cppCamera
         camera = Camera()
         cppCamera = self._cppFactory.CreateCamera(devInfo.GetCppDevInfo())
+        self._debug("CppCamera object created")
         if cppCamera != NULL:
             camera.SetCppCamera(cppCamera)
         return camera

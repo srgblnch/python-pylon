@@ -39,8 +39,10 @@ CppCamera::CppCamera(Pylon::CInstantCamera::DeviceInfo_t _devInfo,
                      Pylon::CInstantCamera* _instantCamera)
   :devInfo(_devInfo),pylonDevice(_pylonDevice),instantCamera(_instantCamera)
 {
-  _name = "CppCamera(" + _devInfo.GetSerialNumber() + ")";
-  control = &_instantCamera->GetNodeMap();
+  _name = "CppCamera(" + devInfo.GetSerialNumber() + ")";
+  _debug("Build control object (INodeMap)");
+  control = &instantCamera->GetNodeMap();
+  prepareNodeIteration();
 //  streamGrabber = pylonDevice.GetStreamGrabber(0);//FIXME: if there are more than 1?
   //TODO: RegisterRemovalCallback
 }
@@ -147,7 +149,7 @@ bool CppCamera::getImage(Pylon::CPylonImage *image)
 {
   std::stringstream msg;
   Pylon::GrabResult resultPtr;
-  void *buffer;
+  //void *buffer;
 
   _debug("CppCamera::getImage()");
 
@@ -226,4 +228,36 @@ uint32_t CppCamera::GetNumStreamGrabberChannels()
 void CppCamera::PrepareStreamGrabber()
 {
 
+}
+
+void CppCamera::prepareNodeIteration()
+{
+  std::stringstream msg;
+
+  _debug("Get INode objects from INodeMap");
+  control->GetNodes(nodesList);
+  _debug("Prepare the iterator to the first element");
+  controlIt = nodesList.begin();
+  msg << "prepared for the INodes iteration (" << nodesList.size() << ")";
+  _debug(msg.str());
+}
+
+GenApi::INode *CppCamera::getNextNode()
+{
+  GenApi::INode *node;
+
+  if ( controlIt == nodesList.end() )
+  {
+    //_debug("Reached the end of the list");
+    prepareNodeIteration();
+    return NULL;
+  }
+  node = (*controlIt);
+  controlIt++;
+  return node;
+}
+
+GenApi::INode *CppCamera::getNode(std::string name)
+{
+  //return control->GetNode(name);
 }

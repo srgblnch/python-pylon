@@ -36,6 +36,8 @@
 #define CAMERA_H
 
 #include <pylon/PylonIncludes.h>
+//#include <pylon/gige/BaslerGigECamera.h>
+#include <GenApi/INode.h>
 #include "Logger.h"
 #include "DevInfo.h"
 #include <iostream>
@@ -43,6 +45,8 @@
 
 class CppCamera : public Logger
 {
+protected:
+  CppCamera(){};
 public:
   CppCamera( Pylon::CInstantCamera::DeviceInfo_t,
              Pylon::IPylonDevice*, Pylon::CInstantCamera* );
@@ -59,11 +63,17 @@ public:
   Pylon::String_t GetSerialNumber();
   Pylon::String_t GetModelName();
   uint32_t GetNumStreamGrabberChannels();
-private:
+
+  GenApi::INode *getNextNode();
+  GenApi::INode *getNode(std::string name);
+protected:
   Pylon::CInstantCamera::DeviceInfo_t devInfo;
   Pylon::IPylonDevice *pylonDevice;
   Pylon::CInstantCamera *instantCamera;
   GenApi::INodeMap *control;
+  GenApi::NodeList_t nodesList;
+  void prepareNodeIteration();
+  GenApi::NodeList_t::iterator controlIt;
   Pylon::IStreamGrabber* streamGrabber;
   void PrepareStreamGrabber();
 };

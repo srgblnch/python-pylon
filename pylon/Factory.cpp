@@ -189,7 +189,8 @@ CppCamera* CppFactory::CreateCamera(CppDevInfo* wrapperDevInfo)
   std::stringstream msg;
   Pylon::CDeviceInfo devInfo;
   Pylon::IPylonDevice *pDevice = NULL;
-  Pylon::CInstantCamera *bCamera = NULL;
+  Pylon::CInstantCamera *iCamera = NULL;
+  CppCamera *cppCamera = NULL;
 
   devInfo = wrapperDevInfo->GetDeviceInfo();
   msg << "Creating a Camera object from the information of the camera with "\
@@ -200,13 +201,16 @@ CppCamera* CppFactory::CreateCamera(CppDevInfo* wrapperDevInfo)
     _debug("Creating IPylonDevice object");
     pDevice = _tlFactory->CreateDevice(devInfo);
     _debug("Creating CInstantCamera object");
-    bCamera = new Pylon::CInstantCamera(pDevice);
+    iCamera = new Pylon::CInstantCamera(pDevice);
   }
   catch(std::exception& e)
   {
-    msg << "CppCamera Constructor exception: " << e.what();
+    msg << "CreateCamera Constructor exception: " << e.what();
     _error(msg.str()); msg.str("");
     return NULL;
   }
-  return new CppCamera(devInfo,pDevice,bCamera);
+  _debug("CreateCamera construction");
+  cppCamera = new CppCamera(devInfo,pDevice,iCamera);
+  _debug("CreateCamera construction done");
+  return cppCamera;
 }

@@ -100,11 +100,11 @@ cdef class Logger(object):
             logger.setLevel(logging.INFO)
 
     #Instead of property decorator, because the setter didn't work.
-    def _getName(self):
-        return self._name
-    def _setName(self,name):
-        self._name = name
-    name = property(_getName,_setName)
+    property name:
+        def __get__(self):
+            return self._name
+        def __set__(self,name):
+            self._name = name
 
     @property
     def _threadId(self):
@@ -116,21 +116,21 @@ cdef class Logger(object):
 
     def _critical(self,msg):
         threadId = self._threadId
-        logger.critical(msg,extra={'objname':self._name,'threadId':threadId})
+        logger.critical(msg,extra={'objname':self.name,'threadId':threadId})
 
     def _error(self,msg):
         threadId = self._threadId
-        logger.error(msg,extra={'objname':self._name,'threadId':threadId})
+        logger.error(msg,extra={'objname':self.name,'threadId':threadId})
 
     def _warning(self,msg):
         threadId = self._threadId
-        logger.warning(msg,extra={'objname':self._name,'threadId':threadId})
+        logger.warning(msg,extra={'objname':self.name,'threadId':threadId})
 
     def _info(self,msg):
         threadId = self._threadId
-        logger.info(msg,extra={'objname':self._name,'threadId':threadId})
+        logger.info(msg,extra={'objname':self.name,'threadId':threadId})
 
     def _debug(self,msg):
         threadId = self._threadId
-        logger.debug(msg,extra={'objname':self._name,'threadId':threadId})
+        logger.debug(msg,extra={'objname':self.name,'threadId':threadId})
 
