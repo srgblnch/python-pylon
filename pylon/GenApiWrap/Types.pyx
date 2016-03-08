@@ -1,5 +1,4 @@
 #!/usr/bin/env cython
-from libxml2mod import parent
 
 #---- licence header
 ###############################################################################
@@ -41,6 +40,28 @@ cdef extern from "GenApi/Types.h" namespace "GenApi":
         Guru = 2,                  # Visible for Gurus
         Invisible = 3,             # Not Visible
         _UndefinedVisibility  = 99 # Object is not yetinitialized
+    ctypedef enum EInterfaceType:
+        intfIValue,       # IBase interface
+        intfIBase,        # IBase interface
+        intfIInteger,     # IInteger interface
+        intfIBoolean,     # IBoolean interface
+        intfICommand,     # IBoolean interface
+        intfIFloat,       # IFloat interface
+        intfIString,      # IString interface
+        intfIRegister,    # IRegister interface
+        intfICategory,    # ICategory interface
+        intfIEnumeration, # IEnumeration interface
+        intfIEnumEntry,   # IEnumEntry interface
+        intfIPort,        # IPort interface
+    ctypedef enum EAccessMode:
+        AccessMode_NI,        # Not implemented
+        AccessMode_NA,        # Not available
+        AccessMode_WO,        # Write Only
+        AccessMode_RO,        # Read Only
+        AccessMode_RW,        # Read and Write
+        _UndefinedAccesMode,    # Object is not yetinitialized
+        _CycleDetectAccesMode   # used internally for AccessMode cycle detection
+
 
 cdef class Visibility(Logger):
     cdef:
@@ -51,6 +72,7 @@ cdef class Visibility(Logger):
 
     def __init__(self,*args,**kwargs):
         super(Visibility,self).__init__(*args,**kwargs)
+        self.name = "None:Visibility"
         self.value = Beginner
 
     def __str__(self):
@@ -98,3 +120,56 @@ cdef class Visibility(Logger):
                     return
             raise TypeError("Invalid visibility %d (%s)"
                             % (value,self.validValues))
+
+
+cdef class InterfaceType(Logger):
+    cdef:
+        EInterfaceType _value
+        INode* _parent
+    interfaceTypeIntegers = {intfIValue:'IValue',
+                             intfIBase:'IBase',
+                             intfIInteger:'IInteger',
+                             intfIBoolean:'IBoolean',
+                             intfICommand:'ICommand',
+                             intfIFloat:'IFloat',
+                             intfIString:'IString',
+                             intfIRegister:'IRegister',
+                             intfICategory:'ICategory',
+                             intfIEnumeration:'IEnumeration',
+                             intfIEnumEntry:'IEnumEntry',
+                             intfIPort:'IPort'}
+    interfaceTypeStrings = {'IValue':intfIValue,
+                            'IBase':intfIBase,
+                            'IInteger':intfIInteger,
+                            'IBoolean':intfIBoolean,
+                            'ICommand':intfICommand,
+                            'IFloat':intfIFloat,
+                            'IString':intfIString,
+                            'IRegister':intfIRegister,
+                            'ICategory':intfICategory,
+                            'IEnumeration':intfIEnumeration,
+                            'IEnumEntry':intfIEnumEntry,
+                            'IPort':intfIPort}
+
+    def __init__(self,*args,**kwargs):
+        super(InterfaceType,self).__init__(*args,**kwargs)
+        self.name = "None:InterfaceType"
+
+    def __str__(self):
+        return self.name
+
+    cdef setParent(self,INode* parent):
+        self._parent = parent
+        if not parent == NULL:
+            self.name = "%s:InterfaceType" % (self._parent.GetName())
+        else:
+            self.name = "None:InterfaceType"
+
+    property numValue:
+        def __get__(self):
+            return self._parent.GetPrincipalInterfaceType()
+
+    property value:
+        def __get__(self):
+            return self.interfaceTypeIntegers[self.numValue]
+

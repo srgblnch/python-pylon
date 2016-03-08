@@ -1,8 +1,6 @@
-#!/usr/bin/env cython
-
-#---- licence header
+/*---- licence header
 ###############################################################################
-## file :               __init__.pyx
+## file :               IEnumeration.h
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -32,43 +30,26 @@
 ## along with python-pylon.  If not, see <http://www.gnu.org/licenses/>.
 ##
 ###############################################################################
+*/
 
-#---- In this init file there are included the cython files needed. They are 
-#     separated in different descendant levels to have this distinshion as 
-#     well as have each level alphabetically sorted.
+#ifndef IENUMERATION_H
+#define IENUMERATION_H
 
-from libcpp cimport bool
-from libcpp.string cimport string
-from libcpp.vector cimport vector
+#include "Logger.h"
+#include "GenApi/IEnumeration.h"
+#include <iostream>
+#include <vector>
+#include "pylon/stdinclude.h"
 
-#basic data types
-include "pylonWrap/stdinclude.pyx"
+class CppEnumeration : public Logger
+{
+public:
+  CppEnumeration(GenApi::INode* node);
+  CppEnumeration(GenApi::IEnumeration* enumeration);
+  std::vector<std::string> getSymbolics();
+  std::string getEntry();
+protected:
+  GenApi::IEnumeration *_enumeration;
+};
 
-# necessary includes from GenApi
-# -first level
-include "GenApiWrap/Types.pyx"
-# -second level
-include "GenApiWrap/IFloat.pyx"
-include "GenApiWrap/IInteger.pyx"
-include "GenApiWrap/IBoolean.pyx"
-include "GenApiWrap/IString.pyx"
-include "GenApiWrap/IEnumeration.pyx"
-# -third level
-include "GenApiWrap/INode.pyx"
-
-# necessary includes from pylonAPI
-include "pylonWrap/PylonImage.pyx"
-
-# highest level of python module includes
-include "Logger.pyx"
-
-# second level of python module includes
-include "DevInfo.pyx"
-
-# third level of python module includes
-include "Camera.pyx"
-include "Factory.pyx"
-include "version.py"
-include "version.pyx"
-
-
+#endif /* IENUMERATION_H */

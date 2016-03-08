@@ -52,7 +52,7 @@ cdef extern from "Camera.h":
         String_t GetModelName() except+
         uint32_t GetNumStreamGrabberChannels() except+
         INode *getNextNode() except+
-        #INode *getNode(string name) except+
+        INode *getNode(string name) except+
 
 cdef class Camera(Logger):
     cdef:
@@ -122,6 +122,7 @@ cdef class Camera(Logger):
                 if nodeVisibility <= self._visibilityLevel.numValue:
                     self._nodeNamesLst.append(nodeName)
             node = self._camera.getNextNode()
+        self._nodeNamesLst.sort()
         msg = "Collected "
         for v,n in [(Beginner,'Beginner'),(Expert,'Expert'),(Guru,'Guru')]:
             msg += "%d %s nodes, " % (len(self._nodeNamesDict[v]),n)
@@ -133,6 +134,7 @@ cdef class Camera(Logger):
             if key <= self._visibilityLevel.numValue:
                 for value in self._nodeNamesDict[key]:
                     self._nodeNamesLst.append(value)
+        self._nodeNamesLst.sort()
         self._debug("rebuild node list, now %d elements on %s visibility"
                     % (len(self._nodeNamesLst),self._visibilityLevel.value))
 
@@ -219,11 +221,19 @@ cdef class Camera(Logger):
     def keys(self):
         return self._nodeNamesLst
     
+    cdef INode* _buildNode(self,name):
+        return self._camera.getNode(<string>name)
+    
     def __getitem__(self, key):
-        #if key in self._nodeNamesLst:
+        if key in self._nodeNamesLst:
+            node = Node()
+            node.setINode(self._buildNode(key))
+            return node
         return None
     
-    def __setitem__(self, key, item):
-        pass
+    def __setitem__(self, key, value):
+        item = self.__getitem__(key)
+        item.value = value
+        #raise NotImplementedError("Not yet implemented!")
     
     

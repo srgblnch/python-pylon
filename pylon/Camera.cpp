@@ -259,5 +259,9 @@ GenApi::INode *CppCamera::getNextNode()
 
 GenApi::INode *CppCamera::getNode(std::string name)
 {
-  //return control->GetNode(name);
+  //const size_t nameSize = name.length();
+  const char *nameChar = name.c_str();
+  GenICam::gcstring *nameAsGenICam = new GenICam::gcstring(nameChar);
+
+  return control->GetNode(*nameAsGenICam);
 }
