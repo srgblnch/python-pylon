@@ -42,7 +42,9 @@ CppCamera::CppCamera(Pylon::CInstantCamera::DeviceInfo_t _devInfo,
   _name = "CppCamera(" + devInfo.GetSerialNumber() + ")";
   _debug("Build control object (INodeMap)");
   control = &instantCamera->GetNodeMap();
+  control_tl = &instantCamera->GetTLNodeMap();
   prepareNodeIteration();
+  prepareNodeIteration_tl();
 //  streamGrabber = pylonDevice.GetStreamGrabber(0);//FIXME: if there are more than 1?
   //TODO: RegisterRemovalCallback
 }
@@ -242,6 +244,18 @@ void CppCamera::prepareNodeIteration()
   _debug(msg.str());
 }
 
+void CppCamera::prepareNodeIteration_tl()
+{
+  std::stringstream msg;
+
+  _debug("Get INode objects from INodeMap");
+  control_tl->GetNodes(nodesList_tl);
+  _debug("Prepare the iterator to the first element");
+  controlIt_tl = nodesList_tl.begin();
+  msg << "prepared for the TL INodes iteration (" << nodesList_tl.size() << ")";
+  _debug(msg.str());
+}
+
 GenApi::INode *CppCamera::getNextNode()
 {
   GenApi::INode *node;
@@ -257,6 +271,21 @@ GenApi::INode *CppCamera::getNextNode()
   return node;
 }
 
+GenApi::INode *CppCamera::getNextNode_tl()
+{
+  GenApi::INode *node;
+
+  if ( controlIt_tl == nodesList_tl.end() )
+  {
+    //_debug("Reached the end of the list");
+    prepareNodeIteration_tl();
+    return NULL;
+  }
+  node = (*controlIt_tl);
+  controlIt_tl++;
+  return node;
+}
+
 GenApi::INode *CppCamera::getNode(std::string name)
 {
   //const size_t nameSize = name.length();
@@ -264,4 +293,13 @@ GenApi::INode *CppCamera::getNode(std::string name)
   GenICam::gcstring *nameAsGenICam = new GenICam::gcstring(nameChar);
 
   return control->GetNode(*nameAsGenICam);
+}
+
+GenApi::INode *CppCamera::getNode_tl(std::string name)
+{
+  //const size_t nameSize = name.length();
+  const char *nameChar = name.c_str();
+  GenICam::gcstring *nameAsGenICam = new GenICam::gcstring(nameChar);
+
+  return control_tl->GetNode(*nameAsGenICam);
 }
