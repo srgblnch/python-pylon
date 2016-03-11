@@ -46,17 +46,21 @@ CppEnumeration::CppEnumeration(GenApi::IEnumeration* enumeration)
 
 std::vector<std::string> CppEnumeration::getSymbolics()
 {
+  std::stringstream msg;
+
   Pylon::StringList_t strLst;
   Pylon::StringList_t::iterator it;
   std::vector<std::string> strVct;
 
   _enumeration->GetSymbolics(strLst);
-  _debug("GetSymbolics()");
+  msg << "GetSymbolics(): ";// << strLst;
+  _debug(msg.str()); msg.str("");
 
   for( it = strLst.begin(); it != strLst.end(); it++)
   {
     std::string symbol = dynamic_cast<std::string&>(*it);
-    _debug(symbol);
+    msg << "- symbol " << symbol;
+    _debug(msg.str()); msg.str("");
     strVct.push_back(symbol);
   }
   return strVct;

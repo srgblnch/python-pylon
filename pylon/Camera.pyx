@@ -61,6 +61,8 @@ cdef class Camera(Logger):
         object _visibilityLevel
     _nodeNamesDict = {}
     _nodeNamesLst = []
+    _nodeCategories = []
+    _nodeTypes = {}
 
     def __init__(self,*args,**kwargs):
         super(Camera,self).__init__(*args,**kwargs)
@@ -103,6 +105,14 @@ cdef class Camera(Logger):
         while len(self._nodeNamesLst) > 0:
             self._nodeNamesLst.pop()
 
+    # TODO: once we get full and nice access to the nodes, the objects should
+    # be build asap. Having the list of node objects instead of their names
+    # will improve the filtering and later access.
+    
+    # TODO: It would be better if the keys are the ICategory nodes and, within
+    # each have the child nodes to have a tree structure of keys (similar view
+    # than the PylonViewerApp).
+
     cdef populateNodeList(self):
         cdef:
             INode *node
@@ -111,23 +121,33 @@ cdef class Camera(Logger):
         self._debug("collect nodes")
         node = self._camera.getNextNode()
         while not node == NULL:
-            if node.IsDeprecated():
-                self._debug("Ignoring %s because it is deprecated")
-            else:
+            nodeName = <string>node.GetName()
+            if not nodeName.count('_'):
                 nodeVisibility = node.GetVisibility()
-                nodeName = <string>node.GetName()
                 if nodeVisibility not in self._nodeNamesDict.keys():
                     self._nodeNamesDict[nodeVisibility] = []
                 self._nodeNamesDict[nodeVisibility].append(nodeName)
                 if nodeVisibility <= self._visibilityLevel.numValue:
                     self._nodeNamesLst.append(nodeName)
+                #check for categories and types classification
+                type = InterfaceType()
+                type.setParent(node)
+                if type.value == 'ICategory':
+                    self._nodeCategories.append(nodeName)
+                else:
+                    if type.value not in self._nodeTypes.keys():
+                        self._nodeTypes[type.value] = []
+                    self._nodeTypes[type.value].append(nodeName)
             node = self._camera.getNextNode()
         self._nodeNamesLst.sort()
+        self._nodeCategories.sort()
+        for key in self._nodeTypes.keys():
+            self._nodeTypes[key].sort()
         msg = "Collected "
         for v,n in [(Beginner,'Beginner'),(Expert,'Expert'),(Guru,'Guru')]:
             msg += "%d %s nodes, " % (len(self._nodeNamesDict[v]),n)
         self._debug(msg[:-2])
-    
+
     def _rebuildNodeList(self):
         self.__cleanNodesList()
         for key in self._nodeNamesDict.keys():
@@ -180,11 +200,11 @@ cdef class Camera(Logger):
             uint32_t width,height
         self._camera.Snap(buffer,payloadSize,width,height)
         self._debug("Get Snap(): (payload %d, width %d, heigth %d)"
-                    %(payloadSize,width,height))
-        return self.__fromBuffer(buffer,payloadSize,width,height)
+                    % (payloadSize, width, height))
+        return self.__fromBuffer(buffer, payloadSize, width, height)
 
-    cdef __fromBuffer(self,char *buffer,size_t payloadSize,
-                     uint32_t width,uint32_t height):
+    cdef __fromBuffer(self, char *buffer, size_t payloadSize,
+                      uint32_t width, uint32_t height):
         if width*height == payloadSize:
             pixelType = np.uint8
             self._debug("pixelType: 8 bits")
@@ -208,7 +228,7 @@ cdef class Camera(Logger):
     @property
     def SerialNumber(self):
         return int(<string>self._camera.GetSerialNumber())
-    
+
     @property
     def ModelName(self):
         return <string>self._camera.GetModelName()
@@ -219,21 +239,26 @@ cdef class Camera(Logger):
 
     # dictionary behaviour for the nodes
     def keys(self):
-        return self._nodeNamesLst
+        return self._nodeNamesLst[:]
     
+    def categories(self):
+        return self._nodeCategories[:]
+    
+    def types(self):
+        return self._nodeTypes.keys()
+
     cdef INode* _buildNode(self,name):
         return self._camera.getNode(<string>name)
-    
+
     def __getitem__(self, key):
-        if key in self._nodeNamesLst:
+        if key in self._nodeCategories or key in self._nodeNamesLst:
             node = Node()
             node.setINode(self._buildNode(key))
             return node
         return None
-    
+
     def __setitem__(self, key, value):
-        item = self.__getitem__(key)
-        item.value = value
-        #raise NotImplementedError("Not yet implemented!")
-    
-    
+        if key in self._nodeNamesLst:
+            item = self.__getitem__(key)
+            item.value = value
+

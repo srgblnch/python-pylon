@@ -1,8 +1,6 @@
-#!/usr/bin/env cython
-
-#---- licence header
+/*---- licence header
 ###############################################################################
-## file :               __init__.pyx
+## file :               INode.h
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -32,43 +30,52 @@
 ## along with python-pylon.  If not, see <http://www.gnu.org/licenses/>.
 ##
 ###############################################################################
+*/
 
-#---- In this init file there are included the cython files needed. They are 
-#     separated in different descendant levels to have this distinshion as 
-#     well as have each level alphabetically sorted.
+#ifndef INODE_H
+#define INODE_H
 
-from libcpp cimport bool
-from libcpp.string cimport string
-from libcpp.vector cimport vector
+#include "Logger.h"
+//#include <pylon/PylonIncludes.h>
+#include "GenApi/INode.h"
+#include "GenApi/Container.h"
+#include "GenApi/ICategory.h"
+#include <iostream>
+#include <vector>
 
-#basic data types
-include "pylonWrap/stdinclude.pyx"
+class CppINode : public Logger
+{
+public:
+  CppINode(GenApi::INode* node);
+  virtual ~CppINode(){};
 
-# necessary includes from GenApi
-# -first level
-include "GenApiWrap/Types.pyx"
-# -second level
-include "GenApiWrap/IFloat.pyx"
-include "GenApiWrap/IInteger.pyx"
-include "GenApiWrap/IBoolean.pyx"
-#include "GenApiWrap/IString.pyx"
-#include "GenApiWrap/IEnumeration.pyx"
-# -third level
-include "GenApiWrap/INode.pyx"
+  std::string getDescription();
+  std::string getToolTip();
+  std::string getDisplayName();
+  bool isImplemented();
+  bool isAvailable();
+  bool isReadable();
+  bool isWritable();
+  bool isCachable();
+  bool isFeature();
+  bool isDeprecated();
+  GenApi::INode* getINode();
+  std::vector<std::string> getChildren();
+protected:
+  GenApi::INode* _node;
+};
 
-# necessary includes from pylonAPI
-include "pylonWrap/PylonImage.pyx"
+class CppICategory : public CppINode
+{
+public:
+  CppICategory(GenApi::INode* node);
+  std::vector<std::string> getChildren();
+};
 
-# highest level of python module includes
-include "Logger.pyx"
+class CppIEnumerate : public CppINode
+{
+public:
+  CppIEnumerate(GenApi::INode* node);
+};
 
-# second level of python module includes
-include "DevInfo.pyx"
-
-# third level of python module includes
-include "Camera.pyx"
-include "Factory.pyx"
-include "version.py"
-include "version.pyx"
-
-
+#endif /* INODE_H */

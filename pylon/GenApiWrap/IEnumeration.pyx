@@ -34,35 +34,35 @@
 ###############################################################################
 
 
-cdef extern from "GenApiWrap/IEnumeration.h":
-    cdef cppclass CppEnumeration:
-        CppEnumeration(INode* node) except+
-        vector[string] getSymbolics() except+
-        string getEntry() except+
-
-
-cdef class Enumeration(Logger):
-    cdef:
-        CppEnumeration* _enumeration
-        list _lst
- 
-    def __init__(self,*args,**kwargs):
-        super(Enumeration,self).__init__(*args,**kwargs)
-        self.name = "Enumeration"
-        self._lst = []
- 
-    cdef setNode(self, INode* node):
-        self._enumeration = new CppEnumeration(node)
-        self._debug("Collecting symbols")
-        for symbol in self._enumeration.getSymbolics():
-            self._debug(symbol)
-            self._lst.append(symbol)
- 
-    property value:
-        def __get__(self):
-            return self._enumeration.getEntry()
- 
-    property symbolics:
-        def __get__(self):
-            return self._lst
+# cdef extern from "GenApiWrap/IEnumeration.h":
+#     cdef cppclass CppEnumeration:
+#         CppEnumeration(INode* node) except+
+#         vector[string] getSymbolics() except+
+#         string getEntry() except+
+# 
+# 
+# cdef class Enumeration(Logger):
+#     cdef:
+#         CppEnumeration* _enumeration
+#         list _lst
+#  
+#     def __init__(self,*args,**kwargs):
+#         super(Enumeration,self).__init__(*args,**kwargs)
+#         self.name = "Enumeration"
+#         self._lst = []
+#  
+#     cdef setNode(self, INode* node):
+#         self._enumeration = new CppEnumeration(node)
+#         self._debug("Collecting symbols")
+# #         for symbol in self._enumeration.getSymbolics():
+# #             self._debug(symbol)
+# #             self._lst.append(symbol)
+#  
+#     property value:
+#         def __get__(self):
+#             return self._enumeration.getEntry()
+#  
+#     property symbolics:
+#         def __get__(self):
+#             return self._lst
 
