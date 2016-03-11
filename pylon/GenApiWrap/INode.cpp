@@ -68,6 +68,41 @@ std::string CppINode::getDisplayName()
   return _node->GetDisplayName().c_str();
 }
 
+std::vector<std::string> CppINode::getProperties()
+{
+  std::stringstream msg;
+  GenICam::gcstring_vector properties;
+  GenICam::gcstring_vector::iterator it;
+  std::vector<std::string> answer;
+  std::string propertyName;
+
+//  _node->GetPropertyNames(properties);
+//  msg << "finding " << this->getDisplayName() << " properties";
+  for( it = properties.begin(); it != properties.end(); it++)
+  {
+    propertyName = (*it).c_str();
+//    msg << propertyName;
+//    _debug(msg.str()); msg.str("");
+    answer.push_back(propertyName);
+  }
+  return answer;
+}
+
+std::string CppINode::getProperty(const std::string name)
+{
+//  std::stringstream msg;
+
+  GenICam::gcstring nameStr,valueStr,attrStr;
+
+  nameStr = name.c_str();
+  _node->GetProperty(nameStr,valueStr,attrStr);
+//  msg << "Property " << name
+//      << " value: " << valueStr.c_str()
+//      << " (attrStr " << attrStr.c_str() << ")";
+//  _debug(msg.str()); msg.str("");
+  return valueStr.c_str();
+}
+
 int CppINode::getAccessMode()
 {
   GenApi::EAccessMode mode = _node->GetAccessMode();
@@ -131,7 +166,7 @@ std::vector<std::string> CppINode::getChildren()
 
 std::vector<std::string> CppICategory::getChildren()
 {
-  std::stringstream msg;
+//  std::stringstream msg;
 
   GenApi::FeatureList_t features;
   GenApi::FeatureList_t::iterator it;
@@ -139,13 +174,13 @@ std::vector<std::string> CppICategory::getChildren()
   std::string featureName;
 
   dynamic_cast<GenApi::ICategory*>(_node)->GetFeatures(features);
-  msg << "finding " << this->getDisplayName() << " children";
-  _debug(msg.str()); msg.str("");
+//  msg << "finding " << this->getDisplayName() << " children";
+//  _debug(msg.str()); msg.str("");
   for( it = features.begin(); it != features.end(); it++)
   {
     featureName = (*it)->GetNode()->GetName().c_str();
-    msg << featureName;
-    _debug(msg.str()); msg.str("");
+//    msg << featureName;
+//    _debug(msg.str()); msg.str("");
     answer.push_back(featureName);
   }
   return answer;
@@ -159,7 +194,7 @@ std::vector<std::string> CppINode::getEntries()
 
 std::vector<std::string> CppIEnumeration::getEntries()
 {
-  std::stringstream msg;
+//  std::stringstream msg;
 
   GenApi::NodeList_t entries;
   GenApi::NodeList_t::iterator it;
@@ -167,13 +202,13 @@ std::vector<std::string> CppIEnumeration::getEntries()
   std::string entryName;
 
   dynamic_cast<GenApi::IEnumeration*>(_node)->GetEntries(entries);
-  msg << "finding " << this->getDisplayName() << " entries";
-  _debug(msg.str()); msg.str("");
+//  msg << "finding " << this->getDisplayName() << " entries";
+//  _debug(msg.str()); msg.str("");
   for( it = entries.begin(); it != entries.end(); it++)
   {
     entryName = (*it)->GetName().c_str();
-    msg << entryName;
-    _debug(msg.str()); msg.str("");
+//    msg << entryName;
+//    _debug(msg.str()); msg.str("");
     answer.push_back(entryName);
   }
   return answer;

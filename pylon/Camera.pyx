@@ -122,22 +122,22 @@ cdef class Camera(Logger):
         node = self._camera.getNextNode()
         while not node == NULL:
             nodeName = <string>node.GetName()
-            if not nodeName.count('_'):
-                nodeVisibility = node.GetVisibility()
-                if nodeVisibility not in self._nodeNamesDict.keys():
-                    self._nodeNamesDict[nodeVisibility] = []
-                self._nodeNamesDict[nodeVisibility].append(nodeName)
-                if nodeVisibility <= self._visibilityLevel.numValue:
+            nodeVisibility = node.GetVisibility()
+            if nodeVisibility not in self._nodeNamesDict.keys():
+                self._nodeNamesDict[nodeVisibility] = []
+            self._nodeNamesDict[nodeVisibility].append(nodeName)
+            if nodeVisibility <= self._visibilityLevel.numValue:
+                if not nodeName.count('_'):
                     self._nodeNamesLst.append(nodeName)
-                #check for categories and types classification
-                type = InterfaceType()
-                type.setParent(node)
-                if type.value == 'ICategory':
-                    self._nodeCategories.append(nodeName)
-                else:
-                    if type.value not in self._nodeTypes.keys():
-                        self._nodeTypes[type.value] = []
-                    self._nodeTypes[type.value].append(nodeName)
+            #check for categories and types classification
+            type = InterfaceType()
+            type.setParent(node)
+            if type.value == 'ICategory':
+                self._nodeCategories.append(nodeName)
+            else:
+                if type.value not in self._nodeTypes.keys():
+                    self._nodeTypes[type.value] = []
+                self._nodeTypes[type.value].append(nodeName)
             node = self._camera.getNextNode()
         self._nodeNamesLst.sort()
         self._nodeCategories.sort()
@@ -150,10 +150,11 @@ cdef class Camera(Logger):
 
     def _rebuildNodeList(self):
         self.__cleanNodesList()
-        for key in self._nodeNamesDict.keys():
-            if key <= self._visibilityLevel.numValue:
-                for value in self._nodeNamesDict[key]:
-                    self._nodeNamesLst.append(value)
+        for nodeVisibility in self._nodeNamesDict.keys():
+            if nodeVisibility <= self._visibilityLevel.numValue:
+                for nodeName in self._nodeNamesDict[nodeVisibility]:
+                    if not nodeName.count('_'):
+                        self._nodeNamesLst.append(nodeName)
         self._nodeNamesLst.sort()
         self._debug("rebuild node list, now %d elements on %s visibility"
                     % (len(self._nodeNamesLst),self._visibilityLevel.value))
@@ -255,6 +256,12 @@ cdef class Camera(Logger):
             node = Node()
             node.setINode(self._buildNode(key))
             return node
+        for nodeVisibility in self._nodeNamesDict.keys():
+            if nodeVisibility <= self._visibilityLevel.numValue and \
+            key in self._nodeNamesDict[nodeVisibility]:
+                node = Node()
+                node.setINode(self._buildNode(key))
+                return node
         return None
 
     def __setitem__(self, key, value):

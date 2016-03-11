@@ -44,6 +44,8 @@ cdef extern from "GenApiWrap/INode.h":
         string getDescription() except+
         string getToolTip() except+
         string getDisplayName() except+
+        vector[string] getProperties() except+
+        string getProperty(string name) except+
         int getAccessMode() except+
         void setAccessMode(int mode)
         bool isImplemented() except+
@@ -116,6 +118,16 @@ cdef class Node(Logger):
                 return self._node.getDisplayName()
             return None
 
+    property properties:
+        def __get__(self):
+            if self._node != NULL:
+                return self._node.getProperties()
+            return None
+    def property(self,name):
+        if self._node != NULL:
+            return self._node.getProperty(name).split('\t')
+        return None
+
     property _accessMode:
         def __get__(self):
             if self._node != NULL:
@@ -185,58 +197,20 @@ cdef class Node(Logger):
                 else:
                     self._error("Unsupported INode type %s" % self.type)
             return None
-
-    # TODO: writable nodes should accept this property for write operation
+        # TODO: writable nodes should accept this property for write operation
+        # def __set__(self,value):
+        # ...
 
     property values:
         def __get__(self):
             if self._node != NULL:
-                if self.type == 'IEnumeration':
+                if self.type == 'ICategory':
+                    # the same than value property
+                    return (<CppICategory*>self._node).getChildren()
+                elif self.type == 'IEnumeration':
                     return (<CppIEnumeration*>self._node).getEntries()
+                # TODO: there are nodes that may have min,max and inc
                 else:
-                    # TODO: there are nodes that may have min,max and inc
                     self._error("Unsupported INode type %s" % self.type)
             return None
-
-
-# 
-# 
-#         
-#     property value:
-#         def __get__(self):
-#             if self._node != NULL:
-#                 if self.type == 'ICategory':
-#                     raise SyntaxError("This node is a category, "\
-#                                       "access like a dictionary")
-#                 elif self.isReadable:
-#                     if self.type == 'IBoolean':
-#                         return dynamic_cast_IBoolean(self._node).GetValue()
-#                     elif self.type == 'IInteger':
-#                         return dynamic_cast_IInteger(self._node).GetValue()
-#                     elif self.type == 'IFloat':
-#                         return dynamic_cast_IFloat(self._node).GetValue()
-#                     elif self.type == 'IString':
-#                         return dynamic_cast_IString(self._node).GetValue()
-#                     elif self.type == 'IEnumeration':
-#                         self._debug(self._enumeration.symbolics)
-#                         return self._enumeration.value
-#                     # TODO: ICommand, IRegister, IPort
-#                     else:
-#                         self._error("Unsupported INode type %s" % self.type)
-#             return None
-#         def __set__(self,value):
-#             if self._node != NULL:
-#                 if self.type == 'ICategory':
-#                     raise SyntaxError("This node is a category, "\
-#                                       "access like a dictionary")
-#                 elif self.isWritable:
-#                     if self.type == 'IFloat':
-#                         dynamic_cast_IFloat(self._node).SetValue(value)
-#                     elif self.type == 'IInteger':
-#                         dynamic_cast_IInteger(self._node).SetValue(value)
-#                     elif self.type == 'IBoolean':
-#                         dynamic_cast_IBoolean(self._node).SetValue(value)
-#                     # TODO: IString, ICommand, IRegister, IPort
-#                     else:
-#                         self._error("Unsupported INode type %s" % self.type)
 

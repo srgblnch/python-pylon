@@ -37,11 +37,7 @@
 
 #include "Logger.h"
 //#include <pylon/PylonIncludes.h>
-#include "GenApi/INode.h"
-#include "GenApi/Container.h"
-#include "GenApi/ICategory.h"
-#include "GenApi/IEnumeration.h"
-#include "GenApi/IEnumEntry.h"
+#include "GenICam.h"
 #include <iostream>
 #include <vector>
 
@@ -54,6 +50,8 @@ public:
   std::string getDescription();
   std::string getToolTip();
   std::string getDisplayName();
+  std::vector<std::string> getProperties();
+  std::string getProperty(const std::string name);
   int getAccessMode();
   void setAccessMode(int mode);
   bool isImplemented();
