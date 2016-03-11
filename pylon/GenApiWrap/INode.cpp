@@ -178,3 +178,9 @@ std::vector<std::string> CppIEnumeration::getEntries()
   }
   return answer;
 }
+
+std::string CppIEnumeration::getValue()
+{
+  return dynamic_cast<GenApi::IEnumeration*>(_node)->ToString().c_str();
+}
+

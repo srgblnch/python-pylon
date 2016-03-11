@@ -63,6 +63,7 @@ cdef extern from "GenApiWrap/INode.h":
 
     cdef cppclass CppIEnumeration:
         vector[string] getEntries() except+
+        string getValue() except+
     CppIEnumeration* newCppIEnumeration "new CppIEnumeration" (INode* node) except+
     CppINode* castIEnumeration "dynamic_cast<CppINode*>" (CppIEnumeration* obj) except+
 
@@ -178,7 +179,8 @@ cdef class Node(Logger):
                     return dynamic_cast_IInteger(self._node.getINode()).GetValue()
                 elif self.type == 'IFloat':
                     return dynamic_cast_IFloat(self._node.getINode()).GetValue()
-                # TODO: IEnumeration
+                elif self.type == 'IEnumeration':
+                    return (<CppIEnumeration*>self._node).getValue()
                 # TODO: IString, ICommand, IRegister, IPort
                 else:
                     self._error("Unsupported INode type %s" % self.type)

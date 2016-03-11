@@ -41,6 +41,7 @@
 #include "GenApi/Container.h"
 #include "GenApi/ICategory.h"
 #include "GenApi/IEnumeration.h"
+#include "GenApi/IEnumEntry.h"
 #include <iostream>
 #include <vector>
 
@@ -81,6 +82,7 @@ class CppIEnumeration : public CppINode
 public:
   CppIEnumeration(GenApi::INode* node);
   std::vector<std::string> getEntries();
+  std::string getValue();
 };
 
 #endif /* INODE_H */
