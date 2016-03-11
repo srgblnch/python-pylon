@@ -40,6 +40,7 @@
 #include "GenApi/INode.h"
 #include "GenApi/Container.h"
 #include "GenApi/ICategory.h"
+#include "GenApi/IEnumeration.h"
 #include <iostream>
 #include <vector>
 
@@ -52,6 +53,8 @@ public:
   std::string getDescription();
   std::string getToolTip();
   std::string getDisplayName();
+  int getAccessMode();
+  void setAccessMode(int mode);
   bool isImplemented();
   bool isAvailable();
   bool isReadable();
@@ -61,6 +64,7 @@ public:
   bool isDeprecated();
   GenApi::INode* getINode();
   std::vector<std::string> getChildren();
+  std::vector<std::string> getEntries();
 protected:
   GenApi::INode* _node;
 };
@@ -72,10 +76,11 @@ public:
   std::vector<std::string> getChildren();
 };
 
-class CppIEnumerate : public CppINode
+class CppIEnumeration : public CppINode
 {
 public:
-  CppIEnumerate(GenApi::INode* node);
+  CppIEnumeration(GenApi::INode* node);
+  std::vector<std::string> getEntries();
 };
 
 #endif /* INODE_H */

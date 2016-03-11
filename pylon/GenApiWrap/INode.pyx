@@ -36,28 +36,16 @@
 cdef extern from "GenApi/INode.h" namespace "GenApi":
     cdef cppclass INode:
         string GetName() except+
-#         bool IsDeprecated() except+
-#         EAccessMode GetAccessMode() except+
-#         void ImposeAccessMode(EAccessMode ImposedAccessMode) except+
-#         bool IsCachable() except+
-#         bool IsFeature() except+
         EVisibility GetVisibility() except+
-#         string GetDescription() except+
-#         string GetToolTip() except+
-#         string GetDisplayName() except+
         EInterfaceType GetPrincipalInterfaceType() except+
-#         void GetChildren(NodeList_t &Children,
-#                          ELinkType LinkType=ctReadingChildren) except+
-#     bool IsImplemented "IsImplemented" (EAccessMode AccessMode) except+
-#     bool IsAvailable "IsAvailable" (EAccessMode AccessMode) except+
-#     bool IsReadable "IsReadable" (EAccessMode AccessMode) except+
-#     bool IsWritable "IsWritable" (EAccessMode AccessMode) except+
 
 cdef extern from "GenApiWrap/INode.h":
     cdef cppclass CppINode:
         string getDescription() except+
         string getToolTip() except+
         string getDisplayName() except+
+        int getAccessMode() except+
+        void setAccessMode(int mode)
         bool isImplemented() except+
         bool isAvailable() except+
         bool isReadable() except+
@@ -73,9 +61,10 @@ cdef extern from "GenApiWrap/INode.h":
     CppICategory*  newCppICategory  "new CppICategory" (INode* node) except+
     CppINode* castICategory "dynamic_cast<CppINode*>" (CppICategory* obj) except+
 
-    cdef cppclass CppIEnumerate
-    CppIEnumerate* newCppIEnumerate "new CppIEnumerate" (INode* node) except+
-    CppINode* castIEnumerate "dynamic_cast<CppINode*>" (CppIEnumerate* obj) except+
+    cdef cppclass CppIEnumeration:
+        vector[string] getEntries() except+
+    CppIEnumeration* newCppIEnumeration "new CppIEnumeration" (INode* node) except+
+    CppINode* castIEnumeration "dynamic_cast<CppINode*>" (CppIEnumeration* obj) except+
 
 
 cdef class Node(Logger):
@@ -98,7 +87,7 @@ cdef class Node(Logger):
         if self.type == 'ICategory':
             self._node = castICategory(newCppICategory(node))
         elif self.type == 'IEnumerate':
-            self._node = castIEnumerate(newCppIEnumerate(node))
+            self._node = castIEnumeration(newCppIEnumeration(node))
         else:
             self._node = newCppINode(node)
 
@@ -125,6 +114,15 @@ cdef class Node(Logger):
             if self._node != NULL:
                 return self._node.getDisplayName()
             return None
+
+    property _accessMode:
+        def __get__(self):
+            if self._node != NULL:
+                return self._node.getAccessMode()
+            return None
+        def __set__(self,value):
+            if self._node != NULL:
+                self._node.setAccessMode(value)
 
     property isImplemented:
         def __get__(self):
@@ -186,38 +184,17 @@ cdef class Node(Logger):
                     self._error("Unsupported INode type %s" % self.type)
             return None
 
+    # TODO: writable nodes should accept this property for write operation
 
-
-
-
-#     cdef:
-#         INode* _node
-#         InterfaceType _type
-#         vector[INode*] _childs  # for ICategory nodes
-#         Enumeration _enumeration  # for IEnumerate nodes
-
-#     def __init__(self,*args,**kwargs):
-#         super(Node,self).__init__(*args,**kwargs)
-#         self.name = "Node"
-#         self._type = InterfaceType()
-#         self._enumeration = Enumeration()
-
-#     cdef setINode(self,INode* node):
-#         self._node = node
-#         self.name = "Node(%s)" % self._node.GetName()
-#         self._type.setParent(self._node)
-#         if self.type == 'ICategory':
-#             
-#             pass  # TODO: child nodes tree
-#         if self.type == 'IEnumeration':
-#             self._enumeration.setNode(self._node)
-
-#     cdef _getNodeChildren(self):
-#         cdef:
-#             NodeList_t children
-#         self._node.GetChildren(children)
-
-
+    property values:
+        def __get__(self):
+            if self._node != NULL:
+                if self.type == 'IEnumeration':
+                    return (<CppIEnumeration*>self._node).getEntries()
+                else:
+                    # TODO: there are nodes that may have min,max and inc
+                    self._error("Unsupported INode type %s" % self.type)
+            return None
 
 
 # 
@@ -260,14 +237,4 @@ cdef class Node(Logger):
 #                     # TODO: IString, ICommand, IRegister, IPort
 #                     else:
 #                         self._error("Unsupported INode type %s" % self.type)
-# 
-#     def keys(self):
-#         if self._node != NULL:
-#             if self.type == 'ICategory':
-#                 pass  # TODO: list the child nodes
-#             elif self.type == 'IEnumeration':
-#                 self._debug(self._enumeration.symbolics)
-#                 return self._enumeration.symbolics
-#             else:
-#                 self._debug("This type of node (%s) is not iterable"
-#                             % (self.type))
+

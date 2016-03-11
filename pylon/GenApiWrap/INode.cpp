@@ -46,7 +46,7 @@ CppICategory::CppICategory(GenApi::INode* node)
 
 }
 
-CppIEnumerate::CppIEnumerate(GenApi::INode* node)
+CppIEnumeration::CppIEnumeration(GenApi::INode* node)
 :CppINode(node)
 {
 
@@ -66,6 +66,21 @@ std::string CppINode::getToolTip()
 std::string CppINode::getDisplayName()
 {
   return _node->GetDisplayName().c_str();
+}
+
+int CppINode::getAccessMode()
+{
+  GenApi::EAccessMode mode = _node->GetAccessMode();
+  return static_cast<int>(mode);
+}
+
+void CppINode::setAccessMode(int mode)
+{
+  std::stringstream msg;
+  GenApi::EAccessMode accessMode = static_cast<GenApi::EAccessMode>(mode);
+  msg << "imposing access mode " << accessMode;
+  _debug(msg.str()); msg.str("");
+  _node->ImposeAccessMode(accessMode);
 }
 
 bool CppINode::isImplemented()
@@ -124,7 +139,7 @@ std::vector<std::string> CppICategory::getChildren()
   std::string featureName;
 
   dynamic_cast<GenApi::ICategory*>(_node)->GetFeatures(features);
-  msg << "find " << this->getDisplayName() << " children";
+  msg << "finding " << this->getDisplayName() << " children";
   _debug(msg.str()); msg.str("");
   for( it = features.begin(); it != features.end(); it++)
   {
@@ -136,3 +151,30 @@ std::vector<std::string> CppICategory::getChildren()
   return answer;
 }
 
+std::vector<std::string> CppINode::getEntries()
+{
+  std::vector<std::string> answer;
+  return answer;
+}
+
+std::vector<std::string> CppIEnumeration::getEntries()
+{
+  std::stringstream msg;
+
+  GenApi::NodeList_t entries;
+  GenApi::NodeList_t::iterator it;
+  std::vector<std::string> answer;
+  std::string entryName;
+
+  dynamic_cast<GenApi::IEnumeration*>(_node)->GetEntries(entries);
+  msg << "finding " << this->getDisplayName() << " entries";
+  _debug(msg.str()); msg.str("");
+  for( it = entries.begin(); it != entries.end(); it++)
+  {
+    entryName = (*it)->GetName().c_str();
+    msg << entryName;
+    _debug(msg.str()); msg.str("");
+    answer.push_back(entryName);
+  }
+  return answer;
+}
