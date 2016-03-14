@@ -70,8 +70,8 @@ public:
   GenApi::INode *getNode(std::string name);
   GenApi::INode *getTLNode(std::string name);
 
-//  void* registerRemovalCallback(void *cbFunction);
-//  void deregisterRemovalCallback(std::vector<void*>::iterator pos);
+  std::vector<void*>::iterator registerRemovalCallback(void *cbFunction);
+  void deregisterRemovalCallback(std::vector<void*>::iterator pos);
 protected:
   Pylon::CInstantCamera::DeviceInfo_t devInfo;
   Pylon::IPylonDevice *pylonDevice;

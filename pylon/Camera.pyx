@@ -55,12 +55,15 @@ cdef extern from "Camera.h":
         INode *getNode(string name) except+
         INode *getTLNextNode() except+
         INode *getTLNode(string name) except+
+        vector[void*].iterator registerRemovalCallback(void*) except+
+        void deregisterRemovalCallback(vector[void*].iterator) except+
 
 cdef class Camera(Logger):
     cdef:
         CppCamera *_camera
         int _serial
         object _visibilityLevel
+        vector[void*].iterator cbRef
     _nodeNamesDict = {}
     _nodeNamesLst = []
     _nodeCategories = []
@@ -174,9 +177,24 @@ cdef class Camera(Logger):
     def isopen(self):
         return <bool>(self._camera.IsOpen())
     def Open(self):
-        return <bool>(self._camera.Open())
+        cdef:
+            bool open
+        open = <bool>(self._camera.Open())
+        self.registerRemovalCallback()
+        return open
     def Close(self):
+        self.deregisterRemovalCallback()
         return <bool>(self._camera.Close())
+
+    cdef registerRemovalCallback(self):
+        self.cbRef = self._camera.\
+            registerRemovalCallback(<void*>&self.cameraRemovalCallback)
+        self._debug("Registered a camera removal callback")
+    cdef deregisterRemovalCallback(self):
+        self._camera.deregisterRemovalCallback(self.cbRef)
+        self._debug("Deregistered the callback for the camera removal")
+    cdef cameraRemovalCallback(self):
+        self._warning("Camera has been removed!")
 
     @property
     def isgrabbing(self):

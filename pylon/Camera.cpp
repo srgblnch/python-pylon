@@ -340,26 +340,39 @@ void CppCamera::prepareRemovalCallback()
   cbHandle = Pylon::RegisterRemovalCallback(pylonDevice,*this,&CppCamera::removalCallback);
 }
 
-//void* CppCamera::registerRemovalCallback(void *cbFunction)
-//{
-//  aboveCallbacks.push_back(cbFunction);
-//  return aboveCallbacks.back();
-//}
+std::vector<void*>::iterator CppCamera::registerRemovalCallback(void *cbFunction)
+{
+  std::stringstream msg;
 
-//void CppCamera::deregisterRemovalCallback(std::vector<void*>::iterator pos)
-//{
-//  aboveCallbacks.erase(pos);
-//}
+  aboveCallbacks.push_back(cbFunction);
+  msg << "registered a new removal callback (" << aboveCallbacks.size() << ")";
+  _debug(msg.str());
+  return aboveCallbacks.end()--;
+}
+
+void CppCamera::deregisterRemovalCallback(std::vector<void*>::iterator pos)
+{
+  std::stringstream msg;
+
+  _debug("Deregistering a removal callback");
+  aboveCallbacks.erase(pos);
+  msg << aboveCallbacks.size() << "removal callback left";
+  _debug(msg.str());
+}
 
 void CppCamera::removalCallback(Pylon::IPylonDevice* pDevice)
 {
-//  std::vector<void*>::iterator it;
+  std::stringstream msg;
+  std::vector<void*>::iterator it;
 
   _warning("Camera has been removed!");
-//  for ( it = aboveCallbacks.begin(); it != aboveCallbacks.end(); it++)
-//  {
-//    (*it) ();
-//  }
+  msg << "iterating the " << aboveCallbacks.size() << " callback registered";
+  _debug(msg.str());
+  for ( it = aboveCallbacks.begin(); it != aboveCallbacks.end(); it++)
+  {
+    void (*it)();
+  }
+  _debug("Deregister removal callback");
   pylonDevice->DeregisterRemovalCallback(cbHandle);
   cameraPresent = false;
 }
