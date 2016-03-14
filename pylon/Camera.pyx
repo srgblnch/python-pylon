@@ -53,8 +53,8 @@ cdef extern from "Camera.h":
         uint32_t GetNumStreamGrabberChannels() except+
         INode *getNextNode() except+
         INode *getNode(string name) except+
-        INode *getNextNode_tl() except+
-        INode *getNode_tl(string name) except+
+        INode *getTLNextNode() except+
+        INode *getTLNode(string name) except+
 
 cdef class Camera(Logger):
     cdef:
@@ -151,12 +151,12 @@ cdef class Camera(Logger):
             msg += "%d %s nodes, " % (len(self._nodeNamesDict[v]),n)
         self._debug(msg[:-2])
         self._debug("Build TL nodes")
-        node = self._camera.getNextNode_tl()
+        node = self._camera.getTLNextNode()
         while not node == NULL:
             nodeName = <string>node.GetName()
             self._debug("Found %s" % (nodeName))
             self._nodeNamesLst_tl.append(nodeName)
-            node = self._camera.getNextNode_tl()
+            node = self._camera.getTLNextNode()
         self._nodeNamesLst_tl.sort()
 
     def _rebuildNodeList(self):
@@ -256,14 +256,15 @@ cdef class Camera(Logger):
     def categories(self):
         return self._nodeCategories[:]
 
-    def tl(self):
+    def tlNodes(self):
         return self._nodeNamesLst_tl[:]
 
-    def tl_node(self,name):
+    def tlNode(self,name):
         if name in self._nodeNamesLst_tl:
             node = Node()
-            node.setINode(self._buildNode_tl(name))
+            node.setINode(self._buildTLNode(name))
             return node
+        return None
 
     def types(self):
         return self._nodeTypes.keys()
@@ -271,8 +272,8 @@ cdef class Camera(Logger):
     cdef INode* _buildNode(self,name):
         return self._camera.getNode(<string>name)
 
-    cdef INode* _buildNode_tl(self,name):
-        return self._camera.getNode_tl(<string>name)
+    cdef INode* _buildTLNode(self,name):
+        return self._camera.getTLNode(<string>name)
 
     def __getitem__(self, key):
         if key in self._nodeCategories or key in self._nodeNamesLst:

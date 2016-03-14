@@ -44,7 +44,7 @@ CppCamera::CppCamera(Pylon::CInstantCamera::DeviceInfo_t _devInfo,
   control = &instantCamera->GetNodeMap();
   control_tl = &instantCamera->GetTLNodeMap();
   prepareNodeIteration();
-  prepareNodeIteration_tl();
+  prepareTLNodeIteration();
 //  streamGrabber = pylonDevice.GetStreamGrabber(0);//FIXME: if there are more than 1?
   //TODO: RegisterRemovalCallback
 }
@@ -244,7 +244,7 @@ void CppCamera::prepareNodeIteration()
   _debug(msg.str());
 }
 
-void CppCamera::prepareNodeIteration_tl()
+void CppCamera::prepareTLNodeIteration()
 {
   std::stringstream msg;
 
@@ -271,14 +271,14 @@ GenApi::INode *CppCamera::getNextNode()
   return node;
 }
 
-GenApi::INode *CppCamera::getNextNode_tl()
+GenApi::INode *CppCamera::getTLNextNode()
 {
   GenApi::INode *node;
 
   if ( controlIt_tl == nodesList_tl.end() )
   {
     //_debug("Reached the end of the list");
-    prepareNodeIteration_tl();
+    prepareTLNodeIteration();
     return NULL;
   }
   node = (*controlIt_tl);
@@ -295,7 +295,7 @@ GenApi::INode *CppCamera::getNode(std::string name)
   return control->GetNode(*nameAsGenICam);
 }
 
-GenApi::INode *CppCamera::getNode_tl(std::string name)
+GenApi::INode *CppCamera::getTLNode(std::string name)
 {
   //const size_t nameSize = name.length();
   const char *nameChar = name.c_str();

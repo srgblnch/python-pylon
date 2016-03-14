@@ -65,9 +65,9 @@ public:
   uint32_t GetNumStreamGrabberChannels();
 
   GenApi::INode *getNextNode();
-  GenApi::INode *getNextNode_tl();
+  GenApi::INode *getTLNextNode();
   GenApi::INode *getNode(std::string name);
-  GenApi::INode *getNode_tl(std::string name);
+  GenApi::INode *getTLNode(std::string name);
 protected:
   Pylon::CInstantCamera::DeviceInfo_t devInfo;
   Pylon::IPylonDevice *pylonDevice;
@@ -80,7 +80,7 @@ protected:
   //INodes TL
   GenApi::INodeMap *control_tl;
   GenApi::NodeList_t nodesList_tl;
-  void prepareNodeIteration_tl();
+  void prepareTLNodeIteration();
   GenApi::NodeList_t::iterator controlIt_tl;
   //StreamGrabber
   Pylon::IStreamGrabber* streamGrabber;
