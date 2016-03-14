@@ -34,19 +34,22 @@
 
 #include "Camera.h"
 
+#define kNUM_EVENTBUFFERS 20;
+
 CppCamera::CppCamera(Pylon::CInstantCamera::DeviceInfo_t _devInfo,
                      Pylon::IPylonDevice *_pylonDevice,
                      Pylon::CInstantCamera* _instantCamera)
-  :devInfo(_devInfo),pylonDevice(_pylonDevice),instantCamera(_instantCamera)
+  :devInfo(_devInfo),pylonDevice(_pylonDevice),instantCamera(_instantCamera),
+   cameraPresent(false)
 {
   _name = "CppCamera(" + devInfo.GetSerialNumber() + ")";
   _debug("Build control object (INodeMap)");
   control = &instantCamera->GetNodeMap();
-  control_tl = &instantCamera->GetTLNodeMap();
   prepareNodeIteration();
+  _debug("Build TL control object (INodeMap)");
+  control_tl = &instantCamera->GetTLNodeMap();
   prepareTLNodeIteration();
-//  streamGrabber = pylonDevice.GetStreamGrabber(0);//FIXME: if there are more than 1?
-  //TODO: RegisterRemovalCallback
+
 }
 
 CppCamera::~CppCamera()
@@ -59,11 +62,17 @@ CppCamera::~CppCamera()
   //}
   //tlFactory->DestroyDevice(pylonDevice);
   //TODO: DeregisterRemovalCallback
+  pylonDevice->DeregisterRemovalCallback(cbHandle);
+}
+
+bool CppCamera::IsCameraPresent()
+{
+  return cameraPresent;
 }
 
 bool CppCamera::IsOpen()
 {
-  return pylonDevice->IsOpen();
+  return IsCameraPresent() && pylonDevice->IsOpen();
 }
 bool CppCamera::Open()
 {
@@ -72,12 +81,16 @@ bool CppCamera::Open()
     //TODO: AccessModeSet
     pylonDevice->Open();
   }
+  _debug("Prepare camera removal callback");
+  prepareRemovalCallback();
+  cameraPresent = true;
   return pylonDevice->IsOpen();
 }
 bool CppCamera::Close()
 {
   if (pylonDevice->IsOpen())
   {
+    pylonDevice->DeregisterRemovalCallback(cbHandle);
     pylonDevice->Close();
   }
   return !pylonDevice->IsOpen();
@@ -85,7 +98,7 @@ bool CppCamera::Close()
 
 bool CppCamera::IsGrabbing()
 {
-  return pylonDevice->IsOpen() && streamGrabber && streamGrabber->IsOpen();
+  return IsOpen() && streamGrabber && streamGrabber->IsOpen();
       //instantCamera->IsGrabbing();
 }
 
@@ -126,10 +139,11 @@ bool CppCamera::Start()
     {
       //FIXME:  I'm seen always only 1 stream grabber available and once it's
       //get no one else can access the camera. But this must be reviewed.
-      streamGrabber = pylonDevice->GetStreamGrabber(0);
-      PrepareStreamGrabber();
+      prepareStreamGrabber();
       streamGrabber->Open();
     }
+    prepareEventGrabber();
+    eventGrabber->Open();
   }
   return IsGrabbing();
 }
@@ -142,6 +156,14 @@ bool CppCamera::Stop()
     if ( streamGrabber )
     {
       streamGrabber->Close();
+    }
+    if ( eventGrabber )
+    {
+      eventGrabber->Close();
+      if ( eventAdapter )
+      {
+        pylonDevice->DestroyEventAdapter(eventAdapter);
+      }
     }
   }
   return !IsGrabbing();
@@ -227,10 +249,19 @@ uint32_t CppCamera::GetNumStreamGrabberChannels()
   return pylonDevice->GetNumStreamGrabberChannels();
 }
 
-void CppCamera::PrepareStreamGrabber()
+void CppCamera::prepareStreamGrabber()
 {
-
+  streamGrabber = pylonDevice->GetStreamGrabber(0);
+  waitObjects.Add(streamGrabber->GetWaitObject());
 }
+
+void CppCamera::prepareEventGrabber()
+{
+  eventGrabber = pylonDevice->GetEventGrabber();
+  eventAdapter = pylonDevice->CreateEventAdapter();
+  waitObjects.Add(eventGrabber->GetWaitObject());
+}
+
 
 void CppCamera::prepareNodeIteration()
 {
@@ -303,3 +334,33 @@ GenApi::INode *CppCamera::getTLNode(std::string name)
 
   return control_tl->GetNode(*nameAsGenICam);
 }
+
+void CppCamera::prepareRemovalCallback()
+{
+  cbHandle = Pylon::RegisterRemovalCallback(pylonDevice,*this,&CppCamera::removalCallback);
+}
+
+//void* CppCamera::registerRemovalCallback(void *cbFunction)
+//{
+//  aboveCallbacks.push_back(cbFunction);
+//  return aboveCallbacks.back();
+//}
+
+//void CppCamera::deregisterRemovalCallback(std::vector<void*>::iterator pos)
+//{
+//  aboveCallbacks.erase(pos);
+//}
+
+void CppCamera::removalCallback(Pylon::IPylonDevice* pDevice)
+{
+//  std::vector<void*>::iterator it;
+
+  _warning("Camera has been removed!");
+//  for ( it = aboveCallbacks.begin(); it != aboveCallbacks.end(); it++)
+//  {
+//    (*it) ();
+//  }
+  pylonDevice->DeregisterRemovalCallback(cbHandle);
+  cameraPresent = false;
+}
+

@@ -51,6 +51,7 @@ public:
   CppCamera( Pylon::CInstantCamera::DeviceInfo_t,
              Pylon::IPylonDevice*, Pylon::CInstantCamera* );
   ~CppCamera();
+  bool IsCameraPresent();
   bool IsOpen();
   bool Open();
   bool Close();
@@ -68,6 +69,9 @@ public:
   GenApi::INode *getTLNextNode();
   GenApi::INode *getNode(std::string name);
   GenApi::INode *getTLNode(std::string name);
+
+//  void* registerRemovalCallback(void *cbFunction);
+//  void deregisterRemovalCallback(std::vector<void*>::iterator pos);
 protected:
   Pylon::CInstantCamera::DeviceInfo_t devInfo;
   Pylon::IPylonDevice *pylonDevice;
@@ -84,7 +88,18 @@ protected:
   GenApi::NodeList_t::iterator controlIt_tl;
   //StreamGrabber
   Pylon::IStreamGrabber* streamGrabber;
-  void PrepareStreamGrabber();
+  void prepareStreamGrabber();
+  //EventGrabber
+  Pylon::IEventGrabber *eventGrabber;
+  Pylon::IEventAdapter *eventAdapter;
+  Pylon::WaitObjects waitObjects;
+  void prepareEventGrabber();
+  //Camera Removal handler
+  bool cameraPresent;
+  Pylon::DeviceCallbackHandle cbHandle;
+  std::vector<void*> aboveCallbacks;
+  void prepareRemovalCallback();
+  void removalCallback(Pylon::IPylonDevice* pDevice);
 };
 
 #endif /* CAMERA_H */

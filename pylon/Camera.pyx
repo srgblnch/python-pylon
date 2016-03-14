@@ -205,6 +205,14 @@ cdef class Camera(Logger):
             return self.CSnap()
         return self.getImage()
 
+        # Example:
+        # import pylon
+        # factory = pylon.Factory(trace=True)
+        # camera = factory.getCameraBySerialNumber(...)
+        # import matplotlib.pyplot as plt
+        # import matplotlib.cm as cm
+        # plt.imshow(camera.Snap(), cmap = cm.Greys_r)
+
     cdef CSnap(self):
         cdef:
             char *buffer = NULL

@@ -200,15 +200,17 @@ cdef class Node(Logger):
         # TODO: writable nodes should accept this property for write operation
         def __set__(self,value):
             if self._node != NULL:
-                if self.type == 'IBoolean':
-                    dynamic_cast_IBoolean(self._node.getINode()).\
-                        SetValue(bool(value))
-                elif self.type == 'IInteger':
+#                 if self.type == 'IBoolean':
+#                     dynamic_cast_IBoolean(self._node.getINode()).\
+#                         SetValue(bool(value))
+                if self.type == 'IInteger':
                     dynamic_cast_IInteger(self._node.getINode()).\
                         SetValue(int(value))
                 elif self.type == 'IFloat':
                     dynamic_cast_IFloat(self._node.getINode()).\
                         SetValue(float(value))
+                # TODO: IString, IEnumeration, IRegister, IPort
+                # What about ICategory, ICommand?
                 else:
                     self._error("Unsupported INode type %s" % self.type)
 
