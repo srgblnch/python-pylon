@@ -214,36 +214,6 @@ bool CppCamera::getImage(Pylon::CPylonImage *image)
   return false;
 }
 
-Pylon::String_t CppCamera::GetSerialNumber()
-{
-  try
-  {
-    return devInfo.GetSerialNumber();
-  }
-  catch(std::exception& e)
-  {
-    std::stringstream msg;
-    msg << "CppCamera GetSerialNumber exception: " << e.what();
-    _error(msg.str()); msg.str("");
-    return "";
-  }
-}
-
-Pylon::String_t CppCamera::GetModelName()
-{
-  try
-  {
-    return devInfo.GetModelName();
-  }
-  catch(std::exception& e)
-  {
-    std::stringstream msg;
-    msg << "CppCamera GetModelName exception: " << e.what();
-    _error(msg.str()); msg.str("");
-    return "";
-  }
-}
-
 uint32_t CppCamera::GetNumStreamGrabberChannels()
 {
   return pylonDevice->GetNumStreamGrabberChannels();

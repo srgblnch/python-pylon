@@ -214,14 +214,15 @@ cdef class Factory(Logger):
             return self._cameraModels[model][:]
         return []
 
-    cdef __BuildCameraObj(self,__DevInfo devInfo):
+    cdef __BuildCameraObj(self, __DevInfo devInfo):
         cdef:
             CppCamera* cppCamera
+            CppDevInfo* cppDevInfo
         camera = Camera()
         cppCamera = self._cppFactory.CreateCamera(devInfo.GetCppDevInfo())
         self._debug("CppCamera object created")
         if cppCamera != NULL:
-            camera.SetCppCamera(cppCamera)
+            camera.SetCppCamera(cppCamera, devInfo)
         return camera
 
     #@trace

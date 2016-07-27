@@ -62,8 +62,6 @@ public:
   bool Stop();
   bool getImage(Pylon::CPylonImage *image);
 
-  Pylon::String_t GetSerialNumber();
-  Pylon::String_t GetModelName();
   uint32_t GetNumStreamGrabberChannels();
 
   GenApi::INode *getNextNode();
