@@ -72,7 +72,7 @@ bool CppCamera::IsCameraPresent()
 
 bool CppCamera::IsOpen()
 {
-  return IsCameraPresent() && pylonDevice->IsOpen();
+  return IsCameraPresent() && pylonDevice != NULL && pylonDevice->IsOpen();
 }
 bool CppCamera::Open()
 {
@@ -98,7 +98,7 @@ bool CppCamera::Close()
 
 bool CppCamera::IsGrabbing()
 {
-  return IsOpen() && streamGrabber && streamGrabber->IsOpen();
+  return IsOpen() && streamGrabber != NULL && streamGrabber->IsOpen();
       //instantCamera->IsGrabbing();
 }
 

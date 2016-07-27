@@ -67,7 +67,7 @@ cdef class Camera(Logger):
         self._visibilityLevel = Visibility()
 
     def __del__(self):
-        if self.isopen:
+        if self.isOpen:
             self.Close()
         del self._camera
 
@@ -169,7 +169,7 @@ cdef class Camera(Logger):
                     % (len(self._nodeNamesLst), self._visibilityLevel.value))
 
     @property
-    def isopen(self):
+    def isOpen(self):
         return <bool> (self._camera.IsOpen())
 
     def Open(self):
@@ -200,7 +200,7 @@ cdef class Camera(Logger):
         return <bool> (self._camera.IsGrabbing())
 
     def Start(self):
-        if not self.isopen:
+        if not self.isOpen:
             self.Open()
         return <bool> (self._camera.Start())
 
@@ -229,9 +229,14 @@ cdef class Camera(Logger):
         # import pylon
         # factory = pylon.Factory(trace=True)
         # camera = factory.getCameraBySerialNumber(...)
+        # - option 1
         # import matplotlib.pyplot as plt
         # import matplotlib.cm as cm
         # plt.imshow(camera.Snap(), cmap = cm.Greys_r)
+        # - option 2
+        # from PIL import Image
+        # img = Image.fromarray(camera.Snap(), 'L')
+        # img.show()
 
     cdef CSnap(self):
         cdef:
