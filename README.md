@@ -40,9 +40,9 @@ Then a python console should return this:
 
 ```python
 >>> import pylon
->>> pylon.Version().pylonAPI_str()
+>>> pylon.VersionAPI()
     '5.0.1-6388'
->>> pylon.Version().wrapper_str()
+>>> pylon.Version()
     '0.0.0-0'
 ```
 
@@ -56,7 +56,7 @@ With the answer:
 
 ```python
 >>> import pylon
->>> pylon.Version().pylonAPI_str()
+>>> pylon.VersionAPI()
     '3.2.1-0'
 ```
 

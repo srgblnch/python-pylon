@@ -34,40 +34,43 @@
 ###############################################################################
 
 
+include "version.py"
+
+
 cdef extern from "pylon/PylonVersionNumber.h":
     int PYLON_VERSION_MAJOR
     int PYLON_VERSION_MINOR
     int PYLON_VERSION_SUBMINOR
     int PYLON_VERSION_BUILD
 
-#from version import version_python_pylon,version_python_pylon_string
 
-#TODO: this should behave like:
-#>>> pylon.Version
-#    '0.0.0-0'
-#>>> repr(pylon.Version)
-#    '0.0.0-0 (pylonAPI X.Y.Z-B)'
-#As well as allow an access that gives a list of integers.
+cdef class VersionObj(object):
+    def __init__(self, *args, **kwargs):
+        super(VersionObj, self).__init__(*args, **kwargs)
 
-cdef class Version(object):
-    def __init__(self,*args,**kwargs):
-        super(Version,self).__init__(*args,**kwargs)
+    def __str__(self):
+        return self.wrapper_str()
+
+    def __repr__(self):
+        return "%s (pylonAPI %s)" % (self.wrapper_str(), self.pylonAPI_str())
+
     def pylonAPI(self):
-        return (PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
-                PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
+        return (PYLON_VERSION_MAJOR, PYLON_VERSION_MINOR,
+                PYLON_VERSION_SUBMINOR, PYLON_VERSION_BUILD)
+
     def pylonAPI_str(self):
-        return '%d.%d.%d-%d'%(PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
-                              PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
+        return '%d.%d.%d-%d' % (self.pylonAPI())
+
     def wrapper(self):
         return version_python_pylon()
+
     def wrapper_str(self):
         return version_python_pylon_string()
 
-def version_pylonAPI():
-    return (PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
-            PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
-    
-def version_pylonAPI_str():
-    return '%d.%d.%d-%d'%(PYLON_VERSION_MAJOR,PYLON_VERSION_MINOR,
-            PYLON_VERSION_SUBMINOR,PYLON_VERSION_BUILD)
 
+def VersionAPI():
+    return VersionObj().pylonAPI_str()
+
+
+def Version():
+    return VersionObj().wrapper_str()

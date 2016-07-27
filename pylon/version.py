@@ -38,7 +38,7 @@
 _MAJOR_VERSION=0
 _MINOR_VERSION=0
 _MAINTENANCE_VERSION=0
-_BUILD_VERSION=0
+_BUILD_VERSION=1
 
 #FIXME: this shall be standarized, there must be many wrappers that already 
 #have develop an smart way for this.

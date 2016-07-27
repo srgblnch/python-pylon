@@ -42,6 +42,7 @@
 #include "DevInfo.h"
 #include <iostream>
 #include <vector>
+#include <stdexcept>
 
 class CppCamera : public Logger
 {

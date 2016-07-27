@@ -68,7 +68,6 @@ include "DevInfo.pyx"
 # third level of python module includes
 include "Camera.pyx"
 include "Factory.pyx"
-include "version.py"
 include "version.pyx"
 
 
