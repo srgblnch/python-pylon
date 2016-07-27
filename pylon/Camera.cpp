@@ -40,7 +40,7 @@ CppCamera::CppCamera(Pylon::CInstantCamera::DeviceInfo_t _devInfo,
                      Pylon::IPylonDevice *_pylonDevice,
                      Pylon::CInstantCamera* _instantCamera)
   :devInfo(_devInfo),pylonDevice(_pylonDevice),instantCamera(_instantCamera),
-   cameraPresent(false)
+   cameraPresent(false), timeout(250)
 {
   _name = "CppCamera(" + devInfo.GetSerialNumber() + ")";
   _debug("Build control object (INodeMap)");
@@ -107,7 +107,13 @@ bool CppCamera::Snap(void *buffer,size_t &payloadSize,
 {
   std::stringstream msg;
   Pylon::CGrabResultPtr grabResult;
-  instantCamera->GrabOne(1000,grabResult);
+  Pylon::EPayloadType payloadType;
+  Pylon::EPixelType pixelType;
+  uint32_t offsetX, offsetY, paddingX, paddingY, frameNumber;
+  uint64_t timestamp;
+  size_t imageSize;
+
+  instantCamera->GrabOne(getTimeout(), grabResult);
   _debug("instantCamera->GrabOne(...)");
   if ( grabResult->GrabSucceeded() )
   {
@@ -115,7 +121,21 @@ bool CppCamera::Snap(void *buffer,size_t &payloadSize,
     width = grabResult->GetWidth();
     height = grabResult->GetHeight();
     payloadSize = grabResult->GetPayloadSize();
+    payloadType = grabResult->GetPayloadType();
+    pixelType = grabResult->GetPixelType();
+    offsetX = grabResult->GetOffsetX();
+    offsetY = grabResult->GetOffsetY();
+    paddingX = grabResult->GetPaddingX();
+    paddingY = grabResult->GetPaddingY();
+    frameNumber = grabResult->GetFrameNumber();
+    timestamp = grabResult->GetTimeStamp();
+    imageSize = grabResult->GetImageSize();
     msg << "Image(" << payloadSize << "): [" << width << "," << height << "]";
+    msg << " payload type: " << payloadType << ", pixel type: " << pixelType;
+    msg << ", offset (" << offsetX << "," << offsetY << ") ";
+    msg << ", padding (" << paddingX << "," << paddingY << ") ";
+    msg << ", frame number: " << frameNumber << ", timestamp: " << timestamp;
+    msg << ", image size: " << imageSize;
     _debug(msg.str()); msg.str("");
     buffer = grabResult->GetBuffer();
     _debug("GetBuffer()");
@@ -217,6 +237,16 @@ bool CppCamera::getImage(Pylon::CPylonImage *image)
 uint32_t CppCamera::GetNumStreamGrabberChannels()
 {
   return pylonDevice->GetNumStreamGrabberChannels();
+}
+
+unsigned int CppCamera::getTimeout()
+{
+  return timeout;
+}
+
+void CppCamera::setTimeout(unsigned int newTimeout)
+{
+  timeout = newTimeout;
 }
 
 void CppCamera::prepareStreamGrabber()

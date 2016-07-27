@@ -57,12 +57,14 @@ public:
   bool Open();
   bool Close();
   bool IsGrabbing();
-  bool Snap(void*,size_t&,uint32_t&,uint32_t&);
+  bool Snap(void*, size_t&, uint32_t&, uint32_t&);
   bool Start();
   bool Stop();
   bool getImage(Pylon::CPylonImage *image);
 
   uint32_t GetNumStreamGrabberChannels();
+  unsigned int getTimeout();
+  void setTimeout(unsigned int);
 
   GenApi::INode *getNextNode();
   GenApi::INode *getTLNextNode();
@@ -75,6 +77,7 @@ protected:
   Pylon::CInstantCamera::DeviceInfo_t devInfo;
   Pylon::IPylonDevice *pylonDevice;
   Pylon::CInstantCamera *instantCamera;
+  unsigned int timeout;
   //INodes
   GenApi::INodeMap *control;
   GenApi::NodeList_t nodesList;
