@@ -197,6 +197,10 @@ cdef class Factory(Logger):
         return self._camerasLst[:]
 
     @property
+    def serialNumbersList(self):
+        return self._serialDct.keys()
+
+    @property
     def ipList(self):
         return self._ipDct.keys()
  
@@ -218,12 +222,21 @@ cdef class Factory(Logger):
         cdef:
             CppCamera* cppCamera
             CppDevInfo* cppDevInfo
-        camera = Camera()
+        camera = Camera(self)
         cppCamera = self._cppFactory.CreateCamera(devInfo.GetCppDevInfo())
         self._debug("CppCamera object created")
         if cppCamera != NULL:
             camera.SetCppCamera(cppCamera, devInfo)
         return camera
+
+    cdef _RecreateCamera(self, Camera camera, number):
+        cdef:
+            __DevInfo devInfo
+            CppCamera* cppCamera
+        devInfo = self._serialDct[number]
+        cppCamera = self._cppFactory.CreateCamera(devInfo.GetCppDevInfo())
+        if cppCamera != NULL:
+            camera.SetCppCamera(cppCamera, devInfo)
 
     #@trace
     def __prepareCameraObj(self,__DevInfo devInfo):

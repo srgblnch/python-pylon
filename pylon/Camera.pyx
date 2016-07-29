@@ -24,11 +24,17 @@ __license__ = "GPLv3+"
 
 import numpy as np
 from Cython.Shadow import NULL
+from cpython cimport PyObject
 # cimport numpy as np
+
+cdef extern from "PyCallback.h":
+    cdef cppclass PyCallback:
+        PyCallback(PyObject*, const char*) except+
 
 cdef extern from "Camera.h":
     cdef cppclass CppCamera:
         CppCamera(CppFactory *factory, CppDevInfo *devInfo) except+
+        bool IsCameraPresent() except+
         bool IsOpen() except+
         bool Open() except+
         bool Close() except+
@@ -43,28 +49,38 @@ cdef extern from "Camera.h":
         INode *getNode(string name) except+
         INode *getTLNextNode() except+
         INode *getTLNode(string name) except+
-        vector[void*].iterator registerRemovalCallback(void*) except+
-        void deregisterRemovalCallback(vector[void*].iterator) except+
+        vector[PyCallback*].iterator registerRemovalCallback(PyCallback*) except+
+        void deregisterRemovalCallback(vector[PyCallback*].iterator) except+
+
+DEFAULT_HEARTBEAT = 3000  # ms
+DEFAULT_READTIMEOUT = 250  # ms
+DEFAULT_WRITETIMEOUT = 250  # ms
 
 cdef class Camera(Logger):
     cdef:
+        Factory _factory
         CppCamera *_camera
         __DevInfo _devInfo
         int _serial
         object _visibilityLevel
-        vector[void*].iterator cbRef
+        vector[PyCallback*].iterator cbRef
+        object _wasPresent
+        object _wasOpen
     _nodeNamesDict = {}
     _nodeNamesLst = []
     _nodeCategories = []
     _nodeTypes = {}
     _nodeNamesLst_tl = []
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, factory, *args, **kwargs):
         super(Camera, self).__init__(*args, **kwargs)
         self.name = "Camera()"
         self._debug("Void Camera Object build, "
                     "but it doesn't link with an specific camera")
+        self._factory = factory
         self._visibilityLevel = Visibility()
+        self._wasPresent = False
+        self._wasOpen = False
 
     def __del__(self):
         if self.isOpen:
@@ -87,6 +103,10 @@ cdef class Camera(Logger):
         self._visibilityLevel.parent = self
         self._debug("CppCamera attached to a Camera (cython) object")
         self.populateNodeList()
+        self._wasPresent = True
+        self._heartbeat = DEFAULT_HEARTBEAT
+        self._readTimeout = DEFAULT_READTIMEOUT
+        self._writeTimeout = DEFAULT_WRITETIMEOUT
 
     property visibility:
         def __get__(self):
@@ -169,6 +189,11 @@ cdef class Camera(Logger):
                     % (len(self._nodeNamesLst), self._visibilityLevel.value))
 
     @property
+    def isPresent(self):
+        # return self._wasPresent
+        return <bool> (self._camera.IsCameraPresent())
+
+    @property
     def isOpen(self):
         return <bool> (self._camera.IsOpen())
 
@@ -176,24 +201,50 @@ cdef class Camera(Logger):
         cdef:
             bool open
         open = <bool> (self._camera.Open())
-        self.registerRemovalCallback()
+        # self.registerRemovalCallback()
+        self._wasOpen = True
         return open
 
     def Close(self):
-        self.deregisterRemovalCallback()
+        # self.deregisterRemovalCallback()
+        self._wasOpen = False
         return <bool> (self._camera.Close())
 
-    cdef registerRemovalCallback(self):
-        self.cbRef = self._camera.\
-            registerRemovalCallback(<void*> &self.cameraRemovalCallback)
-        self._debug("Registered a camera removal callback")
+#     cdef registerRemovalCallback(self):
+#         cdef:
+#             PyCallback* obj
+#         obj = new PyCallback(<PyObject*>self,
+#                              <char*>"cameraRemovalCallback")
+#         self.cbRef = self._camera.registerRemovalCallback(obj)
+#         self._debug("Registered a camera removal callback")
+# 
+#     cdef deregisterRemovalCallback(self):
+#         self._camera.deregisterRemovalCallback(self.cbRef)
+#         self._debug("Deregistered the callback for the camera removal")
+# 
+#     cdef cameraRemovalCallback(self):
+#         self._warning("Camera has been removed!")
+#         self._wasPresent = False
 
-    cdef deregisterRemovalCallback(self):
-        self._camera.deregisterRemovalCallback(self.cbRef)
-        self._debug("Deregistered the callback for the camera removal")
-
-    cdef cameraRemovalCallback(self):
-        self._warning("Camera has been removed!")
+    def reconnect(self):
+        cdef:
+            CppCamera* cppCamera
+        if self.isPresent:
+            self._info("Already connected with the camera")
+        elif self._wasPresent:
+            serial = self.deviceInfo.SerialNumber
+            self._debug("Camera was present, but has been disconnected. "
+                        "Proceed to search if the camera has come back")
+            self._factory._refreshTlInfo()
+            if serial in self._factory.serialNumbersList:
+                self._factory._RecreateCamera(self, serial)
+                self._info("Rebuild the CppCamera object")
+                if self._wasOpen:
+                    self.Open()
+            else:
+                self._warning("Camera not found (%s)" % self._factory.camerasList)
+        else:
+            self._warning("Camera wasn't present to be reconnected")
 
     @property
     def isGrabbing(self):
@@ -286,14 +337,60 @@ cdef class Camera(Logger):
         return self._nodeCategories[:]
 
     def tlNodes(self):
+        '''returns a list of Transport Layer nodes.
+        '''
         return self._nodeNamesLst_tl[:]
 
     def tlNode(self, name):
+        '''Given a Transport Layer node name, return the requested node
+        '''
         if name in self._nodeNamesLst_tl:
             node = Node()
             node.setINode(self._buildTLNode(name))
             return node
         return None
+
+    property _heartbeat:
+        def __get__(self):
+            return self.tlNode('HeartbeatTimeout').value
+ 
+        def __set__(self, value):
+            if type(value) in [int, long] and value > 0:
+                try:
+                    currentValue = self.tlNode('HeartbeatTimeout').value
+                    self._debug("Modify the HeartbeatTimeout from %d to %d"
+                                % (currentValue, value))
+                    self.tlNode('HeartbeatTimeout').value = value
+                except Exception as e:
+                    self._warning("Cannot modify HeartbeatTimeout")
+
+    property _readTimeout:
+        def __get__(self):
+            return self.tlNode('ReadTimeout').value
+ 
+        def __set__(self, value):
+            if type(value) in [int, long] and value > 0:
+                try:
+                    currentValue = self.tlNode('ReadTimeout').value
+                    self._debug("Modify the ReadTimeout from %d to %d"
+                                % (currentValue, value))
+                    self.tlNode('ReadTimeout').value = value
+                except Exception as e:
+                    self._warning("Cannot modify ReadTimeout")
+
+    property _writeTimeout:
+        def __get__(self):
+            return self.tlNode('WriteTimeout').value
+ 
+        def __set__(self, value):
+            if type(value) in [int, long] and value > 0:
+                try:
+                    currentValue = self.tlNode('WriteTimeout').value
+                    self._debug("Modify the WriteTimeout from %d to %d"
+                                % (currentValue, value))
+                    self.tlNode('WriteTimeout').value = value
+                except Exception as e:
+                    self._warning("Cannot modify WriteTimeout")
 
     def types(self):
         return self._nodeTypes.keys()

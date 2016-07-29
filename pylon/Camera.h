@@ -43,6 +43,7 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+#include "PyCallback.h"
 
 class CppCamera : public Logger
 {
@@ -63,21 +64,22 @@ public:
   bool getImage(Pylon::CPylonImage *image);
 
   uint32_t GetNumStreamGrabberChannels();
-  unsigned int getTimeout();
-  void setTimeout(unsigned int);
+  unsigned int getGrabTimeout();
+  void setGrabTimeout(unsigned int);
 
   GenApi::INode *getNextNode();
   GenApi::INode *getTLNextNode();
   GenApi::INode *getNode(std::string name);
   GenApi::INode *getTLNode(std::string name);
 
-  std::vector<void*>::iterator registerRemovalCallback(void *cbFunction);
-  void deregisterRemovalCallback(std::vector<void*>::iterator pos);
+  //Camera Removal notification to upper layers
+//  std::vector<PyCallback*>::iterator registerRemovalCallback(PyCallback*);
+//  void deregisterRemovalCallback(std::vector<PyCallback*>::iterator pos);
 protected:
   Pylon::CInstantCamera::DeviceInfo_t devInfo;
   Pylon::IPylonDevice *pylonDevice;
   Pylon::CInstantCamera *instantCamera;
-  unsigned int timeout;
+  unsigned int grabTimeout;
   //INodes
   GenApi::INodeMap *control;
   GenApi::NodeList_t nodesList;
@@ -99,7 +101,7 @@ protected:
   //Camera Removal handler
   bool cameraPresent;
   Pylon::DeviceCallbackHandle cbHandle;
-  std::vector<void*> aboveCallbacks;
+  std::vector<PyCallback*> aboveCallbacks;
   void prepareRemovalCallback();
   void removalCallback(Pylon::IPylonDevice* pDevice);
 };
