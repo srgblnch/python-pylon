@@ -64,6 +64,7 @@ cdef class Camera(Logger):
         int _serial
         object _visibilityLevel
         vector[PyCallback*].iterator cbRef
+        PyCallback* _cbObj
         object _wasPresent
         object _wasOpen
     _nodeNamesDict = {}
@@ -190,7 +191,6 @@ cdef class Camera(Logger):
 
     @property
     def isPresent(self):
-        # return self._wasPresent
         return <bool> (self._camera.IsCameraPresent())
 
     @property
@@ -201,30 +201,35 @@ cdef class Camera(Logger):
         cdef:
             bool open
         open = <bool> (self._camera.Open())
-        # self.registerRemovalCallback()
+        self.registerRemovalCallback()
         self._wasOpen = True
         return open
 
     def Close(self):
-        # self.deregisterRemovalCallback()
+        self.deregisterRemovalCallback()
         self._wasOpen = False
         return <bool> (self._camera.Close())
 
-#     cdef registerRemovalCallback(self):
-#         cdef:
-#             PyCallback* obj
-#         obj = new PyCallback(<PyObject*>self,
-#                              <char*>"cameraRemovalCallback")
-#         self.cbRef = self._camera.registerRemovalCallback(obj)
-#         self._debug("Registered a camera removal callback")
-# 
-#     cdef deregisterRemovalCallback(self):
-#         self._camera.deregisterRemovalCallback(self.cbRef)
-#         self._debug("Deregistered the callback for the camera removal")
-# 
-#     cdef cameraRemovalCallback(self):
-#         self._warning("Camera has been removed!")
-#         self._wasPresent = False
+    cdef registerRemovalCallback(self):
+        if self._cbObj == NULL:
+            self._cbObj = new PyCallback(<PyObject*>self,
+                                 <char*>"cameraRemovalCallback")
+            self.cbRef = self._camera.registerRemovalCallback(self._cbObj)
+            self._debug("Registered a camera removal callback")
+        else:
+            self._warning("Callback already registered")
+ 
+    cdef deregisterRemovalCallback(self):
+        if self._cbObj != NULL:
+            self._camera.deregisterRemovalCallback(self.cbRef)
+            del self._cbObj
+            self._debug("Deregistered the callback for the camera removal")
+        else:
+            self._warning("No callback to be unregistred")
+ 
+    cdef cameraRemovalCallback(self):
+        self._warning("Camera has been removed!")
+        self._wasPresent = False
 
     def reconnect(self):
         cdef:

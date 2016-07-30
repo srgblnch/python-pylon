@@ -73,8 +73,8 @@ public:
   GenApi::INode *getTLNode(std::string name);
 
   //Camera Removal notification to upper layers
-//  std::vector<PyCallback*>::iterator registerRemovalCallback(PyCallback*);
-//  void deregisterRemovalCallback(std::vector<PyCallback*>::iterator pos);
+  std::vector<PyCallback*>::iterator registerRemovalCallback(PyCallback*);
+  void deregisterRemovalCallback(std::vector<PyCallback*>::iterator pos);
 protected:
   Pylon::CInstantCamera::DeviceInfo_t devInfo;
   Pylon::IPylonDevice *pylonDevice;

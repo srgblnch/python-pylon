@@ -48,24 +48,25 @@ PyCallback::~PyCallback()
 
 void PyCallback::execute()
 {
-  _info("Executing callback");
+  _debug("Executing callback");
   try
   {
-    _info("build arguments");
+    //_info("build arguments");
     //PyObject *args = Py_BuildValue("(self)", _self);
-    PyObject *args = PyTuple_Pack(1,_self);
+    //PyObject *args = PyTuple_Pack(1,_self);
     //PyObject *args = PyTuple_Pack(0, NULL);
     //PyObject *kwargs = PyTuple_Pack(0, NULL);
-    _info("callObject");
+    _debug("callObject");
     //PyObject_Call(_method, args, kwargs);
-    PyObject_CallObject(_method, args);
+    //PyObject_CallObject(_method, args);
     //PyObject_CallObject(_method, NULL);
     //PyObject_CallFunctionObjArgs(_method, args);
-    //PyObject_CallFunctionObjArgs(_method, NULL);
-    _info("callback execution done!");
+    PyObject_CallFunctionObjArgs(_method, _self, NULL);
+    _debug("callback execution done!");
   }
   catch(...)
   {
+    // TODO: collect and show more information about the exception
     _error("Exception calling python");
   }
 }
