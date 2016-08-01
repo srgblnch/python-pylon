@@ -34,39 +34,83 @@
 
 #include "PyCallback.h"
 
-PyCallback::PyCallback(PyObject* self, const char* methodName)
+PyCallback::PyCallback(PyObject* self, const char* methodName,
+                       std::string parentName)
 {
+  std::string str(methodName);
+
+  _name = "PyCallback(" + parentName + "." + str + ")";
+  Py_Initialize();
   Py_XINCREF(self);
   _self = self;
   _method = PyObject_GetAttrString(self, methodName);
+  if ( ! PyCallable_Check(_method) )
+  {
+    _error("The callback attribute is not callable");
+  }
 }
 
 PyCallback::~PyCallback()
 {
   Py_XDECREF(_self);
+  Py_Finalize();
 }
 
 void PyCallback::execute()
 {
-  _debug("Executing callback");
+  PyGILState_STATE gstate;
+
+  gstate = PyGILState_Ensure();
   try
   {
+    // option 0:
+    //_method(_self);
+    // compilation error: "expression cannot be used as a function"
+
+    // option 1:
+    //_self->_method();
+    // compilation error: "’PyObject’ has no member named ‘_method’"
+
+    //// options based in the python c-api:
+
+    // option 2:
+    //PyObject *args = Py_BuildValue("(O)", _self);
+    //PyObject *kwargs = Py_BuildValue("{}", "", NULL);
+    //PyObject_Call(_method, args, kwargs);
+    // segfault in PyObject_Call
+
+    // option 3:
+    if ( PyCallable_Check(_method) )
+    {
+      _debug("Build arguments for the call");
+      PyObject *args = Py_BuildValue("(O)", _self);
+      PyObject *kwargs = Py_BuildValue("{}", "", NULL);
+      _debug("Executing the callback");
+      PyObject_Call(_method, args, kwargs);
+    }
+    else
+    {
+      _warning("The given method is not callable!");
+    }
+
     //_info("build arguments");
-    //PyObject *args = Py_BuildValue("(self)", _self);
+    //PyObject *args = Py_BuildValue("o", _self);
     //PyObject *args = PyTuple_Pack(1,_self);
     //PyObject *args = PyTuple_Pack(0, NULL);
     //PyObject *kwargs = PyTuple_Pack(0, NULL);
-    _debug("callObject");
+    //_debug("callObject");
     //PyObject_Call(_method, args, kwargs);
     //PyObject_CallObject(_method, args);
     //PyObject_CallObject(_method, NULL);
-    //PyObject_CallFunctionObjArgs(_method, args);
-    PyObject_CallFunctionObjArgs(_method, _self, NULL);
-    _debug("callback execution done!");
+    //PyObject_CallFunctionObjArgs(_method, NULL);
+    //PyObject_CallFunctionObjArgs(_method, _self, NULL);
+    //PyObject_CallFunctionObjArgs(_method, args, NULL);
+    //_debug("callback execution done!");
   }
   catch(...)
   {
     // TODO: collect and show more information about the exception
     _error("Exception calling python");
   }
+  PyGILState_Release(gstate);
 }

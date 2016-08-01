@@ -29,7 +29,7 @@ from cpython cimport PyObject
 
 cdef extern from "PyCallback.h":
     cdef cppclass PyCallback:
-        PyCallback(PyObject*, const char*) except+
+        PyCallback(PyObject*, const char*, string) except+
 
 cdef extern from "Camera.h":
     cdef cppclass CppCamera:
@@ -213,7 +213,9 @@ cdef class Camera(Logger):
     cdef registerRemovalCallback(self):
         if self._cbObj == NULL:
             self._cbObj = new PyCallback(<PyObject*>self,
-                                 <char*>"cameraRemovalCallback")
+                                         <char*>"cameraRemovalCallback",
+                                         <string> "%s"
+                                         % (self.deviceInfo.SerialNumber))
             self.cbRef = self._camera.registerRemovalCallback(self._cbObj)
             self._debug("Registered a camera removal callback")
         else:
@@ -229,7 +231,6 @@ cdef class Camera(Logger):
  
     cdef cameraRemovalCallback(self):
         self._warning("Camera has been removed!")
-        self._wasPresent = False
 
     def reconnect(self):
         cdef:

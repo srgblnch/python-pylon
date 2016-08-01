@@ -41,12 +41,12 @@
 class PyCallback : public Logger
 {
 public:
-  PyCallback(PyObject*, const char*);
+  PyCallback(PyObject*, const char*, std::string);
   ~PyCallback();
   void execute();
 protected:
-  PyObject* _self;
-  PyObject* _method;
+  PyObject *_self;
+  PyObject *_method;
 };
 
 #endif /* PYCALLBACK_H */

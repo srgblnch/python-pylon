@@ -81,9 +81,13 @@ bool CppCamera::Open()
   {
     //TODO: AccessModeSet
     pylonDevice->Open();
+    _debug("Prepare camera removal callback");
+    prepareRemovalCallback();
   }
-  _debug("Prepare camera removal callback");
-  prepareRemovalCallback();
+  else
+  {
+    _info("Camera was already open");
+  }
   return pylonDevice->IsOpen();
 }
 bool CppCamera::Close()
@@ -92,6 +96,10 @@ bool CppCamera::Close()
   {
     pylonDevice->DeregisterRemovalCallback(cbHandle);
     pylonDevice->Close();
+  }
+  else
+  {
+    _info("Camera was already close");
   }
   return !pylonDevice->IsOpen();
 }
@@ -380,9 +388,9 @@ void CppCamera::removalCallback(Pylon::IPylonDevice* pDevice)
     try
     {
       cb = (*it);
-      //cb->execute();
-      _error("Because of the segmentation fault it produces, "\
-             "this callback will not be propagated into python.");
+      cb->execute();
+      //_error("Because of the segmentation fault it produces, "\
+      //       "this callback will not be propagated into python.");
       // TODO: this must be fixed and propagate the notification
       //       to the upper layers.
     }
