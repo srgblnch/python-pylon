@@ -58,6 +58,7 @@ include "GenApiWrap/INode.pyx"
 
 # necessary includes from pylonAPI
 include "pylonWrap/PylonImage.pyx"
+include "pylonWrap/PixelType.pyx"
 
 # highest level of python module includes
 include "Logger.pyx"

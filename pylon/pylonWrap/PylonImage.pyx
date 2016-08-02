@@ -39,3 +39,4 @@ cdef extern from "pylon/PylonImage.h" namespace "Pylon":
         size_t GetImageSize() except+
         uint32_t GetWidth() except+
         uint32_t GetHeight() except+
+        EPixelType GetPixelType() except+

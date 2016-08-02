@@ -50,6 +50,9 @@ CppCamera::CppCamera(Pylon::CInstantCamera::DeviceInfo_t _devInfo,
   control_tl = &instantCamera->GetTLNodeMap();
   prepareTLNodeIteration();
   cameraPresent = true;
+  streamGrabber = NULL;
+  eventGrabber = NULL;
+  eventAdapter = NULL;
 }
 
 CppCamera::~CppCamera()
@@ -74,6 +77,8 @@ bool CppCamera::IsOpen()
 {
   return IsCameraPresent() && pylonDevice != NULL && pylonDevice->IsOpen();
 }
+
+
 bool CppCamera::Open()
 {
   // TODO: check if the camera hasn't been removed
@@ -106,50 +111,67 @@ bool CppCamera::Close()
 
 bool CppCamera::IsGrabbing()
 {
-  return IsOpen() && streamGrabber != NULL && streamGrabber->IsOpen();
-      //instantCamera->IsGrabbing();
+  if ( IsOpen() && HasStreamGrabber() )
+  {
+    return streamGrabber->IsOpen();
+  }
+  return false;
+  // TODO: ? instantCamera->IsGrabbing();
 }
 
-bool CppCamera::Snap(void *buffer,size_t &payloadSize,
-                     uint32_t &width,uint32_t &height)
+bool CppCamera::HasStreamGrabber()
+{
+  return streamGrabber != NULL;
+}
+
+bool CppCamera::Snap(void *buffer, size_t &payloadSize,
+                     uint32_t &width,uint32_t &height,
+                     Pylon::EPixelType &pixelType)
 {
   std::stringstream msg;
   Pylon::CGrabResultPtr grabResult;
-  //Pylon::EPayloadType payloadType;
-  Pylon::EPixelType pixelType;
-  uint32_t offsetX, offsetY, paddingX, paddingY, frameNumber;
-  uint64_t timestamp, id;
+  uint64_t id, timestamp;
   size_t imageSize;
 
+  Pylon::CPylonImage *image;
+
+  if ( ! IsOpen() )
+  {
+    msg << "Snap needs to have the camera open";
+    _error(msg.str());
+    throw std::runtime_error(msg.str());
+  }
+
+  if ( IsGrabbing() )
+  {
+    msg << "Snap not allowed when grabbing";
+    _error(msg.str());
+    throw std::runtime_error(msg.str());
+  }
+
   instantCamera->GrabOne(getGrabTimeout(), grabResult);
+  Open(); /* Not understand, to call GrabOne pylonDevice must be open,
+             but this call closes it*/
   _debug("instantCamera->GrabOne(...)");
   if ( grabResult->GrabSucceeded() )
   {
     _debug("Succeeded");
+    payloadSize = grabResult->GetPayloadSize();
     id = grabResult->GetID();
+    msg << "Image(" << id << ")";
+    timestamp = grabResult->GetTimeStamp();
+    msg << ", timestamp: " << timestamp;
+    image = new Pylon::CPylonImage();
+    image->AttachGrabResultBuffer(grabResult);
     width = grabResult->GetWidth();
     height = grabResult->GetHeight();
-    payloadSize = grabResult->GetPayloadSize();
-    //payloadType = grabResult->GetPayloadType();
-    pixelType = grabResult->GetPixelType();
-    offsetX = grabResult->GetOffsetX();
-    offsetY = grabResult->GetOffsetY();
-    paddingX = grabResult->GetPaddingX();
-    paddingY = grabResult->GetPaddingY();
-    frameNumber = grabResult->GetFrameNumber();
-    timestamp = grabResult->GetTimeStamp();
-    imageSize = grabResult->GetImageSize();
-    msg << "Image(" << id << ") frame number:" <<frameNumber;
     msg << " [" << width << "," << height << "]";
-    msg << " payload " << payloadSize; // << " (type: " << payloadType << ")";
-    msg << ", pixel type: " << pixelType;
-    msg << ", offset (" << offsetX << "," << offsetY << ") ";
-    msg << ", padding (" << paddingX << "," << paddingY << ") ";
-    msg << ", timestamp: " << timestamp;
-    msg << ", image size: " << imageSize;
+    imageSize = image->GetImageSize();
+    msg << " image size: " << imageSize;
+    pixelType = image->GetPixelType();
+    msg << " pixel type: " << pixelType;
+    buffer = image->GetBuffer();
     _debug(msg.str()); msg.str("");
-    buffer = grabResult->GetBuffer();
-    _debug("GetBuffer()");
   }
   else
   {
@@ -174,7 +196,10 @@ bool CppCamera::Start()
       streamGrabber->Open();
     }
     prepareEventGrabber();
-    eventGrabber->Open();
+    if ( eventGrabber )
+    {
+      eventGrabber->Open();
+    }
   }
   return IsGrabbing();
 }
@@ -207,6 +232,13 @@ bool CppCamera::getImage(Pylon::CPylonImage *image)
   //void *buffer;
 
   _debug("CppCamera::getImage()");
+
+  if ( ! IsOpen() )
+  {
+    _warning("To get an image (the communication with) "\
+             "the camera must be open");
+    return false;
+  }
 
   if ( IsGrabbing() )
   {
@@ -278,24 +310,30 @@ void CppCamera::prepareNodeIteration()
 {
   std::stringstream msg;
 
-  _debug("Get INode objects from INodeMap");
-  control->GetNodes(nodesList);
-  _debug("Prepare the iterator to the first element");
-  controlIt = nodesList.begin();
-  msg << "Prepared for the INodes iteration (" << nodesList.size() << ")";
-  _debug(msg.str());
+  if ( control )
+  {
+    _debug("Get INode objects from INodeMap");
+    control->GetNodes(nodesList);
+    _debug("Prepare the iterator to the first element");
+    controlIt = nodesList.begin();
+    msg << "Prepared for the INodes iteration (" << nodesList.size() << ")";
+    _debug(msg.str());
+  }
 }
 
 void CppCamera::prepareTLNodeIteration()
 {
   std::stringstream msg;
 
-  _debug("Get INode objects from INodeMap");
-  control_tl->GetNodes(nodesList_tl);
-  _debug("Prepare the iterator to the first element");
-  controlIt_tl = nodesList_tl.begin();
-  msg << "Prepared for the TL INodes iteration (" << nodesList_tl.size() << ")";
-  _debug(msg.str());
+  if ( control_tl )
+  {
+    _debug("Get INode objects from INodeMap");
+    control_tl->GetNodes(nodesList_tl);
+    _debug("Prepare the iterator to the first element");
+    controlIt_tl = nodesList_tl.begin();
+    msg << "Prepared for the TL INodes iteration (" << nodesList_tl.size() << ")";
+    _debug(msg.str());
+  }
 }
 
 GenApi::INode *CppCamera::getNextNode()
@@ -366,11 +404,19 @@ std::vector<PyCallback*>::iterator CppCamera::registerRemovalCallback(PyCallback
 void CppCamera::deregisterRemovalCallback(std::vector<PyCallback*>::iterator pos)
 {
   std::stringstream msg;
+  std::vector<PyCallback*>::iterator it;
 
   _debug("Deregistering a removal callback");
-  aboveCallbacks.erase(pos);
-  msg << aboveCallbacks.size() << "removal callback left";
-  _debug(msg.str());
+  for ( it = aboveCallbacks.begin(); it != aboveCallbacks.end(); it++)
+  {
+    if ( it == pos )
+    {
+      aboveCallbacks.erase(pos);
+      msg << aboveCallbacks.size() << "removal callback left";
+      _debug(msg.str());
+      break;
+    }
+  }
 }
 
 void CppCamera::removalCallback(Pylon::IPylonDevice* pDevice)

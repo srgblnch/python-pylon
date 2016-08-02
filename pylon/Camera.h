@@ -58,7 +58,7 @@ public:
   bool Open();
   bool Close();
   bool IsGrabbing();
-  bool Snap(void*, size_t&, uint32_t&, uint32_t&);
+  bool Snap(void*, size_t&, uint32_t&, uint32_t&, Pylon::EPixelType&);
   bool Start();
   bool Stop();
   bool getImage(Pylon::CPylonImage *image);
@@ -91,6 +91,7 @@ protected:
   void prepareTLNodeIteration();
   GenApi::NodeList_t::iterator controlIt_tl;
   //StreamGrabber
+  bool HasStreamGrabber();
   Pylon::IStreamGrabber* streamGrabber;
   void prepareStreamGrabber();
   //EventGrabber

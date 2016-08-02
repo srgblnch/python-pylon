@@ -35,7 +35,7 @@
 
 
 cdef extern from "pylon/PixelType.h" namespace "Pylon":
-    cdef enum PixelType:
+    cdef enum EPixelType:
         PixelType_Undefined = -1,
         PixelType_Mono8,
         PixelType_Mono8signed,
@@ -83,16 +83,16 @@ cdef extern from "pylon/PixelType.h" namespace "Pylon":
         PixelType_BayerGB16,
         PixelType_BayerBG16,
         PixelType_RGB12V1packed,
-    int PixelSize(PixelType pixelType) except +
-    bool IsMonoPacked(PixelType pixelType) except +
-    bool IsBayerPacked(PixelType pixelType) except +
-    bool IsYUV( PixelType pixelType) except +
-    bool IsRGBPacked(PixelType pixelType) except +
-    bool IsValidRGB(PixelType pixelType) except +
-    bool IsValidBGR(PixelType pixelType) except +
-    bool IsPacked(PixelType pixelType) except +
-    int BitPerPixel(PixelType pixelType) except +
-    int PixelSize( PixelType pixelType) except +
-    bool IsMono( PixelType pixelType) except +
-    int BitDepth(  PixelType pixelType ) except +
+    int PixelSize(EPixelType pixelType) except +
+    bool IsMonoPacked(EPixelType pixelType) except +
+    bool IsBayerPacked(EPixelType pixelType) except +
+    bool IsYUV(EPixelType pixelType) except +
+    bool IsRGBPacked(EPixelType pixelType) except +
+    bool IsValidRGB(EPixelType pixelType) except +
+    bool IsValidBGR(EPixelType pixelType) except +
+    bool IsPacked(EPixelType pixelType) except +
+    int BitPerPixel(EPixelType pixelType) except +
+    int PixelSize(EPixelType pixelType) except +
+    bool IsMono(EPixelType pixelType) except +
+    int BitDepth(EPixelType pixelType) except +
     

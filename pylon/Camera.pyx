@@ -26,6 +26,7 @@ import numpy as np
 from Cython.Shadow import NULL
 from cpython cimport PyObject
 # cimport numpy as np
+from PIL import Image
 
 cdef extern from "PyCallback.h":
     cdef cppclass PyCallback:
@@ -39,8 +40,8 @@ cdef extern from "Camera.h":
         bool Open() except+
         bool Close() except+
         bool IsGrabbing() except+
-        bool Snap(void* buffer, size_t &payload, uint32_t &w, uint32_t &h)\
-            except+
+        bool Snap(void* buffer, size_t &payload, uint32_t &w, uint32_t &h,
+                  EPixelType &pixelType) except+
         bool Start() except+
         bool Stop() except+
         bool getImage(CPylonImage *image) except+
@@ -197,13 +198,22 @@ cdef class Camera(Logger):
     def isOpen(self):
         return <bool> (self._camera.IsOpen())
 
+    @property
+    def isGrabbing(self):
+        return <bool> (self._camera.IsGrabbing())
+
     def Open(self):
         cdef:
             bool open
-        open = <bool> (self._camera.Open())
-        self.registerRemovalCallback()
-        self._wasOpen = True
-        return open
+        try:
+            open = <bool> (self._camera.Open())
+        except RuntimeError as e:
+            self._error(e)
+            raise e
+        else:
+            self.registerRemovalCallback()
+            self._wasOpen = True
+            return open
 
     def Close(self):
         self.deregisterRemovalCallback()
@@ -224,7 +234,7 @@ cdef class Camera(Logger):
     cdef deregisterRemovalCallback(self):
         if self._cbObj != NULL:
             self._camera.deregisterRemovalCallback(self.cbRef)
-            del self._cbObj
+            self._cbObj = NULL
             self._debug("Deregistered the callback for the camera removal")
         else:
             self._warning("No callback to be unregistred")
@@ -252,10 +262,6 @@ cdef class Camera(Logger):
         else:
             self._warning("Camera wasn't present to be reconnected")
 
-    @property
-    def isGrabbing(self):
-        return <bool> (self._camera.IsGrabbing())
-
     def Start(self):
         if not self.isOpen:
             self.Open()
@@ -272,12 +278,13 @@ cdef class Camera(Logger):
             self._debug("done getImage")
             return self.__fromBuffer(<char*> img.GetBuffer(),
                                      img.GetImageSize(),
-                                     img.GetWidth(), img.GetHeight())
+                                     img.GetWidth(), img.GetHeight(),
+                                     img.GetPixelType())
         return np.array([[], []], dtype=np.uint8)
 
     def Snap(self):
         self._debug("Snap()")
-        if not self.isGrabbing:
+        if self.isOpen and not self.isGrabbing:
             self._debug("It's not grabbing")
             return self.CSnap()
         return self.getImage()
@@ -292,7 +299,8 @@ cdef class Camera(Logger):
         # plt.imshow(camera.Snap(), cmap = cm.Greys_r)
         # - option 2
         # from PIL import Image
-        # img = Image.fromarray(camera.Snap(), 'L')
+        # img = Image.fromarray(camera.Snap(), 'L') # mono16
+        # img = Image.fromarray(camera.Snap(), 'YCbCr') # YUV
         # img.show()
 
     cdef CSnap(self):
@@ -300,32 +308,14 @@ cdef class Camera(Logger):
             char *buffer = NULL
             size_t payloadSize
             uint32_t width, height
-        self._camera.Snap(buffer, payloadSize, width, height)
-        self._debug("Get Snap(): (payload %d, width %d, heigth %d)"
-                    % (payloadSize, width, height))
-        return self.__fromBuffer(buffer, payloadSize, width, height)
-
-    cdef __fromBuffer(self, char *buffer, size_t payloadSize,
-                      uint32_t width, uint32_t height):
-        if width * height == payloadSize:
-            pixelType = np.uint8
-            self._debug("pixelType: 8 bits")
-        elif (width * height) * 2 == payloadSize:
-            pixelType = np.uint16
-            self._debug("pixelType: 16 bits")
-        else:
-            self._debug("pixelType: unknown")
-            raise BufferError("Not supported pixel type "
-                              "(payload %d, width %d, heigth %d)"
-                              % (payloadSize, width, height))
-        self._debug("> np.frombuffer(...)")
-        img_np = np.frombuffer(buffer[:payloadSize], dtype=pixelType)
-        self._debug("< np.frombuffer(...)")
-        img_np = img_np.reshape((height, -1))
-        self._debug("np.reshape")
-        img_np = img_np[:height, :width]
-        self._debug("img_np 2D")
-        return img_np
+            EPixelType pixelType
+        self._camera.Snap(buffer, payloadSize, width, height, pixelType)
+        if not self.isOpen:
+            self
+        self._debug("Get Snap(): (payload %d, width %d, heigth %d, "
+                    "pixel type %s)"
+                    % (payloadSize, width, height, pixelType))
+        return self.__fromBuffer(buffer, payloadSize, width, height, pixelType)
 
     @property
     def deviceInfo(self):
@@ -424,3 +414,80 @@ cdef class Camera(Logger):
         if key in self._nodeNamesLst:
             item = self.__getitem__(key)
             item.value = value
+
+    cdef __fromBuffer(self, char *buffer, size_t payloadSize,
+                      uint32_t width, uint32_t height, EPixelType pixelType):
+        npType = self._prepare4pixelType(pixelType)
+        
+        self._debug("> np.frombuffer(...)")
+        img_np = np.frombuffer(buffer[:payloadSize], dtype=npType)
+        self._debug("< np.frombuffer(...)")
+        img_np = img_np.reshape((height, -1))
+        self._debug("np.reshape")
+        img_np = img_np[:height, :width]
+        self._debug("img_np 2D")
+        return img_np
+
+    def _prepare4pixelType(self, EPixelType pixelType):
+        if self._is_pixelType_mono8(pixelType):
+            self._debug("pixelType: mono 1 Byte")
+            npType = np.uint8
+        elif self._is_pixelType_mono16(pixelType):
+            self._debug("pixelType: mono 2 Bytes")
+            npType = np.uint16
+        elif self._is_pixelType_bayer(pixelType):
+            raise BufferError("Not supported Bayer pixel types")
+        elif self._is_pixelType_yuv(pixelType):
+            raise BufferError("Not supported YUV pixel types")
+            # self._debug("pixelType: YUV")
+            # npType = np.uint16
+        elif self._is_pixelType_RGB(pixelType):
+            raise BufferError("Not supported RGB pixel type")
+        elif self._is_pixelType_BGR(pixelType):
+            raise BufferError("Not supported BGR pixel type")
+        else:
+            self._debug("pixelType: unknown")
+            raise BufferError("Unknown pixel type %d" % (pixelType))
+        return npType
+
+    def _is_pixelType_mono(self, EPixelType pixelType):
+        return self._is_pixelType_mono8(pixelType) or \
+            self._is_pixelType_mono16(pixelType)
+    def _is_pixelType_mono8(self, EPixelType pixelType):
+        return pixelType in [PixelType_Mono8, PixelType_Mono8signed]
+        
+    def _is_pixelType_mono16(self, EPixelType pixelType):
+        return pixelType in [PixelType_Mono10, PixelType_Mono10packed,
+                             PixelType_Mono12, PixelType_Mono12packed,
+                             PixelType_Mono16]
+
+    def _is_pixelType_bayer(self, EPixelType pixelType):
+        return pixelType in [PixelType_BayerGR8, PixelType_BayerRG8,
+                             PixelType_BayerGB8, PixelType_BayerBG8,
+                             PixelType_BayerGR10, PixelType_BayerRG10,
+                             PixelType_BayerGB10, PixelType_BayerBG10,
+                             PixelType_BayerGR12, PixelType_BayerRG12,
+                             PixelType_BayerGB12, PixelType_BayerBG12,
+                             PixelType_BayerGR12Packed,
+                             PixelType_BayerRG12Packed,
+                             PixelType_BayerGB12Packed,
+                             PixelType_BayerBG12Packed, PixelType_BayerGR16,
+                             PixelType_BayerRG16, PixelType_BayerGB16,
+                             PixelType_BayerBG16, ]
+
+    def _is_pixelType_yuv(self, EPixelType pixelType):
+        return pixelType in [PixelType_YUV411packed, PixelType_YUV422packed,
+                             PixelType_YUV444packed,
+                             PixelType_YUV422_YUYV_Packed]
+
+    def _is_pixelType_BGR(self, EPixelType pixelType):
+        return pixelType in [PixelType_BGR8packed, PixelType_BGRA8packed,
+                             PixelType_BGR10packed, PixelType_BGR12packed,
+                             PixelType_BGR10V1packed, PixelType_BGR10V2packed]
+
+    def _is_pixelType_RGB(self, EPixelType pixelType):
+        return pixelType in [PixelType_RGB8packed, PixelType_RGBA8packed,
+                             PixelType_RGB10packed, PixelType_RGB12packed,
+                             PixelType_RGB8planar, PixelType_RGB10planar,
+                             PixelType_RGB12planar, PixelType_RGB16planar,
+                             PixelType_RGB12V1packed]

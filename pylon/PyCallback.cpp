@@ -37,16 +37,29 @@
 PyCallback::PyCallback(PyObject* self, const char* methodName,
                        std::string parentName)
 {
-  std::string str(methodName);
+  std::string strMethodName(methodName);
 
-  _name = "PyCallback(" + parentName + "." + str + ")";
+  _name = "PyCallback(" + parentName + ")";
   Py_Initialize();
   Py_XINCREF(self);
   _self = self;
-  _method = PyObject_GetAttrString(self, methodName);
-  if ( ! PyCallable_Check(_method) )
+
+  if ( PyObject_HasAttrString(self, methodName) == 1)
   {
-    _error("The callback attribute is not callable");
+    _method = PyObject_GetAttrString(self, methodName);
+    if ( _method && PyCallable_Check(_method) )
+    {
+      _name = "PyCallback(" + parentName + "." + strMethodName + ")";
+    }
+    else
+    {
+      _error("The callback attribute is not callable");
+    }
+  }
+  else
+  {
+    _method = NULL;
+    _error("method " + strMethodName + " not present");
   }
 }
 
@@ -63,24 +76,7 @@ void PyCallback::execute()
   gstate = PyGILState_Ensure();
   try
   {
-    // option 0:
-    //_method(_self);
-    // compilation error: "expression cannot be used as a function"
-
-    // option 1:
-    //_self->_method();
-    // compilation error: "’PyObject’ has no member named ‘_method’"
-
-    //// options based in the python c-api:
-
-    // option 2:
-    //PyObject *args = Py_BuildValue("(O)", _self);
-    //PyObject *kwargs = Py_BuildValue("{}", "", NULL);
-    //PyObject_Call(_method, args, kwargs);
-    // segfault in PyObject_Call
-
-    // option 3:
-    if ( PyCallable_Check(_method) )
+    if ( _method && PyCallable_Check(_method) )
     {
       _debug("Build arguments for the call");
       PyObject *args = Py_BuildValue("(O)", _self);
@@ -92,20 +88,6 @@ void PyCallback::execute()
     {
       _warning("The given method is not callable!");
     }
-
-    //_info("build arguments");
-    //PyObject *args = Py_BuildValue("o", _self);
-    //PyObject *args = PyTuple_Pack(1,_self);
-    //PyObject *args = PyTuple_Pack(0, NULL);
-    //PyObject *kwargs = PyTuple_Pack(0, NULL);
-    //_debug("callObject");
-    //PyObject_Call(_method, args, kwargs);
-    //PyObject_CallObject(_method, args);
-    //PyObject_CallObject(_method, NULL);
-    //PyObject_CallFunctionObjArgs(_method, NULL);
-    //PyObject_CallFunctionObjArgs(_method, _self, NULL);
-    //PyObject_CallFunctionObjArgs(_method, args, NULL);
-    //_debug("callback execution done!");
   }
   catch(...)
   {
