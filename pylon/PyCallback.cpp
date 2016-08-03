@@ -37,19 +37,17 @@
 PyCallback::PyCallback(PyObject* self, const char* methodName,
                        std::string parentName)
 {
-  std::string strMethodName(methodName);
-
   _name = "PyCallback(" + parentName + ")";
-  Py_Initialize();
-  Py_XINCREF(self);
   _self = self;
+  Py_XINCREF(_self);
 
-  if ( PyObject_HasAttrString(self, methodName) == 1)
+  if ( PyObject_HasAttrString(self, methodName) )
   {
-    _method = PyObject_GetAttrString(self, methodName);
+      _method = PyObject_GetAttrString(self, methodName);
     if ( _method && PyCallable_Check(_method) )
     {
-      _name = "PyCallback(" + parentName + "." + strMethodName + ")";
+      _name = "PyCallback(" + parentName + "." + methodName + ")";
+      _debug("Build the callback object successful");
     }
     else
     {
@@ -59,40 +57,39 @@ PyCallback::PyCallback(PyObject* self, const char* methodName,
   else
   {
     _method = NULL;
-    _error("method " + strMethodName + " not present");
+    _error("method not present");
   }
 }
 
 PyCallback::~PyCallback()
 {
   Py_XDECREF(_self);
-  Py_Finalize();
+  if ( _method )
+  {
+    Py_XDECREF(_method);
+  }
 }
 
 void PyCallback::execute()
 {
-  PyGILState_STATE gstate;
+  PyObject *answer;
 
-  gstate = PyGILState_Ensure();
-  try
+  if ( _method )
   {
-    if ( _method && PyCallable_Check(_method) )
+    PyObject *args = Py_BuildValue("O", _self);
+    PyObject *kwargs = (PyObject *)NULL;
+    //answer = PyObject_Call(_method, args, kwargs);
+    Py_XDECREF(args);
+    Py_XDECREF(kwargs);
+    if ( answer )
     {
-      _debug("Build arguments for the call");
-      PyObject *args = Py_BuildValue("(O)", _self);
-      PyObject *kwargs = Py_BuildValue("{}", "", NULL);
-      _debug("Executing the callback");
-      PyObject_Call(_method, args, kwargs);
+      _debug("Succeed with PyObject_CallObject()");
+      Py_XDECREF(answer);
     }
     else
     {
-      _warning("The given method is not callable!");
+      _warning("PyObject_CallObject() failed");
     }
   }
-  catch(...)
-  {
-    // TODO: collect and show more information about the exception
-    _error("Exception calling python");
-  }
-  PyGILState_Release(gstate);
+
 }
