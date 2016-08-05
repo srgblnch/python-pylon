@@ -37,6 +37,7 @@
 
 #include "Logger.h"
 #include <Python.h>
+#include <stdexcept>
 
 class PyCallback : public Logger
 {
@@ -45,8 +46,7 @@ public:
   ~PyCallback();
   void execute();
 protected:
-  PyObject *_self;
-  PyObject *_method;
+  PyObject *_callbackMethod;
 };
 
 #endif /* PYCALLBACK_H */

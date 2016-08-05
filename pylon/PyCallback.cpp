@@ -38,58 +38,52 @@ PyCallback::PyCallback(PyObject* self, const char* methodName,
                        std::string parentName)
 {
   _name = "PyCallback(" + parentName + ")";
-  _self = self;
-  Py_XINCREF(_self);
+
+  if ( self == NULL )
+  {
+    throw std::runtime_error("self object is NULL");
+  }
 
   if ( PyObject_HasAttrString(self, methodName) )
   {
-      _method = PyObject_GetAttrString(self, methodName);
-    if ( _method && PyCallable_Check(_method) )
+    _callbackMethod = PyObject_GetAttrString(self, methodName);
+    if ( _callbackMethod && PyCallable_Check(_callbackMethod) )
     {
       _name = "PyCallback(" + parentName + "." + methodName + ")";
       _debug("Build the callback object successful");
     }
     else
     {
-      _error("The callback attribute is not callable");
+      throw std::runtime_error("The callback attribute is not callable");
     }
   }
   else
   {
-    _method = NULL;
-    _error("method not present");
+    throw std::runtime_error("The callback attribute does not exist");
   }
 }
 
 PyCallback::~PyCallback()
 {
-  Py_XDECREF(_self);
-  if ( _method )
-  {
-    Py_XDECREF(_method);
-  }
+  Py_XDECREF(_callbackMethod);
 }
 
 void PyCallback::execute()
 {
   PyObject *answer;
+  PyGILState_STATE gstate;
 
-  if ( _method )
+  gstate = PyGILState_Ensure();
+  answer = PyObject_CallFunctionObjArgs(_callbackMethod, NULL);
+  if ( answer )
   {
-    PyObject *args = Py_BuildValue("O", _self);
-    PyObject *kwargs = (PyObject *)NULL;
-    //answer = PyObject_Call(_method, args, kwargs);
-    Py_XDECREF(args);
-    Py_XDECREF(kwargs);
-    if ( answer )
-    {
-      _debug("Succeed with PyObject_CallObject()");
-      Py_XDECREF(answer);
-    }
-    else
-    {
-      _warning("PyObject_CallObject() failed");
-    }
+    _debug("Succeed with PyObject_CallObject()");
+    Py_XDECREF(answer);
   }
-
+  else
+  {
+    _warning("PyObject_CallObject() failed");
+  }
+  Py_XDECREF(answer); // allowed to be null
+  PyGILState_Release(gstate);
 }
