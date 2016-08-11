@@ -32,42 +32,42 @@
 ###############################################################################
 */
 
-#include "IEnumeration.h"
-
-CppEnumeration::CppEnumeration(GenApi::INode* node)
-{
-  _enumeration = dynamic_cast<GenApi::IEnumeration*>(node);
-}
-
-CppEnumeration::CppEnumeration(GenApi::IEnumeration* enumeration)
-{
-  _enumeration = enumeration;
-}
-
-std::vector<std::string> CppEnumeration::getSymbolics()
-{
-  std::stringstream msg;
-
-  Pylon::StringList_t strLst;
-  Pylon::StringList_t::iterator it;
-  std::vector<std::string> strVct;
-
-  _enumeration->GetSymbolics(strLst);
-  msg << "GetSymbolics(): ";// << strLst;
-  _debug(msg.str()); msg.str("");
-
-  for( it = strLst.begin(); it != strLst.end(); it++)
-  {
-    std::string symbol = dynamic_cast<std::string&>(*it);
-    msg << "- symbol " << symbol;
-    _debug(msg.str()); msg.str("");
-    strVct.push_back(symbol);
-  }
-  return strVct;
-}
-
-std::string CppEnumeration::getEntry()
-{
-  return _enumeration->GetCurrentEntry()->ToString().c_str();
-}
+//#include "IEnumeration.h"
+//
+//CppEnumeration::CppEnumeration(GenApi::INode* node)
+//{
+//  _enumeration = dynamic_cast<GenApi::IEnumeration*>(node);
+//}
+//
+//CppEnumeration::CppEnumeration(GenApi::IEnumeration* enumeration)
+//{
+//  _enumeration = enumeration;
+//}
+//
+//std::vector<std::string> CppEnumeration::getSymbolics()
+//{
+//  std::stringstream msg;
+//
+//  Pylon::StringList_t strLst;
+//  Pylon::StringList_t::iterator it;
+//  std::vector<std::string> strVct;
+//
+//  _enumeration->GetSymbolics(strLst);
+//  msg << "GetSymbolics(): ";// << strLst;
+//  _debug(msg.str()); msg.str("");
+//
+//  for( it = strLst.begin(); it != strLst.end(); it++)
+//  {
+//    std::string symbol = dynamic_cast<std::string&>(*it);
+//    msg << "- symbol " << symbol;
+//    _debug(msg.str()); msg.str("");
+//    strVct.push_back(symbol);
+//  }
+//  return strVct;
+//}
+//
+//std::string CppEnumeration::getEntry()
+//{
+//  return _enumeration->GetCurrentEntry()->ToString().c_str();
+//}
 

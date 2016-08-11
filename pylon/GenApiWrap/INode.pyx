@@ -66,8 +66,12 @@ cdef extern from "GenApiWrap/INode.h":
     cdef cppclass CppIEnumeration:
         vector[string] getEntries() except+
         string getValue() except+
+        bool setValue(string) except+
     CppIEnumeration* newCppIEnumeration "new CppIEnumeration" (INode* node) except+
     CppINode* castIEnumeration "dynamic_cast<CppINode*>" (CppIEnumeration* obj) except+
+
+    cdef cppclass CppIEnumEntry:
+        string getValue() except+
 
 
 cdef class Node(Logger):
@@ -186,33 +190,68 @@ cdef class Node(Logger):
                     # ICategory should return a list of subnode names
                     return (<CppICategory*>self._node).getChildren()
                 elif self.type == 'IBoolean':
-                    return dynamic_cast_IBoolean(self._node.getINode()).GetValue()
+                    return dynamic_cast_IBoolean(self._node.getINode()).\
+                        GetValue()
                 elif self.type == 'IInteger':
-                    return dynamic_cast_IInteger(self._node.getINode()).GetValue()
+                    return dynamic_cast_IInteger(self._node.getINode()).\
+                        GetValue()
                 elif self.type == 'IFloat':
-                    return dynamic_cast_IFloat(self._node.getINode()).GetValue()
+                    return dynamic_cast_IFloat(self._node.getINode()).\
+                        GetValue()
+                elif self.type == 'IString':
+                    return dynamic_cast_IString(self._node.getINode()).\
+                        GetValue()
                 elif self.type == 'IEnumeration':
                     return (<CppIEnumeration*>self._node).getValue()
-                # TODO: IString, ICommand, IRegister, IPort
+                # TODO: IEnumEntry, ICommand, IRegister, IPort
+                elif self.type == 'IEnumEntry':
+                    return (<CppIEnumEntry*>self._node).getValue()
+                elif self.type == 'ICommand':
+                    raise NotImplementedError("CppICommand::getValue() "
+                                              "Not implemented")
+                elif self.type == 'IRegister':
+                    raise NotImplementedError("CppIRegister::getValue() "
+                                              "Not implemented")
+                elif self.type == 'IPort':
+                    raise NotImplementedError("CppIPort::getValue() "
+                                              "Not implemented")
                 else:
-                    self._error("Unsupported INode type %s" % self.type)
-            return None
-        # TODO: writable nodes should accept this property for write operation
+                    msg = "Unsupported INode type %s" % self.type
+                    self._error(msg)
+                    raise TypeError(msg)
+
         def __set__(self,value):
             if self._node != NULL:
-#                 if self.type == 'IBoolean':
+                if self.type == 'IBoolean':
 #                     dynamic_cast_IBoolean(self._node.getINode()).\
 #                         SetValue(bool(value))
+                    raise NotImplementedError("CppIBoolean::setValue() "
+                                              "Not implemented")
                 if self.type == 'IInteger':
                     dynamic_cast_IInteger(self._node.getINode()).\
                         SetValue(int(value))
                 elif self.type == 'IFloat':
                     dynamic_cast_IFloat(self._node.getINode()).\
                         SetValue(float(value))
-                # TODO: IString, IEnumeration, IRegister, IPort
-                # What about ICategory, ICommand?
+                elif self.type == 'IString':
+                    dynamic_cast_IString(self._node.getINode()).\
+                        SetValue(str(value))
+                # TODO: IEnumeration, IRegister, IPort
+                elif self.type == 'IEnumeration':
+                    raise NotImplementedError("CppIEnumeration::setValue() "
+                                              "Not implemented")
+                #    (<CppIEnumeration*>self._node).setValue(<string>value)
+                elif self.type == 'IRegister':
+                    raise NotImplementedError("CppIRegister::setValue() "
+                                              "Not implemented")
+                elif self.type == 'IPort':
+                    raise NotImplementedError("CppIPort::setValue() "
+                                              "Not implemented")
+                # FIXME: What about ICategory, ICommand? have sense a write?
                 else:
-                    self._error("Unsupported INode type %s" % self.type)
+                    msg = "Unsupported INode type %s" % self.type
+                    self._error(msg)
+                    raise TypeError(msg)
 
     property values:
         def __get__(self):

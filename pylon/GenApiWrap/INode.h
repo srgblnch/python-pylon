@@ -39,6 +39,7 @@
 //#include <pylon/PylonIncludes.h>
 #include "GenICam.h"
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 class CppINode : public Logger
@@ -80,6 +81,16 @@ class CppIEnumeration : public CppINode
 public:
   CppIEnumeration(GenApi::INode* node);
   std::vector<std::string> getEntries();
+  std::string getValue();
+//  bool setValue(std::string);
+//protected:
+  //std::map<std::string, int64_t> _entries;
+};
+
+class CppIEnumEntry : public CppINode
+{
+public:
+  CppIEnumEntry(GenApi::INode* node);
   std::string getValue();
 };
 

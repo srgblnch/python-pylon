@@ -35,21 +35,21 @@
 #ifndef IENUMERATION_H
 #define IENUMERATION_H
 
-#include "Logger.h"
-#include "GenApi/IEnumeration.h"
-#include <iostream>
-#include <vector>
-#include "pylon/stdinclude.h"
-
-class CppEnumeration : public Logger
-{
-public:
-  CppEnumeration(GenApi::INode* node);
-  CppEnumeration(GenApi::IEnumeration* enumeration);
-  std::vector<std::string> getSymbolics();
-  std::string getEntry();
-protected:
-  GenApi::IEnumeration *_enumeration;
-};
+//#include "Logger.h"
+//#include "GenApi/IEnumeration.h"
+//#include <iostream>
+//#include <vector>
+//#include "pylon/stdinclude.h"
+//
+//class CppEnumeration : public Logger
+//{
+//public:
+//  CppEnumeration(GenApi::INode* node);
+//  CppEnumeration(GenApi::IEnumeration* enumeration);
+//  std::vector<std::string> getSymbolics();
+//  std::string getEntry();
+//protected:
+//  GenApi::IEnumeration *_enumeration;
+//};
 
 #endif /* IENUMERATION_H */

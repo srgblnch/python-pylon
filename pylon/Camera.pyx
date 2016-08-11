@@ -287,25 +287,40 @@ cdef class Camera(Logger):
         return np.array([[], []], dtype=np.uint8)
 
     def Snap(self):
+        '''
+            Take one single image from the camera.
+
+            As an example for an acquisition, lets start by build the factory
+            and request a camera object to open a channel to it:
+                import pylon
+                factory = pylon.Factory(trace=True)
+                camera = factory.getCameraBySerialNumber(...)
+                camera.open()
+
+            With this two options are possible to get an image:
+                option 1:
+                    import matplotlib.pyplot as plt
+                    import matplotlib.cm as cm
+                    plt.imshow(camera.Snap(), cmap = cm.Greys_r)
+                option 2:
+                    img = Image.fromarray(camera.Snap(), 'L') # mono16
+                    img.show()
+            Have on mind that the image may not be in 16 bit grey scale, and
+            this example would need to be adapted.
+
+            To change that, with in camera.categories() there is an element
+            called 'ImageFormat'. The nodes of this category can be requested:
+                camera['ImageFormat'].values
+            The the pixel format can be requested by:
+                camera['PixelFormat'].value
+            if the answer is 'YUV422Packed' build the Image object would be:
+                img = Image.fromarray(camera.Snap(), 'YCbCr') # YUV
+        '''
         self._debug("Snap()")
         if self.isOpen and not self.isGrabbing:
             self._debug("It's not grabbing")
             return self.CSnap()
         return self.getImage()
-
-        # Example:
-        # import pylon
-        # factory = pylon.Factory(trace=True)
-        # camera = factory.getCameraBySerialNumber(...)
-        # - option 1
-        # import matplotlib.pyplot as plt
-        # import matplotlib.cm as cm
-        # plt.imshow(camera.Snap(), cmap = cm.Greys_r)
-        # - option 2
-        # from PIL import Image
-        # img = Image.fromarray(camera.Snap(), 'L') # mono16
-        # img = Image.fromarray(camera.Snap(), 'YCbCr') # YUV
-        # img.show()
 
     cdef CSnap(self):
         cdef:
@@ -394,6 +409,11 @@ cdef class Camera(Logger):
 
     def types(self):
         return self._nodeTypes.keys()
+    
+    def _nodesWithType(self, typeName):
+        if typeName in self.types():
+            return self._nodeTypes[typeName]
+        return []
 
     cdef INode* _buildNode(self, name):
         return self._camera.getNode(<string> name)
