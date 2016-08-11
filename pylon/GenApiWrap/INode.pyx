@@ -199,8 +199,10 @@ cdef class Node(Logger):
                     return dynamic_cast_IFloat(self._node.getINode()).\
                         GetValue()
                 elif self.type == 'IString':
-                    return dynamic_cast_IString(self._node.getINode()).\
-                        GetValue()
+                    #return dynamic_cast_IString(self._node.getINode()).\
+                    #    GetValue()
+                    raise NotImplementedError("dynamic_cast_IString() "
+                                              "Not implemented")
                 elif self.type == 'IEnumeration':
                     return (<CppIEnumeration*>self._node).getValue()
                 # TODO: IEnumEntry, ICommand, IRegister, IPort
@@ -233,10 +235,12 @@ cdef class Node(Logger):
                 elif self.type == 'IFloat':
                     dynamic_cast_IFloat(self._node.getINode()).\
                         SetValue(float(value))
+                # TODO: IString, IEnumeration, IRegister, IPort
                 elif self.type == 'IString':
-                    dynamic_cast_IString(self._node.getINode()).\
-                        SetValue(str(value))
-                # TODO: IEnumeration, IRegister, IPort
+#                     dynamic_cast_IString(self._node.getINode()).\
+#                         SetValue(str(value))
+                    raise NotImplementedError("dynamic_cast_IString() "
+                                              "Not implemented")
                 elif self.type == 'IEnumeration':
                     raise NotImplementedError("CppIEnumeration::setValue() "
                                               "Not implemented")
