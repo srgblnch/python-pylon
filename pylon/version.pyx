@@ -69,8 +69,15 @@ cdef class VersionObj(object):
 
 
 def VersionAPI():
+    '''
+        Version of the underlayer PylonAPI to which this module has been
+        compiled.
+    '''
     return VersionObj().pylonAPI_str()
 
 
 def Version():
+    '''
+        Version of the python's module for the PylonAPI.
+    '''
     return VersionObj().wrapper_str()

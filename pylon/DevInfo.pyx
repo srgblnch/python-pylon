@@ -61,6 +61,11 @@ cdef extern from "DevInfo.h":
 
 
 cdef class __DevInfo(Logger):
+    '''
+        Object with a representation of the available information about an
+        specific camera. It provides information, but it is not the object
+        to take control over the camera.
+    '''
     cdef:
         CppDevInfo *_devInfo #CppDevInfo or subclasses
 
@@ -103,6 +108,7 @@ cdef class __DevInfo(Logger):
     @property
     def DeviceVersion(self):
         return <string>(<CppDevInfo*>self._devInfo).GetDeviceVersion()
+
 
 cdef class __GigEDevInfo(__DevInfo):
     cdef:

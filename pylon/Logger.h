@@ -61,8 +61,8 @@ public:
   void _warning(std::string);
   void _info(std::string);
   void _debug(std::string);
-  void _print(std::string,std::string);
 protected:
+  void _print(std::string,std::string);
   std::string _name;
 private:
   LogLevel _logLevel;

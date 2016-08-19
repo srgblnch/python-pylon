@@ -58,6 +58,16 @@ DEFAULT_READTIMEOUT = 250  # ms
 DEFAULT_WRITETIMEOUT = 250  # ms
 
 cdef class Camera(Logger):
+    '''
+        Control object for a Pylon Camera.
+
+        The construction of this object provides communication with the
+        physical camera. But to book access to it, grab images or change
+        certain properties, it is necessary to call Open().
+
+        It is recommended to call Close() to release the camera control.
+        By the way, the destructor of the object will do it.
+    '''
     cdef:
         Factory _factory
         CppCamera *_camera
@@ -182,6 +192,11 @@ cdef class Camera(Logger):
         self._nodeNamesLst_tl.sort()
 
     def _rebuildNodeList(self):
+        '''
+            Rarely a camera could have updated the list of objects exposed
+            with the API. This method refreshes the list build in the
+            construction stage of the object.
+        '''
         self.__cleanNodesList()
         for nodeVisibility in self._nodeNamesDict.keys():
             if nodeVisibility <= self._visibilityLevel.numValue:
@@ -194,17 +209,35 @@ cdef class Camera(Logger):
 
     @property
     def isPresent(self):
+        '''
+            To build this object the camera must be plugged. But during its
+            use, it can be removed and this flag tells if this has happen.
+
+            It is in the TODO list to allow subscription to be reported when
+            this happens.
+        '''
         return <bool> (self._camera.IsCameraPresent())
 
     @property
     def isOpen(self):
+        '''
+            Construction of the Camera object gives a minimal communication
+            with the camera, but for lock control, grab images and modify
+            certain properties, it is mandatory to have this object Open().
+        '''
         return <bool> (self._camera.IsOpen())
 
     @property
     def isGrabbing(self):
+        '''
+            Reports if this object is grabbing pictures from the camera.
+        '''
         return <bool> (self._camera.IsGrabbing())
 
     def Open(self):
+        '''
+            Open persistent communication with the camera and lock its use.
+        '''
         cdef:
             bool open
         try:
@@ -218,6 +251,9 @@ cdef class Camera(Logger):
             return open
 
     def Close(self):
+        '''
+            Releases the lock of the camera.
+        '''
         self.deregisterRemovalCallback()
         self._wasOpen = False
         return <bool> (self._camera.Close())
@@ -245,8 +281,19 @@ cdef class Camera(Logger):
  
     def cameraRemovalCallback(self, *args, **kwargs):
         self._warning("Camera has been removed!")
+        # TODO: upper level subscription method to be reported to upper layer
+        #       object of this situation.
 
     def reconnect(self):
+        '''
+            When the camera has been pluged again after being removed, this
+            method will proceed to rebuild the necessary bridges to the
+            hardware.
+
+            If the camera was lock (Open()) by this object, it will try to do
+            that. But it is possible that at that time it has been lock by
+            another application.
+        '''
         cdef:
             CppCamera* cppCamera
         if self.isPresent:
@@ -267,14 +314,24 @@ cdef class Camera(Logger):
             self._warning("Camera wasn't present to be reconnected")
 
     def Start(self):
+        '''
+            Commands the camera to start taking pictures and report each time
+            a new picture is available.
+        '''
         if not self.isOpen:
             self.Open()
         return <bool> (self._camera.Start())
 
     def Stop(self):
+        '''
+            Commands the camera to stop any kind of acquisition it is doing.
+        '''
         return <bool> (self._camera.Stop())
 
     def getImage(self):
+        '''
+            Get the last image that has been take by the camera.
+        '''
         cdef:
             CPylonImage *img = NULL
         self._debug("getImage()")
@@ -346,9 +403,13 @@ cdef class Camera(Logger):
 
     # dictionary behaviour for the nodes
     def keys(self):
+        '''
+            Provide information of all the properties available.
+        '''
         return self._nodeNamesLst[:]
 
     def categories(self):
+        
         return self._nodeCategories[:]
 
     def tlNodes(self):

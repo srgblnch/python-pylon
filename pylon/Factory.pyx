@@ -53,6 +53,10 @@ cdef extern from "DevInfo.h":
 #TODO: make it python singleton
 #FIXME: build again the factory produces a segmentation fault!
 cdef class Factory(Logger):
+    '''
+        This class is an interface to the Pylon-API to simplify the discovery
+        of available cameras.
+    '''
     cdef:
         CppFactory *_cppFactory
         int _nCameras
@@ -64,6 +68,11 @@ cdef class Factory(Logger):
     _buildCameras = {}
 
     def __init__(self,*args,**kwargs):
+        '''
+            No mandatory arguments for this class.
+            Optional arguments 'debug' and 'trace' booleans for the Logger
+            superclass.
+        '''
         super(Factory,self).__init__(*args,**kwargs)
         self.name = "Factory()"
         self._debug("Called __init__()")
@@ -98,6 +107,10 @@ cdef class Factory(Logger):
 
     #@trace
     def _refreshTlInfo(self):
+        '''
+            Expert tool to force the factory to rescan the transport layer
+            looking for current cameras available.
+        '''
         if self.__structuresHaveInfo__():
             self.__cleanStructures__()
         self._debug("Do the DeviceDiscovery()")
@@ -190,30 +203,61 @@ cdef class Factory(Logger):
 
     @property
     def nCameras(self):
+        '''
+            Get the number of cameras currently available by this factory.
+        '''
         return self._nCameras
 
     @property
     def camerasList(self):
+        '''
+            Get the list of cameras found. The elements of the list are 
+            DevInfo objects.
+        '''
         return self._camerasLst[:]
 
     @property
     def serialNumbersList(self):
+        '''
+            Return a list of integers with the serial numbers of the cameras
+            discovered by this factory.
+        '''
         return self._serialDct.keys()
 
     @property
     def ipList(self):
+        '''
+            Return the list of ips of the cameras discovered by this factory.
+            The cameras on a transport layer without network transport layer
+            are excluded.
+        '''
         return self._ipDct.keys()
  
     @property
     def macList(self):
+        '''
+            Return the list of mac of the cameras discovered by this factory.
+            The cameras on a transport layer without network transport layer
+            are excluded.
+        '''
         return self._macDct.keys()
 
     @property
     def cameraModels(self):
+        '''
+            Returns a list of unique strings with the model names found in
+            between the cameras discovered.
+        '''
         return self._cameraModels.keys()
 
     #@trace
     def cameraListByModel(self,model):
+        '''
+            With an input parameter an string of a camera model, it returns
+            the list of DevInfo objects with this corresponding model.
+            To know the models found, can be used the property:
+            >>> Factory().cameraModels
+        '''
         if model in self._cameraModels.keys():
             return self._cameraModels[model][:]
         return []
@@ -240,6 +284,12 @@ cdef class Factory(Logger):
 
     #@trace
     def __prepareCameraObj(self,__DevInfo devInfo):
+        '''
+            With a DevInfo as an input argument, this method return the Camera
+            object corresponding to it.
+
+            This is not an interface method. Please use the getCamera* methods.
+        '''
         if not devInfo.SerialNumber in self._buildCameras.keys():
             self._debug("Building instance for the camera with the "\
                         "serial number %d"%(devInfo.SerialNumber))
@@ -254,6 +304,10 @@ cdef class Factory(Logger):
 
     #@trace
     def getCameraBySerialNumber(self,number):
+        '''
+            If the input argument is a serial number of an available camera,
+            this method will build and return its corresponding Camera object.
+        '''
         number = int(number)
         if number in self._serialDct.keys():
             self._debug("Preparing the camera with the serial number %d"%number)
@@ -266,6 +320,10 @@ cdef class Factory(Logger):
 
     #@trace
     def getCameraByIpAddress(self,ipAddress):
+        '''
+            If the input argument is an ip address of an available camera,
+            this method will build and return its corresponding Camera object.
+        '''
         if ipAddress in self._ipDct.keys():
             self._debug("Preparing the camera with the ip address %s"%ipAddress)
             return self.__prepareCameraObj(self._ipDct[ipAddress])
@@ -277,6 +335,10 @@ cdef class Factory(Logger):
  
     #@trace
     def getCameraByMacAddress(self,macAddress):
+        '''
+            If the input argument is a mac address of an available camera,
+            this method will build and return its corresponding Camera object.
+        '''
         macAddress = macAddress.replace(':','')
         if macAddress in self._macDct.keys():
             self._debug("Preparing the camera with the mac address %s"%macAddress)
