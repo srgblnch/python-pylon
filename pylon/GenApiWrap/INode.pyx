@@ -58,20 +58,20 @@ cdef extern from "GenApiWrap/INode.h":
         INode* getINode() except+
     CppINode* newCppINode "new CppINode" (INode* node) except+
 
-    cdef cppclass CppICategory:
-        vector[string] getChildren() except+
-    CppICategory*  newCppICategory  "new CppICategory" (INode* node) except+
-    CppINode* castICategory "dynamic_cast<CppINode*>" (CppICategory* obj) except+
+#     cdef cppclass CppICategory:
+#         vector[string] getChildren() except+
+#     CppICategory*  newCppICategory  "new CppICategory" (INode* node) except+
+#     CppINode* castICategory "dynamic_cast<CppINode*>" (CppICategory* obj) except+
 
-    cdef cppclass CppIEnumeration:
-        vector[string] getEntries() except+
-        string getValue() except+
-        bool setValue(string) except+
-    CppIEnumeration* newCppIEnumeration "new CppIEnumeration" (INode* node) except+
-    CppINode* castIEnumeration "dynamic_cast<CppINode*>" (CppIEnumeration* obj) except+
-
-    cdef cppclass CppIEnumEntry:
-        string getValue() except+
+#     cdef cppclass CppIEnumeration:
+#         vector[string] getEntries() except+
+#         string getValue() except+
+#         bool setValue(string) except+
+#     CppIEnumeration* newCppIEnumeration "new CppIEnumeration" (INode* node) except+
+#     CppINode* castIEnumeration "dynamic_cast<CppINode*>" (CppIEnumeration* obj) except+
+# 
+#     cdef cppclass CppIEnumEntry:
+#         string getValue() except+
 
 
 cdef class Node(Logger):
@@ -110,7 +110,7 @@ cdef class Node(Logger):
                 return self._node.getDescription()
             return None
 
-    property tooptip:
+    property tooltip:
         def __get__(self):
             if self._node != NULL:
                 return self._node.getToolTip()
@@ -127,6 +127,7 @@ cdef class Node(Logger):
             if self._node != NULL:
                 return self._node.getProperties()
             return None
+
     def property(self,name):
         if self._node != NULL:
             return self._node.getProperty(name).split('\t')

@@ -1,6 +1,6 @@
 /*---- licence header
 ###############################################################################
-## file :               IEnumeration.h
+## file :               ICategory.cpp
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -32,31 +32,30 @@
 ###############################################################################
 */
 
-#ifndef IENUMERATION_H
-#define IENUMERATION_H
+#include "ICategory.h"
 
-#include "INode.h"
-//#include "GenApi/IEnumeration.h"
-//#include <iostream>
-//#include <vector>
-//#include "pylon/stdinclude.h"
+CppICategory::CppICategory(GenApi::INode* node)
+  :CppINode(node) { }
 
-class CppIEnumeration : public CppINode
+std::vector<std::string> CppICategory::getChildren()
 {
-public:
-  CppIEnumeration(GenApi::INode* node);
-  std::vector<std::string> getEntries();
-  std::string getValue();
-//  bool setValue(std::string);
-//protected:
-  //std::map<std::string, int64_t> _entries;
-};
+//  std::stringstream msg;
 
-class CppIEnumEntry : public CppINode
-{
-public:
-  CppIEnumEntry(GenApi::INode* node);
-  std::string getValue();
-};
+  GenApi::FeatureList_t features;
+  GenApi::FeatureList_t::iterator it;
+  std::vector<std::string> answer;
+  std::string featureName;
 
-#endif /* IENUMERATION_H */
+  dynamic_cast<GenApi::ICategory*>(_node)->GetFeatures(features);
+//  msg << "finding " << this->getDisplayName() << " children";
+//  _debug(msg.str()); msg.str("");
+  for( it = features.begin(); it != features.end(); it++)
+  {
+    featureName = (*it)->GetNode()->GetName().c_str();
+//    msg << featureName;
+//    _debug(msg.str()); msg.str("");
+    answer.push_back(featureName);
+  }
+  return answer;
+}
+

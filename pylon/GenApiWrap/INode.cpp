@@ -40,15 +40,6 @@ CppINode::CppINode(GenApi::INode* node)
   _name = "CppINode()";
 }
 
-CppICategory::CppICategory(GenApi::INode* node)
-  :CppINode(node) { }
-
-CppIEnumeration::CppIEnumeration(GenApi::INode* node)
-  :CppINode(node) { }
-
-CppIEnumEntry::CppIEnumEntry(GenApi::INode* node)
-  :CppINode(node) { }
-
 std::string CppINode::getDescription()
 {
   return _node->GetDescription().c_str();
@@ -160,102 +151,9 @@ std::vector<std::string> CppINode::getChildren()
   return answer;
 }
 
-std::vector<std::string> CppICategory::getChildren()
-{
-//  std::stringstream msg;
-
-  GenApi::FeatureList_t features;
-  GenApi::FeatureList_t::iterator it;
-  std::vector<std::string> answer;
-  std::string featureName;
-
-  dynamic_cast<GenApi::ICategory*>(_node)->GetFeatures(features);
-//  msg << "finding " << this->getDisplayName() << " children";
-//  _debug(msg.str()); msg.str("");
-  for( it = features.begin(); it != features.end(); it++)
-  {
-    featureName = (*it)->GetNode()->GetName().c_str();
-//    msg << featureName;
-//    _debug(msg.str()); msg.str("");
-    answer.push_back(featureName);
-  }
-  return answer;
-}
-
 std::vector<std::string> CppINode::getEntries()
 {
   std::vector<std::string> answer;
   return answer;
 }
 
-std::vector<std::string> CppIEnumeration::getEntries()
-{
-  std::stringstream msg;
-
-  GenApi::IEnumeration* enumeration;
-  GenApi::NodeList_t entriesLst;
-  GenApi::NodeList_t::iterator it;
-  std::string entryStr;
-//  GenApi::IEnumEntry* currentEntry;
-//  int64_t enumValue;
-  std::vector<std::string> answer;
-
-  enumeration = dynamic_cast<GenApi::IEnumeration*>(_node);
-  enumeration->GetEntries(entriesLst);
-  for( it = entriesLst.begin(); it != entriesLst.end(); it++)
-  {
-    entryStr = (*it)->GetName().c_str();
-
-    // FIXME: It looks this is not the way for write access to those IValues
-    //        The class GenApi::IEnumEntry is abstract and it seem its
-    //        subclasses would be internal to the library.
-    //        For example, for the PixelType it seems there are specific
-    //        objects in the Pylon namespace.
-//    currentEntry = enumeration->GetEntryByName((*it)->GetName());
-//    enumValue = currentEntry->GetValue();
-//    enumValue = (*it)->GetValue();
-//    _entries[entryStr] = enumValue;
-//    // or:
-//    //_entries.insert(std::pair<std::string, int64_t>(entryStr,0));
-    answer.push_back(entryStr);
-  }
-  msg << "found " << answer.size() << " entries";
-  _debug(msg.str());
-  return answer;
-}
-
-std::string CppIEnumeration::getValue()
-{
-  return dynamic_cast<GenApi::IEnumeration*>(_node)->ToString().c_str();
-}
-
-//bool CppIEnumeration::setValue(std::string value)
-//{
-//  std::stringstream msg;
-//  std::map<std::string, int64_t>::iterator it;
-//
-//  msg << "CppIEnumeration::setValue(" << value << ")";
-//  _info(msg.str()); msg.str("");
-//  it = _entries.find(value);
-//  _debug("find ends");
-//  if ( it != _entries.end() )
-//  {
-//    msg << "value " << value << " found, calling FromString";
-//    _debug(msg.str());
-//    dynamic_cast<GenApi::IEnumeration*>(_node)->SetIntValue(it->second);
-//    return true;
-//  }
-//  msg << "value " << value << " not found";
-//  _warning(msg.str());
-//  return false;
-//}
-
-std::string CppIEnumEntry::getValue()
-{
-  //return dynamic_cast<GenApi::IEnumEntry*>(_node)->ToString().c_str();
-  // There is no such method 'ToString()'
-  //return dynamic_cast<GenApi::IEnumEntry*>(_node)->GetValue();
-  // It is an abstract class
-
-  throw std::runtime_error("CppIEnumEntry::getValue() Not implemented");
-}

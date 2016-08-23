@@ -360,6 +360,7 @@ cdef class Camera(Logger):
                     import matplotlib.cm as cm
                     plt.imshow(camera.Snap(), cmap = cm.Greys_r)
                 option 2:
+                    from PIL import Image
                     img = Image.fromarray(camera.Snap(), 'L') # mono16
                     img.show()
             Have on mind that the image may not be in 16 bit grey scale, and

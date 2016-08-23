@@ -52,7 +52,8 @@ include "GenApiWrap/IFloat.pyx"
 include "GenApiWrap/IInteger.pyx"
 include "GenApiWrap/IBoolean.pyx"
 #include "GenApiWrap/IString.pyx"
-#include "GenApiWrap/IEnumeration.pyx"
+include "GenApiWrap/ICategory.pyx"
+include "GenApiWrap/IEnumeration.pyx"
 # -third level
 include "GenApiWrap/INode.pyx"
 

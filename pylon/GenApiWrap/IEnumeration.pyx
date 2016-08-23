@@ -34,13 +34,18 @@
 ###############################################################################
 
 
-# cdef extern from "GenApiWrap/IEnumeration.h":
-#     cdef cppclass CppEnumeration:
-#         CppEnumeration(INode* node) except+
-#         vector[string] getSymbolics() except+
-#         string getEntry() except+
-# 
-# 
+cdef extern from "GenApiWrap/IEnumeration.h":
+    cdef cppclass CppIEnumeration:
+        vector[string] getEntries() except+
+        string getValue() except+
+        bool setValue(string) except+
+    CppIEnumeration* newCppIEnumeration "new CppIEnumeration" (INode* node) except+
+    CppINode* castIEnumeration "dynamic_cast<CppINode*>" (CppIEnumeration* obj) except+
+
+    cdef cppclass CppIEnumEntry:
+        string getValue() except+
+
+
 # cdef class Enumeration(Logger):
 #     cdef:
 #         CppEnumeration* _enumeration
@@ -65,4 +70,5 @@
 #     property symbolics:
 #         def __get__(self):
 #             return self._lst
+
 

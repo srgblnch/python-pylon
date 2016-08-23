@@ -1,6 +1,6 @@
 /*---- licence header
 ###############################################################################
-## file :               IEnumeration.h
+## file :               ICategory.h
 ##
 ## description :        This file has been made to provide a python access to
 ##                      the Pylon SDK from python.
@@ -32,31 +32,17 @@
 ###############################################################################
 */
 
-#ifndef IENUMERATION_H
-#define IENUMERATION_H
+
+#ifndef ICATEGORY_H
+#define ICATEGORY_H
 
 #include "INode.h"
-//#include "GenApi/IEnumeration.h"
-//#include <iostream>
-//#include <vector>
-//#include "pylon/stdinclude.h"
 
-class CppIEnumeration : public CppINode
+class CppICategory : public CppINode
 {
 public:
-  CppIEnumeration(GenApi::INode* node);
-  std::vector<std::string> getEntries();
-  std::string getValue();
-//  bool setValue(std::string);
-//protected:
-  //std::map<std::string, int64_t> _entries;
+  CppICategory(GenApi::INode* node);
+  std::vector<std::string> getChildren();
 };
 
-class CppIEnumEntry : public CppINode
-{
-public:
-  CppIEnumEntry(GenApi::INode* node);
-  std::string getValue();
-};
-
-#endif /* IENUMERATION_H */
+#endif /* ICATEGORY_H */
