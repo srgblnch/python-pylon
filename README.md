@@ -1,5 +1,5 @@
 # python-pylon
-A thin Cython binding of the Basler Pylon SDK.
+I suggest you check for [PyPylon](https://github.com/mabl/PyPylon) project. It seems to have a more active development and it has an approach that make it evan thinner than this one.
 
 <p align="center"> <b>'Development Status :: 1 - Planning'</b> </p>
 
